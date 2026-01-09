@@ -4,14 +4,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NDSA GMBC OS V5 - Imperium Edition</title>
+    <title>NDSA GMBC OS V6 - Stark Imperium 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
       :root {
         --primary: #00d4ff;
         --secondary: #10b981;
-        --dark: #020617;
+        --accent: #FFD700;
+        --dark: #010409;
+        --glow: rgba(0, 212, 255, 0.4);
       }
       body {
         font-family: 'Inter', sans-serif;
@@ -19,51 +21,83 @@
         color: white;
         overflow-x: hidden;
       }
-      .font-stark {
-        font-family: 'Orbitron', sans-serif;
-      }
-      ::-webkit-scrollbar {
-        width: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.02);
-      }
-      ::-webkit-scrollbar-thumb {
-        background: var(--primary);
-        border-radius: 10px;
-        box-shadow: 0 0 10px var(--primary);
-      }
-      .glass-card {
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-      .glass-card:hover {
-        border-color: rgba(0, 212, 255, 0.4);
-        box-shadow: 0 0 40px rgba(0, 212, 255, 0.1);
-      }
-      /* Biotech Particle Effect */
-      .particles {
+      .font-stark { font-family: 'Orbitron', sans-serif; }
+      
+      .stark-bg {
         position: fixed;
         inset: 0;
-        z-index: 0;
-        pointer-events: none;
-        opacity: 0.3;
-        background-image: radial-gradient(circle at 2px 2px, rgba(0, 212, 255, 0.15) 1px, transparent 0);
-        background-size: 40px 40px;
+        z-index: -1;
+        background: radial-gradient(circle at 50% 50%, #0d1117 0%, #010409 100%);
+        overflow: hidden;
       }
-      @keyframes scanline {
-        0% { transform: translateY(-100%); }
-        100% { transform: translateY(100%); }
-      }
-      .scanline {
+      .stark-bg::after {
+        content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(to bottom, transparent 0%, rgba(0, 212, 255, 0.05) 50%, transparent 100%);
-        height: 20%;
-        animation: scanline 8s linear infinite;
-        pointer-events: none;
+        background-image: 
+          linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        opacity: 0.3;
+      }
+      
+      .glass-card {
+        background: rgba(13, 17, 23, 0.85);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(0, 212, 255, 0.15);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9);
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .glass-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 0 50px rgba(0, 212, 255, 0.15);
+        transform: translateY(-2px);
+      }
+
+      .stark-btn-glow {
+        background: var(--primary);
+        color: var(--dark);
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        transition: all 0.3s ease;
+      }
+      .stark-btn-glow:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
+        filter: brightness(1.2);
+      }
+
+      @keyframes wave {
+        0%, 100% { transform: scaleY(0.4); }
+        50% { transform: scaleY(1.8); }
+      }
+      .wave-bar {
+        width: 3px;
+        height: 18px;
+        background: var(--primary);
+        margin: 0 1px;
+        animation: wave 1s infinite ease-in-out;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar { width: 4px; }
+      ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+      
+      .hologram-text {
+        text-shadow: 0 0 10px var(--primary);
+        animation: glitch 3s infinite;
+      }
+      
+      @keyframes glitch {
+        0% { opacity: 1; }
+        95% { opacity: 1; }
+        96% { opacity: 0.8; transform: skewX(2deg); }
+        97% { opacity: 1; transform: skewX(0); }
+        98% { opacity: 0.9; }
+        100% { opacity: 1; }
       }
     </style>
   <script type="importmap">
@@ -81,7 +115,7 @@
 </script>
 </head>
   <body>
-    <div class="particles"></div>
+    <div class="stark-bg"></div>
     <div id="root"></div>
   </body>
 </html>

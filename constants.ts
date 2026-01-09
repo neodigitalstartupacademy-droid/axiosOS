@@ -81,8 +81,8 @@ export const I18N = {
 };
 
 export const SYSTEM_CONFIG = {
-  brand: "AXIOMA OS",
-  version: "5.5.0-IMPERIUM",
+  brand: "NDSA GMBC OS",
+  version: "6.0.0-IMPERIUM",
   founder: {
     name: "Leader JOSÉ",
     id: "067-2922111",
@@ -114,16 +114,51 @@ export const SYSTEM_CONFIG = {
   academy: {
     modules: [
       { 
-        id: "m1", 
-        title: "Science de la Restauration Cellulaire", 
-        description: "Maîtrisez les fondements biologiques du SAB pour devenir une autorité en santé.",
+        id: "neuro-psych", 
+        title: "Neuro-Psychiatrie Cellulaire", 
+        description: "Comprendre comment l'esprit verrouille ou libère la cellule.",
         lessons: [
           {
-            id: "m1-l1",
-            title: "La membrane : porte d'entrée de la vie",
-            content: "La nutrition cellulaire commence par la compréhension de la membrane lipidique. La technologie Tre-en-en restaure cette fluidité critique.",
-            starkInsight: "Si la porte est verrouillée, la fête n'aura jamais lieu.",
-            practicalExercise: "Analysez votre apport lipidique quotidien."
+            id: "psy-cell-1",
+            title: "La Psychiatrie Cellulaire : L'Esprit sur la Matière",
+            content: "La NDSA intègre les dernières découvertes psychiatriques : les émotions toxiques comme la colère, la médisance ou la haine ne sont pas que spirituelles, elles sont biochimiques. Elles génèrent un stress oxydatif qui 'verrouille' la membrane de vos cellules. Pour guérir, le corps a besoin de paix. Le pardon alcalinise votre sang et permet à la nutrition cellulaire de fonctionner. Un esprit fluide égale une membrane fluide.",
+            starkInsight: "Le stress est une arme chimique interne qui paralyse vos membranes.",
+            practicalExercise: "Identifiez une émotion toxique et pratiquez le 'Pardon Métabolique' pour fluidifier votre bio-système."
+          },
+          {
+            id: "path-ind-1",
+            title: "Conscientisation : Les Secrets de l'Insuccès",
+            content: "L'insuccès dans les affaires et les maladies chroniques ont la même source : l'asphyxie par les produits chimiques. Engrais bio-industriels, conservateurs, et résidus de médicaments s'accumulent dans vos tissus naturels. La NDSA éduque sur les solutions naturelles pour un corps naturel. Sortir de l'industrialisation alimentaire est le premier pas vers la richesse et la santé.",
+            starkInsight: "L'échec financier est souvent le miroir d'une bio-asphyxie environnementale.",
+            practicalExercise: "Faites l'inventaire chimique de votre foyer et remplacez une substance industrielle par une alternative naturelle."
+          }
+        ] 
+      },
+      { 
+        id: "nutri-therm", 
+        title: "Thermique & Vitalité Fondamentale", 
+        description: "Le respect de la température biologique pour une absorption maximale.",
+        lessons: [
+          {
+            id: "therm-0-danger",
+            title: "Le Danger des 0°C : Pourquoi le Froid vous Tue",
+            content: "La science de la nutrition NDSA révèle une erreur mondiale : consommer du froid. Votre corps fonctionne à 37°C. Introduire du glacé fige instantanément les lipides (graisses) de vos membranes cellulaires. Une cellule figée ne peut plus absorber de nutriments ni rejeter de toxines. C'est l'origine des maladies chroniques modernes. Restaurez votre fluidité avec le Tre-en-en et respectez votre température naturelle.",
+            starkInsight: "Chaque glaçon est un verrou posé sur vos mitochondries.",
+            practicalExercise: "Basculez vers des boissons à température ambiante ou tiède pendant 7 jours pour observer le retour de votre énergie."
+          }
+        ] 
+      },
+      { 
+        id: "econ-mlm", 
+        title: "Économie Digitale & MLM 2026", 
+        description: "Transformer le chômage en leadership mondial via l'IA.",
+        lessons: [
+          {
+            id: "amb-dig-1",
+            title: "L'Ambassadeur NDSA : Un Métier pour l'Humanité",
+            content: "Le MLM Digital NDSA est le remède au chômage et à la crise. En devenant Ambassadeur, vous utilisez l'IA José pour conscientiser le monde. Chaque université, chaque société, chaque foyer a besoin de ce savoir pour réduire les coûts de santé et augmenter la productivité. Bâtissez votre empire économique en rendant le monde plus saint et plus heureux.",
+            starkInsight: "Vous n'êtes pas un vendeur, vous êtes un Bio-Architecte de la liberté.",
+            practicalExercise: "Configurez votre Smart Link Elite et partagez un diagnostic avec une personne de votre entourage."
           }
         ] 
       }
@@ -138,7 +173,7 @@ export const SYSTEM_CONFIG = {
     ]
   },
   socialViral: {
-    template: "J'utilise AXIOMA OS et l'IA JOSÉ pour ma santé cellulaire. Rejoins mon équipe ! 🧬🚀",
+    template: "J'utilise NDSA GMBC OS et l'IA JOSÉ pour ma santé cellulaire. Rejoins mon équipe ! 🧬🚀",
     responseScript: "Bonjour ! Utilisez ce lien pour votre diagnostic : ",
     structure: "HOOK / BRIDGE / CTA"
   }

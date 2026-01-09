@@ -8,6 +8,7 @@ class VoiceService {
   private activeSource: AudioBufferSourceNode | null = null;
   private subscribers: Set<(isSpeaking: boolean, key: string | null) => void> = new Set();
   private currentKey: string | null = null;
+  private isLoading: boolean = false;
 
   private constructor() {}
 
@@ -28,18 +29,23 @@ class VoiceService {
   }
 
   async play(text: string, key: string, lang: Language = 'fr') {
-    // Si la même clé est déjà en cours de lecture, on arrête tout
+    // Audit vocal : Stop immédiat si on reclique sur le même lecteur
     if (this.currentKey === key) {
       this.stop();
       return;
     }
 
-    // Arrêter toute lecture en cours avant d'en lancer une nouvelle
+    // Protection interférence : On coupe toute source active
     this.stop();
+    this.isLoading = true;
+    this.notify(false, 'loading'); // Etat spécial pour l'UI
 
     try {
       const base64 = await generateJoseAudio(text, lang);
-      if (!base64) return;
+      if (!base64) {
+        this.isLoading = false;
+        return;
+      }
 
       if (!this.ctx) {
         this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -58,6 +64,7 @@ class VoiceService {
       
       this.activeSource = source;
       this.currentKey = key;
+      this.isLoading = false;
       this.notify(true, key);
 
       source.start();
@@ -68,7 +75,7 @@ class VoiceService {
         }
       };
     } catch (e) {
-      console.error("VoiceService Play Error:", e);
+      console.error("STARK-VOICE-ERROR:", e);
       this.stop();
     }
   }
@@ -81,11 +88,12 @@ class VoiceService {
       this.activeSource = null;
     }
     this.currentKey = null;
+    this.isLoading = false;
     this.notify(false, null);
   }
 
-  getStatus() {
-    return { isSpeaking: !!this.currentKey, currentKey: this.currentKey };
+  isCurrentlyReading(key: string) {
+    return this.currentKey === key;
   }
 }
 
