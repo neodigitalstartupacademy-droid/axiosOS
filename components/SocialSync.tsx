@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-    Zap, Share2, Check, Copy, Target, Globe, Fingerprint, Activity, BarChart3, TrendingUp, Users, MessageSquare, Volume2, Square, Sparkles, HeartPulse
+    Zap, Share2, Check, Copy, Target, Globe, Fingerprint, Activity, BarChart3, TrendingUp, Users, MessageSquare, Volume2, Square, Sparkles, HeartPulse, ShoppingCart
 } from 'lucide-react';
 import { SYSTEM_CONFIG } from '../constants';
 import { generateJoseAudio, decodeBase64, decodeAudioData } from '../services/geminiService';
@@ -9,6 +9,7 @@ import { generateJoseAudio, decodeBase64, decodeAudioData } from '../services/ge
 export const SocialSync: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [customId, setCustomId] = useState("");
+  const [shopUrl, setShopUrl] = useState("");
   const [isReading, setIsReading] = useState(false);
   const [viralHealth, setViralHealth] = useState(88);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -16,21 +17,32 @@ export const SocialSync: React.FC = () => {
 
   useEffect(() => {
     const savedId = localStorage.getItem('ndsa_personal_id');
+    const savedShop = localStorage.getItem('ndsa_personal_shop');
     if (savedId) setCustomId(savedId);
     else setCustomId(SYSTEM_CONFIG.founder.id);
+    if (savedShop) setShopUrl(savedShop);
+    else setShopUrl(SYSTEM_CONFIG.founder.officialShopUrl);
   }, []);
 
   const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setCustomId(val);
     localStorage.setItem('ndsa_personal_id', val);
-    // Dynamic health simulation
-    setViralHealth(val ? 94 : 88);
+    setViralHealth(val && shopUrl ? 98 : 88);
   };
 
-  const smartLink = `${window.location.origin}${window.location.pathname}?ref=${customId || SYSTEM_CONFIG.founder.id}&mode=welcome`;
-  const inviteLink = `https://axioma-app.com/join?ref=${customId || SYSTEM_CONFIG.founder.id}`;
-  const shareMessage = `J'utilise ${SYSTEM_CONFIG.brand} et l'IA ${SYSTEM_CONFIG.ai.name} pour ma santé cellulaire. Rejoins mon équipe !`;
+  const handleShopChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setShopUrl(val);
+    localStorage.setItem('ndsa_personal_shop', val);
+    setViralHealth(customId && val ? 98 : 88);
+  };
+
+  // Encodage Base64 pour le shopUrl pour éviter les problèmes de caractères spéciaux dans l'URL
+  const encodedShop = btoa(shopUrl || SYSTEM_CONFIG.founder.officialShopUrl);
+  const smartLink = `${window.location.origin}${window.location.pathname}?ref=${customId || SYSTEM_CONFIG.founder.id}&shop=${encodedShop}&mode=welcome`;
+  
+  const shareMessage = `J'utilise ${SYSTEM_CONFIG.brand} et l'IA ${SYSTEM_CONFIG.ai.name} pour ma santé cellulaire. C'est la révolution du MLM digital ! Viens voir :`;
 
   const stopAudio = () => {
     if (activeSourceRef.current) {
@@ -43,7 +55,7 @@ export const SocialSync: React.FC = () => {
   const handleRead = async () => {
     if (isReading) { stopAudio(); return; }
     setIsReading(true);
-    const textToRead = `Bienvenue dans le Moteur de Viralité AXIOMA. Votre Smart Link Élite vous permet de capturer des prospects bio-numériques. Chaque clic redirige vers Coach ${SYSTEM_CONFIG.ai.name}. Partagez votre impact sur WhatsApp et Facebook.`;
+    const textToRead = `Bienvenue dans le Moteur de Viralité. Configurez votre ID et votre boutique NeoLife. Votre Smart Link Elite permet à José de faire le travail de prospection et de vente pour vous. C'est l'automatisation totale.`;
     const base64 = await generateJoseAudio(textToRead);
     if (base64) {
       if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -96,14 +108,14 @@ export const SocialSync: React.FC = () => {
               </div>
               <h2 className="text-6xl font-black text-white tracking-tighter italic uppercase leading-none">Smart Link <span className="text-[#00d4ff]">Elite</span></h2>
               <p className="text-slate-400 text-xl font-medium leading-relaxed max-w-2xl italic">
-                Votre lien de capture bio-digital. Chaque clic injecte un nouveau prospect dans le scanner de {SYSTEM_CONFIG.ai.name}.
+                Votre lien de capture bio-digital. Automatisez votre prospection : JOSÉ accueille vos invités et les redirige vers votre boutique.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                <div className="space-y-6">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 flex items-center gap-2">
-                    <Fingerprint size={12} className="text-[#00d4ff]" /> Votre ID NeoLife / Hub
+                    <Fingerprint size={12} className="text-[#00d4ff]" /> ID Distributeur NeoLife
                   </label>
                   <div className="relative group">
                     <input 
@@ -116,20 +128,26 @@ export const SocialSync: React.FC = () => {
                     <Sparkles size={20} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-700 group-hover:text-[#00d4ff] transition-colors" />
                   </div>
                </div>
-               
-               <div className="space-y-6 p-6 bg-white/5 border border-white/10 rounded-[2.5rem] flex items-center justify-between group">
-                  <div>
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic mb-2">Viral Health Score</p>
-                    <h4 className={`text-4xl font-black italic tracking-tighter ${viralHealth > 90 ? 'text-emerald-400' : 'text-amber-400'}`}>{viralHealth}%</h4>
-                  </div>
-                  <div className={`p-4 rounded-2xl ${viralHealth > 90 ? 'bg-emerald-400/10 text-emerald-400' : 'bg-amber-400/10 text-amber-400'} border border-current opacity-60 group-hover:opacity-100 transition-opacity`}>
-                    <HeartPulse size={32} className={viralHealth > 90 ? 'animate-pulse' : ''} />
+
+               <div className="space-y-6">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 flex items-center gap-2">
+                    <ShoppingCart size={12} className="text-[#00d4ff]" /> URL Boutique NeoLife
+                  </label>
+                  <div className="relative group">
+                    <input 
+                      type="text" 
+                      value={shopUrl} 
+                      onChange={handleShopChange}
+                      placeholder="https://shopneolife.com/..." 
+                      className="w-full bg-slate-950/80 border border-white/10 px-8 py-6 rounded-3xl text-white font-black italic text-sm outline-none focus:border-[#00d4ff] transition-all shadow-inner"
+                    />
+                    <Globe size={20} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-700 group-hover:text-[#00d4ff] transition-colors" />
                   </div>
                </div>
             </div>
 
             <div className="space-y-6">
-               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Lien de Capture Universel</label>
+               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Votre Lien de Prospection Automatisé</label>
                <div className="flex flex-col sm:flex-row gap-4">
                   <div className="flex-1 bg-slate-950/90 border border-[#00d4ff]/20 px-8 py-6 rounded-3xl text-[#00d4ff] font-mono text-xs truncate flex items-center shadow-inner group overflow-hidden relative">
                     <div className="absolute inset-y-0 left-0 w-1 bg-[#00d4ff] group-hover:w-full transition-all duration-700 opacity-5"></div>

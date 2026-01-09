@@ -46,6 +46,12 @@ const App: React.FC = () => {
 
     const syncTimer = setInterval(() => setSyncStatus(prev => +(prev + (Math.random() * 0.0001 - 0.00005)).toFixed(6)), 5000);
     
+    // LOGIQUE DE REDIRECTION SI LIEN DE PARRAINAGE
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('mode') === 'welcome') {
+      setActiveTab('jose');
+    }
+
     const savedSession = localStorage.getItem('ndsa_session');
     if (savedSession) {
       try {
@@ -69,7 +75,7 @@ const App: React.FC = () => {
     let brief = "";
     switch(activeTab) {
       case 'stats': brief = "Commandant Brasfield, vos vecteurs de croissance NeoLife sont à leur apogée. Système Imperium stabilisé."; break;
-      case 'jose': brief = "Terminal JOSÉ v6. Scan bio-moléculaire et détection thermique actifs."; break;
+      case 'jose': brief = "Terminal JOSÉ v6. Accueil et Closing automatisé actif."; break;
       case 'academy': brief = "Bio-Academy Brasfield. Maîtrisez les lois de la psychiatrie cellulaire."; break;
       case 'social': brief = "Moteur de viralité NDSA. Propagation de l'impact en cours."; break;
       case 'finance': brief = "Terminal Financier Diamond. Flux SaaS et MLM audités."; break;
@@ -79,7 +85,10 @@ const App: React.FC = () => {
   };
 
   if (isAuthLoading) return null;
-  if (!currentUser && new URLSearchParams(window.location.search).get('mode') !== 'welcome') return <AuthView onLogin={handleLogin} />;
+
+  // Si c'est un visiteur externe (mode welcome), on ne force pas le login
+  const isWelcomeMode = new URLSearchParams(window.location.search).get('mode') === 'welcome';
+  if (!currentUser && !isWelcomeMode) return <AuthView onLogin={handleLogin} />;
 
   const myReferralLink = currentUser 
     ? `${window.location.origin}${window.location.pathname}?ref=${currentUser.neoLifeId}&mode=welcome`
@@ -88,7 +97,6 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen flex font-sans antialiased text-white overflow-hidden selection:bg-[#00d4ff] selection:text-slate-900">
       
-      {/* 2026 Neural Wave HUD - Futuristic Audio Feedback */}
       {isSpeaking && (
         <div className="fixed top-0 left-0 right-0 h-20 z-[2000] flex items-center justify-center pointer-events-none px-4">
           <div className="glass-card px-12 py-5 rounded-full border border-[#00d4ff]/60 flex items-center gap-8 animate-in slide-in-from-top duration-1000">
@@ -108,7 +116,6 @@ const App: React.FC = () => {
       {showOnboarding && <OnboardingWizard onClose={() => setShowOnboarding(false)} />}
       {showNotification && <ConversionNotification prospectCountry="France" healthFocus="Psychiatrie Cellulaire" onClose={() => setShowNotification(false)} onSocialSync={() => setActiveTab('social')} />}
 
-      {/* Stark Sidebar - Monolithic & Sleek */}
       <aside className={`fixed inset-y-0 left-0 w-80 glass-card z-50 transition-transform lg:translate-x-0 lg:static border-r border-white/5 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-10 h-full flex flex-col">
           <div className="flex items-center gap-5 mb-20 px-2 group cursor-pointer">
@@ -125,50 +132,63 @@ const App: React.FC = () => {
           </div>
 
           <nav className="space-y-4 flex-1 overflow-y-auto no-scrollbar">
-            {[
-              { id: 'stats', label: t.dashboard, icon: LayoutDashboard },
-              { id: 'jose', label: t.jose, icon: Bot },
-              { id: 'history', label: "Bio-Archives", icon: ClipboardList },
-              { id: 'academy', label: t.academy, icon: GraduationCap },
-              { id: 'social', label: t.social, icon: Share2 },
-              { id: 'finance', label: t.finance, icon: Wallet },
-              { id: 'profile', label: "Command Profile", icon: User },
-              ...(currentUser?.role === 'ADMIN' ? [{ id: 'admin', label: t.admin, icon: Settings }] : []),
-            ].map((item) => (
+            {isWelcomeMode ? (
+              // Navigation limitée pour les visiteurs
               <button 
-                key={item.id} 
-                onClick={() => { setActiveTab(item.id as TabType); setIsSidebarOpen(false); voiceService.stop(); }} 
-                className={`w-full flex items-center gap-6 px-8 py-6 rounded-[2.5rem] text-[13px] font-bold transition-all uppercase tracking-[0.2em] group ${activeTab === item.id ? 'bg-[#00d4ff] text-slate-900 font-black shadow-[0_0_40px_#00d4ff66]' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                onClick={() => setActiveTab('jose')} 
+                className={`w-full flex items-center gap-6 px-8 py-6 rounded-[2.5rem] text-[13px] font-bold transition-all uppercase tracking-[0.2em] bg-[#00d4ff] text-slate-900 font-black shadow-[0_0_40px_#00d4ff66]`}
               >
-                <item.icon size={22} className={activeTab === item.id ? 'scale-110' : 'group-hover:scale-110 transition-transform'} /> 
-                {item.label}
+                <Bot size={22} /> {t.jose}
               </button>
-            ))}
+            ) : (
+              [
+                { id: 'stats', label: t.dashboard, icon: LayoutDashboard },
+                { id: 'jose', label: t.jose, icon: Bot },
+                { id: 'history', label: "Bio-Archives", icon: ClipboardList },
+                { id: 'academy', label: t.academy, icon: GraduationCap },
+                { id: 'social', label: t.social, icon: Share2 },
+                { id: 'finance', label: t.finance, icon: Wallet },
+                { id: 'profile', label: "Command Profile", icon: User },
+                ...(currentUser?.role === 'ADMIN' ? [{ id: 'admin', label: t.admin, icon: Settings }] : []),
+              ].map((item) => (
+                <button 
+                  key={item.id} 
+                  onClick={() => { setActiveTab(item.id as TabType); setIsSidebarOpen(false); voiceService.stop(); }} 
+                  className={`w-full flex items-center gap-6 px-8 py-6 rounded-[2.5rem] text-[13px] font-bold transition-all uppercase tracking-[0.2em] group ${activeTab === item.id ? 'bg-[#00d4ff] text-slate-900 font-black shadow-[0_0_40px_#00d4ff66]' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                >
+                  <item.icon size={22} className={activeTab === item.id ? 'scale-110' : 'group-hover:scale-110 transition-transform'} /> 
+                  {item.label}
+                </button>
+              ))
+            )}
           </nav>
           
-          <div className="mt-12 pt-10 border-t border-white/5 space-y-6">
-             <div className="p-8 bg-black/50 rounded-[3rem] border border-[#00d4ff]/20 shadow-inner">
-                <div className="flex items-center justify-between mb-4">
-                   <p className="font-stark text-[10px] font-black text-slate-500 uppercase tracking-widest italic">Core Stability</p>
-                   <Wifi size={16} className="text-emerald-500" />
-                </div>
-                <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden p-0.5">
-                   <div className="h-full bg-emerald-500 shadow-[0_0_15px_#10b981] rounded-full" style={{ width: `${syncStatus}%` }}></div>
-                </div>
-                <p className="font-stark text-[11px] text-emerald-400 font-black mt-3 text-right tabular-nums">{syncStatus}%</p>
-             </div>
-          </div>
+          {!isWelcomeMode && (
+            <div className="mt-12 pt-10 border-t border-white/5 space-y-6">
+               <div className="p-8 bg-black/50 rounded-[3rem] border border-[#00d4ff]/20 shadow-inner">
+                  <div className="flex items-center justify-between mb-4">
+                     <p className="font-stark text-[10px] font-black text-slate-500 uppercase tracking-widest italic">Core Stability</p>
+                     <Wifi size={16} className="text-emerald-500" />
+                  </div>
+                  <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden p-0.5">
+                     <div className="h-full bg-emerald-500 shadow-[0_0_15px_#10b981] rounded-full" style={{ width: `${syncStatus}%` }}></div>
+                  </div>
+                  <p className="font-stark text-[11px] text-emerald-400 font-black mt-3 text-right tabular-nums">{syncStatus}%</p>
+               </div>
+            </div>
+          )}
         </div>
       </aside>
 
-      {/* Main Bridge Deck - Carbon & Light Architecture */}
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative z-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
         <header className="h-36 px-16 flex items-center justify-between relative bg-black/30 backdrop-blur-2xl border-b border-white/5 shadow-2xl">
           <div className="flex items-center gap-10 relative z-10">
             <button className="lg:hidden p-5 bg-white/5 border border-white/10 rounded-2xl" onClick={() => setIsSidebarOpen(true)}><Menu size={28} /></button>
             <div className="hidden xl:flex flex-col">
               <p className="font-stark text-[11px] font-black text-[#00d4ff] uppercase tracking-[0.6em] italic mb-2">STARK INDUSTRIES PROTOCOL</p>
-              <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter">Command Master Hub</h2>
+              <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter">
+                {isWelcomeMode ? "Bienvenue chez NDSA" : "Command Master Hub"}
+              </h2>
             </div>
           </div>
           
@@ -183,9 +203,11 @@ const App: React.FC = () => {
                 {activeSpeechKey?.startsWith('brief_') ? <Square size={26} /> : <Volume2 size={26} />}
              </button>
              
-             <div onClick={() => setActiveTab('profile')} className="h-16 w-16 rounded-[1.8rem] flex items-center justify-center cursor-pointer overflow-hidden border-2 border-[#00d4ff]/50 shadow-[0_0_25px_#00d4ff44] hover:scale-110 transition-transform group bg-slate-900">
-                <img src={currentUser?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=guest`} alt="Avatar" className="w-full h-full object-cover group-hover:brightness-125" />
-             </div>
+             {!isWelcomeMode && (
+               <div onClick={() => setActiveTab('profile')} className="h-16 w-16 rounded-[1.8rem] flex items-center justify-center cursor-pointer overflow-hidden border-2 border-[#00d4ff]/50 shadow-[0_0_25px_#00d4ff44] hover:scale-110 transition-transform group bg-slate-900">
+                  <img src={currentUser?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=guest`} alt="Avatar" className="w-full h-full object-cover group-hover:brightness-125" />
+               </div>
+             )}
           </div>
         </header>
 
@@ -256,22 +278,6 @@ const DashboardContent = ({ t, stats, myReferralLink }: any) => (
                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </div>
             ))}
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          <LeadChart />
-          <section className="glass-card p-20 rounded-[6rem] flex flex-col justify-center relative overflow-hidden group shadow-3xl bg-black/40">
-             <div className="absolute top-0 right-0 p-24 opacity-[0.04] group-hover:scale-110 transition-transform duration-[6s] pointer-events-none text-[#00d4ff]"><Cpu size={500} /></div>
-             <h4 className="font-stark text-5xl font-black text-white italic mb-12 uppercase tracking-tight flex items-center gap-8"><Bot size={56} className="text-[#00d4ff] hologram-text" /> COGNITIVE CORE</h4>
-             <p className="text-slate-400 text-3xl leading-relaxed italic opacity-95 max-w-2xl">L'IA JOSÉ automatise le closing clinique via l'analyse SAB 2.0. Votre réseau se densifie pendant que vous construisez votre héritage mondial.</p>
-             <div className="mt-20 p-12 bg-black/60 rounded-[4rem] border border-[#00d4ff]/20 flex items-center justify-between group cursor-pointer hover:border-[#00d4ff]/60 transition-all shadow-inner">
-                <div>
-                   <p className="font-stark text-[11px] font-black text-slate-500 uppercase tracking-widest italic opacity-70 mb-3">Global Health Status</p>
-                   <p className="font-stark text-3xl font-black text-emerald-400 italic uppercase tracking-[0.4em] drop-shadow-[0_0_10px_#10b98166]">SECURE & OPTIMIZED</p>
-                </div>
-                <div className="w-24 h-24 rounded-3xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 shadow-[0_0_40px_#10b98155] animate-pulse border border-emerald-500/30"><ShieldCheck size={48} /></div>
-             </div>
-          </section>
         </div>
     </div>
 );

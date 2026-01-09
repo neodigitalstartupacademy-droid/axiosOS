@@ -40,20 +40,42 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
       setActiveSpeechKey(isSpeaking ? key : null);
     });
 
+    // ANALYSE DU LIEN DE PARRAINAGE
     const params = new URLSearchParams(window.location.search);
-    let refId = params.get('ref') || window.location.hash.split('ref=')[1]?.split('&')[0];
+    let refId = params.get('ref');
+    let encodedShop = params.get('shop');
+    let mode = params.get('mode');
+
+    let shopUrl = "";
+    if (encodedShop) {
+      try { shopUrl = atob(encodedShop); } catch (e) { console.error("Base64 decode error"); }
+    }
+
     const storedRef = refId || sessionStorage.getItem('ndsa_active_ref');
+    const storedShop = shopUrl || sessionStorage.getItem('ndsa_active_shop');
     
-    if (storedRef && storedRef !== (currentSubscriberId || SYSTEM_CONFIG.founder.id)) {
-      setReferralContext({ referrerId: storedRef, referrerName: `Leader ${storedRef}`, language: language as Language });
+    if (storedRef) {
+      setReferralContext({ 
+        referrerId: storedRef, 
+        referrerName: `Leader ${storedRef}`, 
+        shopUrl: storedShop || undefined,
+        language: language as Language 
+      });
       sessionStorage.setItem('ndsa_active_ref', storedRef);
+      if (storedShop) sessionStorage.setItem('ndsa_active_shop', storedShop);
     }
 
     if (messages.length === 0) {
+      let welcomeText = `Protocole Imperium 2026 activé. Salutations Commandant.\n\nPrêt pour le bio-scan. Soumettez un document ou posez vos questions cliniques. Je décode votre architecture biologique.`;
+      
+      if (mode === 'welcome' && storedRef) {
+        welcomeText = `Bonjour ! Je suis JOSÉ, votre assistant de santé et de succès digital. ✨\n\nJe travaille avec votre parrain (ID: ${storedRef}). Je suis ici pour vous faire découvrir comment la nutrition cellulaire NeoLife et le MLM digital peuvent transformer votre vie.\n\nDites-moi : qu'est-ce qui vous intéresse le plus aujourd'hui ? Votre SANTÉ 🧬 ou votre LIBERTÉ FINANCIÈRE 💰 ?`;
+      }
+
       setMessages([{ 
         id: 'welcome', 
         role: 'model', 
-        parts: [{ text: `Protocole Imperium 2026 activé. Salutations Commandant.\n\nPrêt pour le bio-scan. Soumettez un document ou posez vos questions cliniques. Je décode votre architecture biologique.` }], 
+        parts: [{ text: welcomeText }], 
         timestamp: new Date(), 
         status: 'read' 
       }]);
@@ -215,7 +237,7 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
             value={input} 
             onChange={(e) => setInput(e.target.value)} 
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-            placeholder={`Soumettez votre requête biomoléculaire à JOSÉ...`} 
+            placeholder={`Posez vos questions à JOSÉ...`} 
             className="flex-1 bg-transparent border-none px-8 py-4 text-white placeholder-slate-800 outline-none font-medium text-2xl italic tracking-tight"
           />
           <button onClick={() => handleSend()} disabled={isLoading || (!input.trim() && !selectedImage)} className="w-20 h-20 rounded-[2rem] bg-[#00d4ff] text-slate-900 flex items-center justify-center shadow-[0_0_30px_#00d4ff44] hover:brightness-125 disabled:opacity-20 transition-all active:scale-90"><Send size={40} /></button>
