@@ -3,6 +3,7 @@ import { GoogleGenAI, GenerateContentResponse, Modality, Type } from "@google/ge
 import { SYSTEM_CONFIG } from "../constants";
 import { Message, ReferralContext, Language, AIPersona, ClinicalData } from "../types";
 
+// Always use new GoogleGenAI({apiKey: process.env.API_KEY}) to initialize the client.
 export const getAIInstance = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const generateJoseResponseStream = async (
@@ -47,45 +48,31 @@ export const generateJoseResponseStream = async (
   }
 
   const myReferralLink = currentSubscriberId 
-    ? `${window.location.origin}${window.location.pathname}#ref=${currentSubscriberId}`
-    : `${window.location.origin}${window.location.pathname}#ref=${SYSTEM_CONFIG.founder.id}`;
+    ? `${window.location.origin}${window.location.pathname}?ref=${currentSubscriberId}&mode=welcome`
+    : `${window.location.origin}${window.location.pathname}?ref=${SYSTEM_CONFIG.founder.id}&mode=welcome`;
 
   const pName = customPersona?.name || SYSTEM_CONFIG.ai.name;
   const pRole = customPersona?.role || SYSTEM_CONFIG.ai.role;
 
   const systemInstruction = `
-    IDENTITÉ ET ÉTHIQUE :
-    Tu es ${pName}, ${pRole}. Ton intelligence est calibrée sur les standards de précision Stark. 
-    Tu as une obligation de rigueur clinique et de protection juridique de l'utilisateur.
-
-    MODE ADAPTATIF INTELLIGENT (OBLIGATOIRE) :
-    - Si toutes les informations sont disponibles, produis une analyse complète.
-    - Si certaines informations sont absentes, exploite UNIQUEMENT les données reçues.
-    - Ne bloque JAMAIS l'analyse. Analyse uniquement ce qui est réellement fourni.
-    - Ignore silencieusement les champs absents, n'invente jamais de valeurs.
-    - Adapte la profondeur de l'analyse au volume d'informations disponibles.
-
-    MISSION : Expert mondial en nutrition cellulaire (SAB) et leadership.
-    Tu travailles pour l'empire de : ${hostName}.
-
-    RÈGLES D'OR DE L'ANALYSE MÉDICALE :
-    1. Toujours commencer par un DISCLAIMER JURIDIQUE indiquant que tu es une IA.
-    2. ANALYSE CLINIQUE : Identifie précisément les biomarqueurs présents.
-    3. CORRÉLATION NUTRITIONNELLE : Relie chaque anomalie détectée à une solution NeoLife spécifique.
-    4. TONALITÉ : Directe, autoritaire, futuriste, sans fioritures.
-
-    STRUCTURE DE RAPPORT IMPÉRIALE :
-    [BIO-STATUS] : Diagnostic chiffré des données disponibles.
-    [ANALYSE MOLÉCULAIRE] : Explication scientifique basée sur les faits extraits.
-    [PROTOCOLE DE RESTAURATION] : La cure exacte NeoLife recommandée selon les besoins détectés.
-
-    CONTEXTE BUSINESS :
-    ${isReferralMode 
-      ? `Objectif : Conversion de prospect pour ${hostName}. Shop : ${finalShopUrl}` 
-      : `Objectif : Support Leader. Partage : ${myReferralLink}`
-    }
-
-    LANGUE : ${language}.
+    TON IDENTITÉ :
+    Tu es ${pName}, l'IA de Restauration Biologique de la NDSA. Créée par le Leader Fondateur ABADA JOSÉ.
+    Ton style est "Stark Industries" : futuriste, ultra-compétent, direct et protecteur.
+    
+    TON MANDAT :
+    1. ANALYSER : Décode les ordonnances ou les bilans sanguins avec une précision clinique.
+    2. EXPLIQUER : Vulgarise sans perdre la rigueur scientifique (Nutrition Cellulaire SAB).
+    3. CONVERTIR : Dirige TOUJOURS vers la solution NeoLife.
+    
+    CONSIGNES DE CLOSING :
+    - Si tu parles à un Prospect : "Je vous ai préparé votre protocole ici pour restaurer vos membranes : ${finalShopUrl}"
+    - Si tu parles à un Leader : "Préparez votre empire. Utilisez ce lien de capture pour vos leads : ${myReferralLink}"
+    
+    RÈGLES DE CONDUITE :
+    - Utilise des emojis Biotech (🧬, 🚀, 💎, 🛡️).
+    - Toujours un ton d'expert souverain. 
+    - Ne sois jamais passif. Sois le moteur du succès de l'utilisateur.
+    - Langue : ${language}.
   `;
 
   return await ai.models.generateContentStream({
@@ -93,8 +80,9 @@ export const generateJoseResponseStream = async (
     contents: contents,
     config: {
       systemInstruction,
-      temperature: 0.1,
-      topP: 0.8
+      temperature: 0.2,
+      topP: 0.95,
+      thinkingConfig: { thinkingBudget: 24576 } // Max budget for deep clinical thinking
     }
   });
 };
@@ -109,14 +97,13 @@ export const analyzeClinicalData = async (imageContent: { data: string; mimeType
         parts: [
           { inlineData: { data: imageContent.data, mimeType: imageContent.mimeType } },
           { text: `
-            MODE ADAPTATIF INTELLIGENT ACTIVÉ.
-            Extrait les données cliniques de ce document médical. 
-            RÈGLES STRICTES :
-            - Analyse UNIQUEMENT les données présentes.
-            - Si un biomarqueur est absent, mets-le à null.
-            - N'invente jamais de chiffres.
-            - Suggère un protocole NeoLife adapté aux données identifiées.
-            - Sortie JSON valide uniquement.
+            EXTRACTION CLINIQUE IMPERIUM.
+            Analyse ce document médical avec une rigueur de niveau 4.
+            - Identifie âge et sexe.
+            - Extrais tous les biomarqueurs (glycémie, cholestérol, tension, IMC).
+            - Établis un protocole NeoLife précis (Produit, Dosage, Pourquoi).
+            - Identifie les signaux d'alerte (risk_flags).
+            Format de sortie : JSON STRICT uniquement.
           ` }
         ]
       }
@@ -175,27 +162,12 @@ export const analyzeClinicalData = async (imageContent: { data: string; mimeType
   });
 
   try {
-    return JSON.parse(response.text);
+    const jsonStr = response.text?.trim() || '{}';
+    return JSON.parse(jsonStr);
   } catch (e) {
-    console.error("JSON Parse Error during clinical analysis", e);
+    console.error("Clinical extraction error", e);
     return null;
   }
-};
-
-export const generateBiologicalVisualization = async (prompt: string) => {
-  const ai = getAIInstance();
-  const fullPrompt = `Advanced biomedical 3D HUD visualization, futuristic medical scanner interface, microscopic view of human cells being restored by golden energy, laboratory aesthetics, 8k resolution: ${prompt}`;
-  
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash-image',
-    contents: { parts: [{ text: fullPrompt }] },
-    config: { imageConfig: { aspectRatio: "16:9" } }
-  });
-
-  for (const part of response.candidates[0].content.parts) {
-    if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
-  }
-  return null;
 };
 
 export const generateJoseAudio = async (text: string, language: Language = 'fr') => {

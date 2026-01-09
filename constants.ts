@@ -19,7 +19,7 @@ export const I18N = {
     report_ready: "Rapport de Restauration Prêt",
     legal_title: "Conformité & Protection Juridique",
     legal_accept: "Accepter les Protocoles de Sécurité",
-    legal_disclaimer: "AXIOMA OS est une plateforme d'aide à la décision nutritionnelle. L'IA José n'est pas un médecin certifié. Les données sont traitées localement pour votre confidentialité."
+    legal_disclaimer: "L'IA José ne remplace pas votre médecin. AXIOMA OS est une plateforme d'aide à la décision nutritionnelle. Les données sont traitées localement pour votre confidentialité."
   },
   en: {
     dashboard: "Command Cockpit",
@@ -38,7 +38,7 @@ export const I18N = {
     report_ready: "Restoration Report Ready",
     legal_title: "Legal Compliance & Protection",
     legal_accept: "Accept Security Protocols",
-    legal_disclaimer: "AXIOMA OS is a nutritional decision support platform. AI José is not a certified physician. Data is processed locally for your privacy."
+    legal_disclaimer: "AI José does not replace your doctor. AXIOMA OS is a nutritional decision support platform. Data is processed locally for your privacy."
   },
   it: {
     dashboard: "Cabina di Comando",
@@ -57,7 +57,7 @@ export const I18N = {
     report_ready: "Rapporto Restauro Pronto",
     legal_title: "Conformità Legale",
     legal_accept: "Accetta Protocolli di Sicurezza",
-    legal_disclaimer: "AXIOMA OS è una piattaforma di supporto nutrizionale. L'IA José non è un medico certificato."
+    legal_disclaimer: "L'IA José non sostituisce il tuo medico. AXIOMA OS è una piattaforma di supporto nutrizionale."
   },
   es: {
     dashboard: "Cabina de Mando",
@@ -76,7 +76,7 @@ export const I18N = {
     report_ready: "Informe de Restauración Listo",
     legal_title: "Cumplimiento Legal",
     legal_accept: "Aceptar Protocolos",
-    legal_disclaimer: "AXIOMA OS es una plataforma de apoyo nutricional. IA José no es un médico."
+    legal_disclaimer: "La IA José no reemplaza a su médico. AXIOMA OS es una plataforma de apoyo nutricional."
   }
 };
 
