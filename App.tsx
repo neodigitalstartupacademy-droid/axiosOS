@@ -12,13 +12,12 @@ import { ProfileView } from './components/ProfileView';
 import { OnboardingWizard } from './components/OnboardingWizard';
 import { ConversionNotification } from './components/ConversionNotification';
 import { DiagnosticHistory } from './components/DiagnosticHistory';
-import { LegalDisclaimer } from './components/LegalDisclaimer';
 import { Language, AuthUser } from './types'; 
 import { voiceService } from './services/voiceService';
 import { 
   LayoutDashboard, Bot, GraduationCap, Share2, Wallet, Menu,
-  Zap, Settings, Layers, Cpu, Rocket, Volume2, Square, Trophy, ShieldCheck, User,
-  ClipboardList, Globe, Activity, Wifi, AudioLines, Sparkles, Diamond
+  Layers, Volume2, Square, ShieldCheck, User,
+  ClipboardList, Rocket, Diamond, Settings, Cpu, Sparkles
 } from 'lucide-react';
 
 type TabType = 'stats' | 'jose' | 'academy' | 'social' | 'finance' | 'admin' | 'profile' | 'history';
@@ -33,7 +32,6 @@ const App: React.FC = () => {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showNotification, setShowNotification] = useState(false);
 
   const t = I18N[lang];
 
@@ -51,27 +49,18 @@ const App: React.FC = () => {
       try {
         const user = JSON.parse(savedSession) as AuthUser;
         setCurrentUser(user);
-        
-        // Par défaut, on va sur José AI pour le service
-        if (!isWelcome) {
-          setActiveTab('jose');
-        }
-
+        if (!isWelcome) setActiveTab('jose');
         if (!localStorage.getItem(`ndsa_onboarding_${user.id}`)) setShowOnboarding(true);
       } catch (e) {}
     }
     
-    if (isWelcome) {
-      setActiveTab('jose');
-    }
-
+    if (isWelcome) setActiveTab('jose');
     setIsAuthLoading(false);
     return () => unsubVoice();
   }, []);
 
   const handleLogin = (user: AuthUser) => {
     setCurrentUser(user);
-    // Tout le monde commence sur José AI
     setActiveTab('jose');
     if (!localStorage.getItem(`ndsa_onboarding_${user.id}`)) setShowOnboarding(true);
   };
@@ -79,12 +68,10 @@ const App: React.FC = () => {
   const readPageBrief = () => {
     let brief = "";
     switch(activeTab) {
-      case 'jose': brief = "Terminal JOSÉ v6.5. Le futur de votre santé cellulaire commence ici."; break;
-      case 'academy': brief = "Academy Leadership. Maîtrisez les lois de la psychiatrie cellulaire et l'empire digital."; break;
-      case 'stats': brief = "Accès restreint au Cockpit Master. Analyse des flux mondiaux."; break;
-      case 'social': brief = "Social Sync. Votre moteur de propagation virale."; break;
-      case 'finance': brief = "Gestion Financière. Audit de vos dividendes."; break;
-      default: brief = `Système Stark Imperium opérationnel.`;
+      case 'jose': brief = "Coach JOSÉ. Analyse et restauration bio-cellulaire active."; break;
+      case 'academy': brief = "Academy Stark. Puissance entrepreneuriale et savoir clinique."; break;
+      case 'social': brief = "Social Link. Diffusion de votre impact digital."; break;
+      default: brief = `Système Coach JOSÉ opérationnel.`;
     }
     voiceService.play(brief, `brief_${activeTab}`, lang);
   };
@@ -101,123 +88,101 @@ const App: React.FC = () => {
     : `${window.location.origin}${window.location.pathname}?ref=${SYSTEM_CONFIG.founder.id}&mode=welcome`;
 
   return (
-    <div className="min-h-screen flex font-sans antialiased text-white overflow-hidden selection:bg-[#00d4ff] selection:text-slate-900">
+    <div className="min-h-screen flex font-sans antialiased text-white overflow-hidden selection:bg-[#00d4ff] selection:text-slate-900 bg-[#020617]">
       
       {isSpeaking && (
-        <div className="fixed top-0 left-0 right-0 h-20 z-[2000] flex items-center justify-center pointer-events-none px-4">
-          <div className="glass-card px-12 py-5 rounded-full border border-[#00d4ff]/60 flex items-center gap-8 animate-in slide-in-from-top duration-1000">
-            <div className="flex items-end h-8 gap-1">
-              {[...Array(24)].map((_, i) => (
+        <div className="fixed top-12 left-0 right-0 z-[2000] flex items-center justify-center pointer-events-none px-6">
+          <div className="glass-card px-12 py-5 rounded-full flex items-center gap-10 animate-in slide-in-from-top duration-700">
+            <div className="flex items-end h-6 gap-1">
+              {[...Array(20)].map((_, i) => (
                 <div key={i} className="wave-bar" style={{ animationDelay: `${i * 0.05}s` }}></div>
               ))}
             </div>
-            <div className="flex flex-col">
-              <span className="font-stark text-[10px] font-black text-[#00d4ff] uppercase tracking-[0.4em]">Neural Stream Active</span>
-              <span className="font-stark text-[8px] text-slate-500 uppercase tracking-widest">{activeSpeechKey}</span>
-            </div>
+            <span className="font-stark text-[10px] font-black text-[#00d4ff] uppercase tracking-[0.5em]">Voice active</span>
           </div>
         </div>
       )}
 
       {showOnboarding && <OnboardingWizard onClose={() => setShowOnboarding(false)} />}
-      {showNotification && <ConversionNotification prospectCountry="Cameroun" healthFocus="Psychiatrie Cellulaire" onClose={() => setShowNotification(false)} onSocialSync={() => setActiveTab('social')} />}
-
-      <aside className={`fixed inset-y-0 left-0 w-80 glass-card z-50 transition-transform lg:translate-x-0 lg:static border-r border-white/5 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      
+      <aside className={`fixed inset-y-0 left-0 w-72 glass-card z-50 transition-transform lg:translate-x-0 lg:static border-r border-white/5 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-10 h-full flex flex-col">
-          <div className="flex items-center gap-5 mb-16 px-2 group cursor-pointer" onClick={() => setActiveTab('jose')}>
-            <div className="w-16 h-16 rounded-[2rem] flex items-center justify-center bg-gradient-to-br from-[#00d4ff] to-blue-900 shadow-[0_0_40px_#00d4ff33] border border-white/10 group-hover:scale-110 transition-transform">
-              <Layers size={32} className="text-white" />
+          <div className="flex flex-col items-center gap-6 mb-16 px-4 cursor-pointer" onClick={() => setActiveTab('jose')}>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-[#00d4ff]/10 border border-[#00d4ff]/20 shadow-xl">
+              <Bot size={32} className="text-[#00d4ff]" />
             </div>
-            <div>
-              <h1 className="font-stark font-black text-2xl tracking-tighter uppercase leading-none hologram-text">{SYSTEM_CONFIG.brand}</h1>
-              <div className="flex items-center gap-2 mt-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]"></span>
-                <p className="font-stark text-[11px] text-emerald-400 font-bold tracking-[0.2em] uppercase italic">IMPERIUM v6.5</p>
-              </div>
+            <div className="text-center">
+              <h1 className="font-stark font-black text-xl tracking-tighter uppercase leading-none">{SYSTEM_CONFIG.brand}</h1>
+              <p className="font-stark text-[8px] text-emerald-400 font-bold tracking-widest uppercase mt-2 opacity-50 italic">v7.8 Elite</p>
             </div>
           </div>
 
-          <nav className="space-y-4 flex-1 overflow-y-auto no-scrollbar">
-            {isWelcomeMode && !currentUser ? (
+          <nav className="space-y-3 flex-1 overflow-y-auto no-scrollbar">
+            {[
+              { id: 'jose', label: "Coach Jose", icon: Bot },
+              { id: 'academy', label: "Academy", icon: GraduationCap },
+              { id: 'social', label: "Social Engine", icon: Share2 },
+              { id: 'history', label: "Archives", icon: ClipboardList },
+              { id: 'finance', label: "Finance", icon: Wallet },
+              ...(isMasterFounder ? [{ id: 'stats', label: "Cockpit", icon: LayoutDashboard }] : []),
+              { id: 'profile', label: "Leadership", icon: User },
+            ].map((item) => (
               <button 
-                onClick={() => setActiveTab('jose')} 
-                className={`w-full flex items-center gap-6 px-8 py-6 rounded-[2.5rem] text-[13px] font-bold transition-all uppercase tracking-[0.2em] bg-[#00d4ff] text-slate-900 font-black shadow-[0_0_40px_#00d4ff66]`}
+                key={item.id} 
+                onClick={() => { setActiveTab(item.id as TabType); setIsSidebarOpen(false); voiceService.stop(); }} 
+                className={`w-full flex items-center gap-5 px-6 py-4 rounded-xl text-[11px] font-black transition-all uppercase tracking-widest ${activeTab === item.id ? 'bg-[#00d4ff] text-slate-900 shadow-lg' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
               >
-                <Bot size={22} /> {t.jose}
+                <item.icon size={18} /> 
+                {item.label}
               </button>
-            ) : (
-              [
-                // ORDRE DE COMMANDEMENT RECONFIGURÉ
-                { id: 'jose', label: t.jose, icon: Bot },
-                { id: 'academy', label: t.academy, icon: GraduationCap },
-                { id: 'history', label: "Bio-Archives", icon: ClipboardList },
-                { id: 'social', label: t.social, icon: Share2 },
-                { id: 'finance', label: t.finance, icon: Wallet },
-                { id: 'profile', label: "Mon Profil", icon: User },
-                ...(currentUser?.role === 'ADMIN' ? [{ id: 'admin', label: t.admin, icon: Settings }] : []),
-                // COCKPIT EN DERNIER - RÉSERVÉ AU MASTER
-                ...(isMasterFounder ? [{ id: 'stats', label: t.dashboard, icon: LayoutDashboard }] : []),
-              ].map((item) => (
-                <button 
-                  key={item.id} 
-                  onClick={() => { setActiveTab(item.id as TabType); setIsSidebarOpen(false); voiceService.stop(); }} 
-                  className={`w-full flex items-center gap-6 px-8 py-6 rounded-[2.5rem] text-[13px] font-bold transition-all uppercase tracking-[0.2em] group ${activeTab === item.id ? 'bg-[#00d4ff] text-slate-900 font-black shadow-[0_0_40px_#00d4ff66]' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
-                >
-                  <item.icon size={22} className={activeTab === item.id ? 'scale-110' : 'group-hover:scale-110 transition-transform'} /> 
-                  {item.label}
-                </button>
-              ))
-            )}
+            ))}
           </nav>
-          
-          {!currentUser && isWelcomeMode && (
-            <div className="mt-12 pt-10 border-t border-white/5">
-              <button onClick={() => window.location.href = window.location.pathname} className="w-full py-4 bg-white/5 text-slate-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:text-white transition-all">Accès Command Center</button>
-            </div>
-          )}
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative z-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
-        <header className="h-36 px-16 flex items-center justify-between relative bg-black/30 backdrop-blur-2xl border-b border-white/5 shadow-2xl">
+      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative z-10">
+        <header className="h-32 px-12 flex items-center justify-between relative bg-black/5 backdrop-blur-3xl border-b border-white/5">
           <div className="flex items-center gap-10 relative z-10">
-            <button className="lg:hidden p-5 bg-white/5 border border-white/10 rounded-2xl" onClick={() => setIsSidebarOpen(true)}><Menu size={28} /></button>
+            <button className="lg:hidden p-4 bg-white/5 border border-white/10 rounded-xl" onClick={() => setIsSidebarOpen(true)}><Menu size={24} /></button>
             <div className="hidden xl:flex flex-col">
-              <p className="font-stark text-[11px] font-black text-[#00d4ff] uppercase tracking-[0.6em] italic mb-2">PROTOCOL MASTER ACTIVE</p>
-              <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter">
-                {isWelcomeMode && !currentUser ? "NDSA Welcome Hub" : isMasterFounder ? "Cockpit Master : ABADA José" : "Leader Terminal"}
+              <p className="font-stark text-[10px] font-black text-[#00d4ff] uppercase tracking-[0.6em] mb-1 opacity-50">Stark Bio-System</p>
+              <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter flex items-center gap-5">
+                Coach Jose <Sparkles size={20} className="text-[#00d4ff]" />
               </h2>
             </div>
           </div>
           
           <div className="flex items-center gap-8 relative z-10">
-             <div className="flex items-center bg-black/60 border border-white/10 rounded-[2rem] p-1.5 shadow-2xl backdrop-blur-3xl">
+             <div className="flex items-center bg-black/20 border border-white/5 rounded-xl p-1">
                 {(['fr', 'en', 'it', 'es'] as Language[]).map(l => (
-                  <button key={l} onClick={() => { setLang(l); voiceService.stop(); }} className={`px-7 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${lang === l ? 'bg-[#00d4ff] text-slate-900 shadow-xl' : 'text-slate-500 hover:text-white'}`}>{l}</button>
+                  <button key={l} onClick={() => { setLang(l); voiceService.stop(); }} className={`px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${lang === l ? 'bg-[#00d4ff] text-slate-900' : 'text-slate-500 hover:text-white'}`}>{l}</button>
                 ))}
              </div>
 
-             <button onClick={readPageBrief} className={`w-16 h-16 rounded-[1.8rem] border transition-all flex items-center justify-center ${activeSpeechKey?.startsWith('brief_') ? 'bg-[#00d4ff] text-slate-950 shadow-[0_0_30px_#00d4ff]' : 'bg-white/5 text-slate-400 border-white/10 hover:text-white hover:border-[#00d4ff]/60'}`}>
-                {activeSpeechKey?.startsWith('brief_') ? <Square size={26} /> : <Volume2 size={26} />}
+             <button onClick={readPageBrief} className={`w-14 h-14 rounded-xl border transition-all flex items-center justify-center ${activeSpeechKey?.startsWith('brief_') ? 'bg-[#00d4ff] text-slate-950' : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'}`}>
+                {activeSpeechKey?.startsWith('brief_') ? <Square size={20} /> : <Volume2 size={20} />}
              </button>
              
-             {!isWelcomeMode && currentUser && (
-               <div onClick={() => setActiveTab('profile')} className="h-16 w-16 rounded-[1.8rem] flex items-center justify-center cursor-pointer overflow-hidden border-2 border-[#00d4ff]/50 shadow-[0_0_25px_#00d4ff44] hover:scale-110 transition-transform group bg-slate-900">
-                  <img src={currentUser?.avatar} alt="Avatar" className="w-full h-full object-cover group-hover:brightness-125" />
+             {currentUser && (
+               <div onClick={() => setActiveTab('profile')} className="h-14 w-14 rounded-xl flex items-center justify-center cursor-pointer overflow-hidden border border-[#00d4ff]/20 bg-slate-900">
+                  {/* Fixed undefined formData error by using currentUser.avatar directly */}
+                  <img src={currentUser.avatar} alt="Avatar" className="w-full h-full object-cover" />
                </div>
              )}
           </div>
         </header>
 
-        <div className="p-16 flex-1 overflow-y-auto no-scrollbar pb-40">
-          {activeTab === 'stats' && isMasterFounder && <DashboardContent t={t} stats={{ prospects: 124, salesVolume: 5840, subscriptionMRR: 2150, commissions: 430, conversions: 18, activeAffiliates: 24 }} myReferralLink={myReferralLink} />}
-          {activeTab === 'jose' && <AssistantJose language={lang} currentSubscriberId={currentUser?.neoLifeId} />}
-          {activeTab === 'history' && <DiagnosticHistory />}
-          {activeTab === 'academy' && <AcademyView />}
-          {activeTab === 'social' && <SocialSync />}
-          {activeTab === 'finance' && <FinanceView />}
-          {activeTab === 'profile' && currentUser && <ProfileView user={currentUser} onUpdate={(u) => setCurrentUser(u)} onLogout={() => { localStorage.removeItem('ndsa_session'); setCurrentUser(null); voiceService.stop(); }} />}
-          {activeTab === 'admin' && currentUser?.role === 'ADMIN' && <AdminMonitor stats={{ totalNetSaaS: 145200, aiEffectiveness: 98.5, orphanLeadsCount: 2450, totalActiveHubs: 42 }} />}
+        <div className="p-8 flex-1 overflow-y-auto no-scrollbar pb-32">
+          <div className="max-w-[1400px] mx-auto h-full">
+            {activeTab === 'jose' && <AssistantJose language={lang} currentSubscriberId={currentUser?.neoLifeId} />}
+            {activeTab === 'stats' && isMasterFounder && <DashboardContent t={t} stats={{ prospects: 124, salesVolume: 5840, subscriptionMRR: 2150, commissions: 430, conversions: 18, activeAffiliates: 24 }} myReferralLink={myReferralLink} />}
+            {activeTab === 'history' && <DiagnosticHistory />}
+            {activeTab === 'academy' && <AcademyView />}
+            {activeTab === 'social' && <SocialSync />}
+            {activeTab === 'finance' && <FinanceView />}
+            {activeTab === 'profile' && currentUser && <ProfileView user={currentUser} onUpdate={(u) => setCurrentUser(u)} onLogout={() => { localStorage.removeItem('ndsa_session'); setCurrentUser(null); voiceService.stop(); }} />}
+            {activeTab === 'admin' && currentUser?.role === 'ADMIN' && <AdminMonitor stats={{ totalNetSaaS: 145200, aiEffectiveness: 98.5, orphanLeadsCount: 2450, totalActiveHubs: 42 }} />}
+          </div>
         </div>
       </main>
     </div>
@@ -225,67 +190,55 @@ const App: React.FC = () => {
 };
 
 const DashboardContent = ({ t, stats, myReferralLink }: any) => (
-    <div className="space-y-20 animate-in fade-in duration-1000">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-16">
-          <header className="space-y-8">
-            <h2 className="font-stark text-9xl font-black text-white tracking-tighter leading-none italic uppercase drop-shadow-[0_0_30px_rgba(0,212,255,0.3)]">{t.dashboard}</h2>
-            <div className="flex items-center gap-8">
-              <span className="h-1.5 w-40 bg-gradient-to-r from-[#00d4ff] to-transparent"></span>
-              <p className="text-slate-400 font-medium text-3xl italic opacity-90 uppercase tracking-[0.5em]">Commandeur en Chef Stratégique</p>
-            </div>
-          </header>
-          <div className="flex items-center gap-12 glass-card p-14 rounded-[5rem] border border-[#00d4ff]/40 shadow-[0_0_60px_rgba(0,212,255,0.15)] bg-black/40">
-             <div className="text-right">
-                <p className="font-stark text-[12px] font-black text-slate-500 uppercase tracking-widest italic opacity-70 mb-3">Statut Fondateur</p>
-                <p className="font-stark text-5xl font-black text-[#FFD700] italic uppercase tracking-tighter flex items-center gap-5 drop-shadow-[0_0_15px_#FFD70066]">
-                  <Diamond size={44} /> DIAMOND MASTER
-                </p>
-             </div>
-             <div className="w-24 h-24 bg-emerald-500/10 rounded-3xl flex items-center justify-center text-emerald-400 shadow-[0_0_30px_#10b98144] border border-emerald-500/30"><ShieldCheck size={56} /></div>
+    <div className="space-y-16 animate-in fade-in duration-1000">
+        <header className="space-y-4">
+          <h2 className="font-stark text-6xl font-black text-white tracking-tighter italic uppercase">COCKPIT</h2>
+          <div className="flex items-center gap-8">
+            <span className="h-1 w-32 bg-[#00d4ff]"></span>
+            <p className="text-slate-500 font-bold text-xl uppercase tracking-widest italic opacity-50">Empire Management</p>
           </div>
-        </div>
+        </header>
 
-        <section className="glass-card rounded-[6rem] p-24 md:p-32 text-white relative overflow-hidden group border-white/5 shadow-3xl">
-           <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-[#00d4ff]/10 rounded-full blur-[200px] -mr-96 -mt-96 animate-pulse pointer-events-none"></div>
-           <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-32">
-              <div className="space-y-16 flex-1">
-                 <h3 className="font-stark text-9xl font-black tracking-tighter leading-none italic uppercase leading-[0.85]">IMPERIUM <span className="text-[#00d4ff]">SYNC</span></h3>
-                 <p className="text-slate-400 text-3xl font-medium max-w-4xl italic leading-relaxed opacity-95">Fondateur Gaétan, vos vecteurs de croissance sont en pleine expansion. L'IA JOSÉ convertit les flux à travers le globe.</p>
-                 <div className="flex flex-col md:flex-row gap-8 items-center max-w-5xl">
-                    <div className="flex-1 w-full bg-black/80 border border-white/10 px-12 py-8 rounded-[3rem] font-mono text-[#00d4ff] text-lg truncate shadow-inner">{myReferralLink}</div>
-                    <button onClick={() => { navigator.clipboard.writeText(myReferralLink); alert("Lien Master copié."); }} className="p-10 stark-btn-glow rounded-[3rem] active:scale-95 transition-all"><Share2 size={36} /></button>
+        <section className="glass-card rounded-3xl p-12 text-white relative overflow-hidden">
+           <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-16">
+              <div className="space-y-8 flex-1">
+                 <h3 className="font-stark text-6xl font-black tracking-tighter italic uppercase">AURA <span className="text-[#00d4ff]">SYNC</span></h3>
+                 <p className="text-slate-400 text-2xl font-medium max-w-4xl italic leading-relaxed">Le flux d'expansion est optimal. JOSÉ harmonise vos vecteurs de croissance à travers le globe.</p>
+                 <div className="flex flex-col md:flex-row gap-6 items-center max-w-4xl">
+                    <div className="flex-1 w-full bg-black/40 border border-white/5 px-8 py-5 rounded-2xl font-mono text-[#00d4ff] text-lg truncate">{myReferralLink}</div>
+                    <button onClick={() => { navigator.clipboard.writeText(myReferralLink); alert("Lien Master copié."); }} className="p-8 bg-[#00d4ff] text-slate-900 rounded-2xl active:scale-95 transition-all"><Share2 size={28} /></button>
                  </div>
               </div>
            </div>
         </section>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
                 { label: "Total Prospects", value: stats.prospects, color: "text-[#00d4ff]", icon: Rocket, bg: "bg-blue-500/5" },
                 { label: "Chiffre MLM (PV)", value: stats.salesVolume, color: "text-emerald-400", icon: Layers, bg: "bg-emerald-500/5" },
                 { label: "Gains SaaS", value: `$${stats.commissions}`, color: "text-[#FFD700]", icon: Wallet, bg: "bg-amber-500/5" },
                 { label: "Closing Automatisé", value: `${stats.conversions}%`, color: "text-rose-400", icon: Bot, bg: "bg-rose-500/5" },
             ].map((stat, i) => (
-                <div key={i} className={`glass-card p-14 rounded-[5rem] border border-white/10 relative group overflow-hidden ${stat.bg} hover:border-[#00d4ff]/50 shadow-2xl`}>
-                    <stat.icon size={56} className={`${stat.color} mb-12 relative z-10 opacity-80 group-hover:scale-125 transition-transform duration-1000`} />
-                    <p className="font-stark text-[12px] font-black text-slate-500 uppercase tracking-[0.5em] italic relative z-10">{stat.label}</p>
-                    <h3 className={`font-stark text-6xl font-black ${stat.color} mt-8 italic tracking-tighter relative z-10 tabular-nums`}>{stat.value}</h3>
+                <div key={i} className={`glass-card p-10 rounded-3xl border border-white/5 relative group overflow-hidden ${stat.bg} shadow-xl hover:scale-105 transition-all duration-500`}>
+                    <stat.icon size={48} className={`${stat.color} mb-6 opacity-60`} />
+                    <p className="font-stark text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3 italic">{stat.label}</p>
+                    <h3 className={`font-stark text-5xl font-black ${stat.color} italic tracking-tighter tabular-nums`}>{stat.value}</h3>
                 </div>
             ))}
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <LeadChart />
-          <section className="glass-card p-20 rounded-[6rem] flex flex-col justify-center relative overflow-hidden group shadow-3xl bg-black/40">
-             <div className="absolute top-0 right-0 p-24 opacity-[0.04] group-hover:scale-110 transition-transform duration-[6s] pointer-events-none text-[#00d4ff]"><Cpu size={500} /></div>
-             <h4 className="font-stark text-5xl font-black text-white italic mb-12 uppercase tracking-tight flex items-center gap-8"><Bot size={56} className="text-[#00d4ff] hologram-text" /> NEURAL ENGINE</h4>
-             <p className="text-slate-400 text-3xl leading-relaxed italic opacity-95 max-w-2xl">JOSÉ déploie vos stratégies de psychiatrie cellulaire. Les prospects sont éduqués sur les lois de la température biologique avant d'être dirigés vers votre boutique.</p>
-             <div className="mt-20 p-12 bg-black/60 rounded-[4rem] border border-[#00d4ff]/20 flex items-center justify-between group cursor-pointer hover:border-[#00d4ff]/60 transition-all shadow-inner">
+          <section className="glass-card p-12 rounded-3xl flex flex-col justify-center relative overflow-hidden bg-black/10">
+             <div className="absolute top-0 right-0 p-20 opacity-5 pointer-events-none text-[#00d4ff]"><Cpu size={300} /></div>
+             <h4 className="font-stark text-4xl font-black text-white italic mb-8 uppercase tracking-tight flex items-center gap-8"><Bot size={48} className="text-[#00d4ff]" /> CORE ENGINE</h4>
+             <p className="text-slate-400 text-2xl leading-relaxed italic max-w-2xl">La restauration cellulaire est en marche. Chaque diagnostic renforce l'autorité de votre Hub digital.</p>
+             <div className="mt-12 p-10 bg-black/40 rounded-2xl border border-white/5 flex items-center justify-between">
                 <div>
-                   <p className="font-stark text-[11px] font-black text-slate-500 uppercase tracking-widest italic opacity-70 mb-3">Global Health Status</p>
-                   <p className="font-stark text-3xl font-black text-emerald-400 italic uppercase tracking-[0.4em] drop-shadow-[0_0_10px_#10b98166]">SECURE & OPTIMIZED</p>
+                   <p className="font-stark text-[11px] font-black text-slate-500 uppercase tracking-widest italic mb-2">Network Status</p>
+                   <p className="font-stark text-2xl font-black text-emerald-400 italic uppercase tracking-widest">SECURE & FLUID</p>
                 </div>
-                <div className="w-24 h-24 rounded-3xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 shadow-[0_0_40px_#10b98155] animate-pulse border border-emerald-500/30"><ShieldCheck size={48} /></div>
+                <div className="w-16 h-16 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20"><ShieldCheck size={40} /></div>
              </div>
           </section>
         </div>
