@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-    Zap, Share2, Check, Copy, Target, Globe, Fingerprint, Activity, BarChart3, TrendingUp, Users, MessageSquare, Volume2, Square, Sparkles, HeartPulse, ShoppingCart
+    Zap, Share2, Check, Copy, Target, Globe, Fingerprint, Activity, BarChart3, TrendingUp, Users, MessageSquare, Volume2, Square, Sparkles, HeartPulse, ShoppingCart, Rocket
 } from 'lucide-react';
 import { SYSTEM_CONFIG } from '../constants';
 import { generateJoseAudio, decodeBase64, decodeAudioData } from '../services/geminiService';
@@ -11,15 +11,16 @@ export const SocialSync: React.FC = () => {
   const [customId, setCustomId] = useState("");
   const [shopUrl, setShopUrl] = useState("");
   const [isReading, setIsReading] = useState(false);
-  const [viralHealth, setViralHealth] = useState(88);
   const audioContextRef = useRef<AudioContext | null>(null);
   const activeSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
   useEffect(() => {
     const savedId = localStorage.getItem('ndsa_personal_id');
     const savedShop = localStorage.getItem('ndsa_personal_shop');
+    
     if (savedId) setCustomId(savedId);
     else setCustomId(SYSTEM_CONFIG.founder.id);
+    
     if (savedShop) setShopUrl(savedShop);
     else setShopUrl(SYSTEM_CONFIG.founder.officialShopUrl);
   }, []);
@@ -28,21 +29,18 @@ export const SocialSync: React.FC = () => {
     const val = e.target.value;
     setCustomId(val);
     localStorage.setItem('ndsa_personal_id', val);
-    setViralHealth(val && shopUrl ? 98 : 88);
   };
 
   const handleShopChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setShopUrl(val);
     localStorage.setItem('ndsa_personal_shop', val);
-    setViralHealth(customId && val ? 98 : 88);
   };
 
-  // Encodage Base64 pour le shopUrl pour éviter les problèmes de caractères spéciaux dans l'URL
   const encodedShop = btoa(shopUrl || SYSTEM_CONFIG.founder.officialShopUrl);
   const smartLink = `${window.location.origin}${window.location.pathname}?ref=${customId || SYSTEM_CONFIG.founder.id}&shop=${encodedShop}&mode=welcome`;
   
-  const shareMessage = `J'utilise ${SYSTEM_CONFIG.brand} et l'IA ${SYSTEM_CONFIG.ai.name} pour ma santé cellulaire. C'est la révolution du MLM digital ! Viens voir :`;
+  const shareMessage = `Bonjour ! Je t'invite à découvrir la nutrition cellulaire NeoLife avec mon assistant IA JOSÉ. C'est le futur du MLM digital ! Viens faire ton diagnostic ici :`;
 
   const stopAudio = () => {
     if (activeSourceRef.current) {
@@ -55,7 +53,7 @@ export const SocialSync: React.FC = () => {
   const handleRead = async () => {
     if (isReading) { stopAudio(); return; }
     setIsReading(true);
-    const textToRead = `Bienvenue dans le Moteur de Viralité. Configurez votre ID et votre boutique NeoLife. Votre Smart Link Elite permet à José de faire le travail de prospection et de vente pour vous. C'est l'automatisation totale.`;
+    const textToRead = `Voici votre moteur de viralité. Saisissez votre identifiant NeoLife et le lien de votre boutique. Votre Smart Link Elite permet à JOSÉ de faire tout le travail : accueil, diagnostic et vente. C'est l'automatisation totale pour votre succès.`;
     const base64 = await generateJoseAudio(textToRead);
     if (base64) {
       if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -96,7 +94,7 @@ export const SocialSync: React.FC = () => {
           <div className="flex-1 space-y-10">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-[#00d4ff]/10 border border-[#00d4ff]/20 rounded-full text-[11px] font-black text-[#00d4ff] uppercase tracking-[0.3em] italic">
+                <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-[#00d4ff]/10 border border-[#00d4ff]/20 rounded-full text-[10px] font-black text-[#00d4ff] uppercase tracking-[0.3em] italic">
                   <Zap size={16} /> Viral Engine Active
                 </div>
                 <button 
@@ -108,7 +106,7 @@ export const SocialSync: React.FC = () => {
               </div>
               <h2 className="text-6xl font-black text-white tracking-tighter italic uppercase leading-none">Smart Link <span className="text-[#00d4ff]">Elite</span></h2>
               <p className="text-slate-400 text-xl font-medium leading-relaxed max-w-2xl italic">
-                Votre lien de capture bio-digital. Automatisez votre prospection : JOSÉ accueille vos invités et les redirige vers votre boutique.
+                C'est votre lien magique. Partagez-le sur les réseaux sociaux. JOSÉ accueillera vos invités, fera leur diagnostic et les enverra directement sur VOTRE boutique officielle.
               </p>
             </div>
 
@@ -117,40 +115,33 @@ export const SocialSync: React.FC = () => {
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 flex items-center gap-2">
                     <Fingerprint size={12} className="text-[#00d4ff]" /> ID Distributeur NeoLife
                   </label>
-                  <div className="relative group">
-                    <input 
-                      type="text" 
-                      value={customId} 
-                      onChange={handleIdChange}
-                      placeholder="Ex: 067-2922111" 
-                      className="w-full bg-slate-950/80 border border-white/10 px-8 py-6 rounded-3xl text-white font-black italic text-lg outline-none focus:border-[#00d4ff] transition-all shadow-inner"
-                    />
-                    <Sparkles size={20} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-700 group-hover:text-[#00d4ff] transition-colors" />
-                  </div>
+                  <input 
+                    type="text" 
+                    value={customId} 
+                    onChange={handleIdChange}
+                    placeholder="Ex: 067-2922111" 
+                    className="w-full bg-slate-950/80 border border-white/10 px-8 py-6 rounded-3xl text-white font-black italic text-lg outline-none focus:border-[#00d4ff] transition-all"
+                  />
                </div>
 
                <div className="space-y-6">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 flex items-center gap-2">
-                    <ShoppingCart size={12} className="text-[#00d4ff]" /> URL Boutique NeoLife
+                    <ShoppingCart size={12} className="text-[#00d4ff]" /> URL de votre Boutique NeoLife
                   </label>
-                  <div className="relative group">
-                    <input 
-                      type="text" 
-                      value={shopUrl} 
-                      onChange={handleShopChange}
-                      placeholder="https://shopneolife.com/..." 
-                      className="w-full bg-slate-950/80 border border-white/10 px-8 py-6 rounded-3xl text-white font-black italic text-sm outline-none focus:border-[#00d4ff] transition-all shadow-inner"
-                    />
-                    <Globe size={20} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-700 group-hover:text-[#00d4ff] transition-colors" />
-                  </div>
+                  <input 
+                    type="text" 
+                    value={shopUrl} 
+                    onChange={handleShopChange}
+                    placeholder="https://shopneolife.com/..." 
+                    className="w-full bg-slate-950/80 border border-white/10 px-8 py-6 rounded-3xl text-white font-black italic text-sm outline-none focus:border-[#00d4ff] transition-all"
+                  />
                </div>
             </div>
 
             <div className="space-y-6">
-               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Votre Lien de Prospection Automatisé</label>
+               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Lien de Prospection Automatisé</label>
                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1 bg-slate-950/90 border border-[#00d4ff]/20 px-8 py-6 rounded-3xl text-[#00d4ff] font-mono text-xs truncate flex items-center shadow-inner group overflow-hidden relative">
-                    <div className="absolute inset-y-0 left-0 w-1 bg-[#00d4ff] group-hover:w-full transition-all duration-700 opacity-5"></div>
+                  <div className="flex-1 bg-slate-950/90 border border-[#00d4ff]/20 px-8 py-6 rounded-3xl text-[#00d4ff] font-mono text-xs truncate flex items-center shadow-inner">
                     {smartLink}
                   </div>
                   <button 
@@ -158,7 +149,6 @@ export const SocialSync: React.FC = () => {
                     className="p-6 bg-[#00d4ff] text-slate-950 rounded-3xl transition-all shadow-[0_10px_30px_#00d4ff44] hover:brightness-110 active:scale-90 flex items-center justify-center gap-3 font-stark font-black text-xs uppercase"
                   >
                     {copied ? <Check size={28} /> : <Copy size={28} />}
-                    {copied && <span className="pr-2">Copié</span>}
                   </button>
                </div>
             </div>
@@ -166,47 +156,32 @@ export const SocialSync: React.FC = () => {
             <div className="pt-6 flex flex-wrap gap-4">
                <button 
                 onClick={() => shareTo('whatsapp')}
-                className="px-8 py-4 bg-emerald-600/10 border border-emerald-500/20 text-emerald-500 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-emerald-600 hover:text-white transition-all flex items-center gap-3"
+                className="px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg hover:scale-105 transition-all flex items-center gap-3"
                >
-                 <MessageSquare size={16} /> WhatsApp Sync
+                 <MessageSquare size={16} /> WhatsApp
                </button>
                <button 
                 onClick={() => shareTo('facebook')}
-                className="px-8 py-4 bg-blue-600/10 border border-blue-500/20 text-blue-500 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-blue-600 hover:text-white transition-all flex items-center gap-3"
+                className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg hover:scale-105 transition-all flex items-center gap-3"
                >
-                 <Globe size={16} /> Facebook Viral
+                 <Globe size={16} /> Facebook
                </button>
             </div>
           </div>
         </div>
       </div>
-
-      <div className="bg-white/5 p-12 rounded-[4rem] border border-white/10 shadow-xl overflow-hidden relative backdrop-blur-md group">
-         <div className="absolute inset-0 bg-gradient-to-br from-[#00d4ff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-         <div className="flex items-center justify-between mb-12 relative z-10">
+      
+      <div className="bg-white/5 p-12 rounded-[4rem] border border-white/10 shadow-xl overflow-hidden relative backdrop-blur-md">
+         <div className="flex items-center gap-8 mb-8">
+            <div className="w-20 h-20 bg-[#00d4ff]/10 rounded-3xl flex items-center justify-center text-[#00d4ff] shadow-2xl"><Rocket size={40} /></div>
             <div>
-              <h3 className="text-3xl font-stark font-black text-white tracking-tight flex items-center gap-6 italic uppercase leading-none"><BarChart3 size={40} className="text-[#00d4ff]" /> Viral Dynamics</h3>
-              <p className="text-slate-500 text-lg font-medium mt-4 italic opacity-80">Mesure de l'impact organique de vos partages Stark.</p>
-            </div>
-            <div className="px-6 py-3 bg-emerald-500/10 text-emerald-500 rounded-2xl text-[11px] font-black uppercase tracking-widest border border-emerald-500/20 flex items-center gap-3">
-              <TrendingUp size={16} className="animate-bounce" /> Optimization Active
+              <h3 className="text-3xl font-stark font-black text-white italic uppercase tracking-tighter">Duplication Illimitée</h3>
+              <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px] mt-1">L'IA JOSÉ travaille pour votre équipe.</p>
             </div>
          </div>
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
-            {[
-              { label: "Portée Totale", value: "14,250", icon: Users, color: "text-[#00d4ff]" },
-              { label: "Engagement", value: "8.4%", icon: TrendingUp, color: "text-emerald-400" },
-              { label: "Vitesse Virale", value: "STARK-1", icon: Zap, color: "text-amber-500" }
-            ].map((stat, i) => (
-              <div key={i} className="glass-card p-10 rounded-[3rem] border border-white/5 space-y-8 hover:bg-white/5 transition-all group/item">
-                <stat.icon size={36} className={`${stat.color} group-hover/item:scale-125 transition-transform duration-500`} />
-                <div>
-                  <p className="font-stark text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] mb-3 italic">{stat.label}</p>
-                  <h4 className="font-stark text-4xl font-black text-white italic tracking-tighter tabular-nums">{stat.value}</h4>
-                </div>
-              </div>
-            ))}
-         </div>
+         <p className="text-slate-400 text-lg leading-relaxed italic">
+           Lorsqu'un prospect rejoint votre équipe NeoLife via votre boutique, il accède lui aussi à cette plateforme. JOSÉ devient son assistant personnel, créant un cycle de succès infini. C'est ça, la révolution du MLM digital.
+         </p>
       </div>
     </div>
   );

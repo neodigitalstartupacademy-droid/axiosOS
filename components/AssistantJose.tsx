@@ -6,7 +6,7 @@ import { storageService } from '../services/storageService';
 import { Message, Language, AIPersona, ReferralContext, DiagnosticReport } from '../types'; 
 import { SYSTEM_CONFIG, I18N as I18N_CONST } from '../constants';
 import { 
-  Send, Bot, Loader2, Play, Square, User, Image as ImageIcon, Activity, FlaskConical, ShieldAlert, BrainCircuit, Microscope
+  Send, Bot, Loader2, Play, Square, User, Image as ImageIcon, Activity, FlaskConical, ShieldAlert, BrainCircuit, Microscope, Sparkles, HeartPulse, DollarSign
 } from 'lucide-react';
 
 interface AssistantJoseProps {
@@ -48,28 +48,28 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
 
     let shopUrl = "";
     if (encodedShop) {
-      try { shopUrl = atob(encodedShop); } catch (e) { console.error("Base64 decode error"); }
+      try { shopUrl = atob(encodedShop); } catch (e) { console.error("URL Shop Base64 Error"); }
     }
 
-    const storedRef = refId || sessionStorage.getItem('ndsa_active_ref');
-    const storedShop = shopUrl || sessionStorage.getItem('ndsa_active_shop');
+    const activeRef = refId || sessionStorage.getItem('ndsa_active_ref');
+    const activeShop = shopUrl || sessionStorage.getItem('ndsa_active_shop');
     
-    if (storedRef) {
+    if (activeRef) {
       setReferralContext({ 
-        referrerId: storedRef, 
-        referrerName: `Leader ${storedRef}`, 
-        shopUrl: storedShop || undefined,
+        referrerId: activeRef, 
+        referrerName: `Leader ${activeRef}`, 
+        shopUrl: activeShop || undefined,
         language: language as Language 
       });
-      sessionStorage.setItem('ndsa_active_ref', storedRef);
-      if (storedShop) sessionStorage.setItem('ndsa_active_shop', storedShop);
+      sessionStorage.setItem('ndsa_active_ref', activeRef);
+      if (activeShop) sessionStorage.setItem('ndsa_active_shop', activeShop);
     }
 
     if (messages.length === 0) {
-      let welcomeText = `Protocole Imperium 2026 activé. Salutations Commandant.\n\nPrêt pour le bio-scan. Soumettez un document ou posez vos questions cliniques. Je décode votre architecture biologique.`;
+      let welcomeText = `Bonjour ! Je suis JOSÉ, votre assistant de santé et de succès digital. ✨\n\nPrêt pour votre diagnostic. Comment puis-je vous aider aujourd'hui ?`;
       
-      if (mode === 'welcome' && storedRef) {
-        welcomeText = `Bonjour ! Je suis JOSÉ, votre assistant de santé et de succès digital. ✨\n\nJe travaille avec votre parrain (ID: ${storedRef}). Je suis ici pour vous faire découvrir comment la nutrition cellulaire NeoLife et le MLM digital peuvent transformer votre vie.\n\nDites-moi : qu'est-ce qui vous intéresse le plus aujourd'hui ? Votre SANTÉ 🧬 ou votre LIBERTÉ FINANCIÈRE 💰 ?`;
+      if (mode === 'welcome' && activeRef) {
+        welcomeText = `Bonjour ! ✨ Quel plaisir de vous accueillir. Je suis JOSÉ, l'assistant personnel de votre parrain (ID: ${activeRef}).\n\nJe suis là pour vous montrer comment la nutrition cellulaire NeoLife et le MLM digital peuvent révolutionner votre vie.\n\nSaviez-vous que la colère fige vos cellules et que boire glacé (0°C) est un danger pour votre corps qui est à 37°C ? 🌡️\n\nDites-moi : souhaitez-vous d'abord parler de votre SANTÉ 🧬 ou de votre LIBERTÉ FINANCIÈRE 💰 ?`;
       }
 
       setMessages([{ 
@@ -79,9 +79,13 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
         timestamp: new Date(), 
         status: 'read' 
       }]);
+
+      if (mode === 'welcome') {
+        setTimeout(() => voiceService.play(welcomeText, 'welcome_msg', language as Language), 1000);
+      }
     }
     return () => unsubVoice();
-  }, [language, currentSubscriberId]);
+  }, [language]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -101,11 +105,6 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
     setSelectedImage(null);
     
     try {
-      let clinicalData = null;
-      if (medicalMode && currentImg) {
-        clinicalData = await analyzeClinicalData(currentImg);
-      }
-
       const stream = await generateJoseResponseStream(userMsg.parts[0].text, messages, referralContext, language as Language, persona, currentSubscriberId, currentImg);
       setIsScanning(false);
       let aiMsgId = 'ai_response_' + Date.now();
@@ -115,22 +114,6 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
       for await (const chunk of stream) {
         fullText += chunk.text || "";
         setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, parts: [{ text: fullText }] } : m));
-      }
-
-      if (medicalMode || fullText.includes('[BIO-STATUS]')) {
-        let compressedImage = currentImg ? await storageService.compressImage(currentImg.data) : undefined;
-        const newReport: DiagnosticReport = {
-          id: 'rep_' + Date.now(),
-          date: new Date(),
-          title: fullText.split('\n')[0].substring(0, 50) || "Bio-Scan Stark Imperium",
-          type: fullText.toLowerCase().includes('ordonnance') ? 'PRESCRIPTION' : 'BLOOD_WORK',
-          summary: clinicalData?.analysis?.substring(0, 200) || fullText.substring(0, 200) + "...",
-          fullContent: fullText,
-          status: fullText.toLowerCase().includes('alerte') ? 'ALERT' : 'STABLE',
-          image: compressedImage ? `data:image/jpeg;base64,${compressedImage}` : undefined,
-          clinicalData: clinicalData || undefined
-        };
-        await storageService.saveReport(newReport);
       }
 
       setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, status: 'read' } : m));
@@ -144,7 +127,6 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
 
   return (
     <div className="flex flex-col h-[calc(100vh-160px)] glass-card rounded-[5rem] border border-white/10 overflow-hidden shadow-3xl relative animate-in fade-in duration-1000">
-      
       {isScanning && (
         <div className="absolute inset-0 z-[100] bg-black/90 backdrop-blur-3xl flex items-center justify-center">
            <div className="text-center space-y-12">
@@ -161,22 +143,25 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
         <div className="flex items-center gap-10">
           <div className="w-20 h-20 bg-[#00d4ff]/10 rounded-[2rem] flex items-center justify-center border border-[#00d4ff]/40 relative shadow-inner overflow-hidden group">
             <Bot size={44} className={`text-[#00d4ff] transition-transform duration-1000 ${isLoading ? 'scale-110 rotate-12' : ''}`} />
-            {isLoading && <div className="absolute inset-0 border-2 border-[#00d4ff] animate-ping opacity-20"></div>}
             <div className="absolute inset-0 bg-gradient-to-tr from-[#00d4ff]/20 to-transparent"></div>
           </div>
           <div>
             <h2 className="font-stark font-black text-3xl text-white tracking-tighter italic uppercase leading-none">{persona.name}</h2>
-            <p className="font-stark text-[11px] text-[#00d4ff] font-black uppercase tracking-[0.5em] mt-3 opacity-80">Cognitive Terminal Elite</p>
+            <div className="flex items-center gap-4 mt-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <p className="font-stark text-[11px] text-[#00d4ff] font-black uppercase tracking-[0.5em] opacity-80">Cognitive Terminal Elite</p>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-10">
-          {isLoading && (
-             <div className="flex items-center gap-5 px-10 py-5 bg-[#00d4ff]/5 border border-[#00d4ff]/20 rounded-full animate-pulse shadow-3xl">
-                <BrainCircuit size={20} className="text-[#00d4ff] animate-spin" style={{ animationDuration: '3s' }} />
-                <span className="font-stark text-[11px] font-black text-[#00d4ff] uppercase tracking-widest italic">Neural Link Computing...</span>
+        {referralContext && (
+          <div className="px-8 py-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-4 animate-in slide-in-from-right duration-700">
+             <Sparkles size={18} className="text-emerald-500" />
+             <div className="text-right">
+               <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Sponsorisé par</p>
+               <p className="text-xs font-black text-emerald-400 uppercase italic tracking-tighter">{referralContext.referrerName}</p>
              </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-16 space-y-16 no-scrollbar scroll-smooth">
@@ -188,22 +173,24 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
               </div>
               <div className="flex flex-col space-y-3">
                 <div className={`p-10 rounded-[3.5rem] border backdrop-blur-3xl shadow-[0_25px_60px_rgba(0,0,0,0.6)] leading-relaxed ${msg.role === 'user' ? 'bg-[#00d4ff]/10 border-[#00d4ff]/40 text-white rounded-tr-none' : 'bg-black/40 border-white/10 text-slate-200 rounded-tl-none'}`}>
-                   {msg.parts[0].text.includes('[BIO-STATUS]') && (
-                     <div className="mb-10 p-10 bg-rose-500/10 border border-rose-500/30 rounded-[3rem] flex items-start gap-8">
-                        <ShieldAlert size={36} className="text-rose-500 shrink-0" />
-                        <p className="text-[13px] font-bold text-rose-500 uppercase leading-relaxed tracking-widest italic">
-                           Alerte Bio-Scan : {SYSTEM_CONFIG.legal.medical_disclaimer}
-                        </p>
-                     </div>
-                   )}
                    <div className="text-[19px] font-medium whitespace-pre-line italic opacity-95">
                       {msg.parts[0].text}
                    </div>
                    {msg.role === 'model' && (
-                    <div className="flex items-center gap-10 mt-10 pt-10 border-t border-white/5">
-                      <button onClick={() => voiceService.play(msg.parts[0].text, `msg_${msg.id}`, language as Language)} className={`flex items-center gap-5 font-stark text-[12px] font-black uppercase tracking-[0.4em] transition-all group ${activeSpeechKey === `msg_${msg.id}` ? 'text-[#00d4ff] animate-pulse' : 'text-slate-500 hover:text-white'}`}>
-                        {activeSpeechKey === `msg_${msg.id}` ? <Square size={20} className="text-rose-500" /> : <Play size={20} className="group-hover:scale-110 transition-transform" />} 
-                        {activeSpeechKey === `msg_${msg.id}` ? 'Terminate Sync' : 'Neural Voice Output'}
+                    <div className="flex flex-wrap items-center gap-4 mt-10 pt-10 border-t border-white/5">
+                      <button onClick={() => voiceService.play(msg.parts[0].text, `msg_${msg.id}`, language as Language)} className={`flex items-center gap-3 font-stark text-[10px] font-black uppercase tracking-[0.4em] transition-all group ${activeSpeechKey === `msg_${msg.id}` ? 'text-[#00d4ff] animate-pulse' : 'text-slate-500 hover:text-white'}`}>
+                        {activeSpeechKey === `msg_${msg.id}` ? <Square size={16} className="text-rose-500" /> : <Play size={16} />} 
+                        {activeSpeechKey === `msg_${msg.id}` ? 'STOP SYNC' : 'NEURAL VOICE'}
+                      </button>
+                      
+                      {referralContext?.shopUrl && (
+                        <a href={referralContext.shopUrl} target="_blank" rel="noopener noreferrer" className="px-6 py-2 bg-emerald-500 text-slate-950 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:scale-105 transition-transform">
+                          <HeartPulse size={14} /> Voir Boutique
+                        </a>
+                      )}
+                      
+                      <button onClick={() => setInput("Parle-moi du business digital 💰")} className="px-6 py-2 bg-blue-600/20 border border-blue-500/30 text-blue-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all">
+                        Business 💰
                       </button>
                     </div>
                   )}
@@ -215,21 +202,6 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
       </div>
 
       <div className="p-14 bg-black/60 border-t border-white/5 space-y-10 backdrop-blur-3xl">
-        {selectedImage && (
-          <div className="flex items-center gap-10 bg-[#00d4ff]/10 p-10 rounded-[3.5rem] w-fit border border-[#00d4ff]/40 shadow-3xl animate-in zoom-in duration-300">
-            <div className="relative group">
-              <img src={`data:image/jpeg;base64,${selectedImage.data}`} className="h-32 w-32 rounded-[2rem] object-cover border-4 border-[#00d4ff] shadow-2xl group-hover:scale-105 transition-transform" alt="Bio-Detect" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-[2rem]"></div>
-            </div>
-            <div className="space-y-5">
-               <h4 className="font-stark text-sm font-black text-white uppercase tracking-widest">Bio-Signature Détectée</h4>
-               <div className="flex gap-6">
-                 <button onClick={() => handleSend(true)} className="px-12 py-6 stark-btn-glow rounded-2xl flex items-center gap-5 text-xs italic"><FlaskConical size={24} /> Déclencher Bio-Extraction</button>
-                 <button onClick={() => setSelectedImage(null)} className="px-10 py-6 bg-white/5 border border-white/10 text-rose-500 rounded-2xl font-black uppercase text-[11px] tracking-widest hover:bg-rose-500/10">Annuler</button>
-               </div>
-            </div>
-          </div>
-        )}
         <div className="flex gap-8 max-w-6xl mx-auto bg-black border border-white/10 px-8 py-8 rounded-[4rem] focus-within:border-[#00d4ff]/60 transition-all shadow-3xl group">
           <button onClick={() => fileInputRef.current?.click()} className="w-16 h-16 rounded-2xl flex items-center justify-center text-slate-500 hover:text-[#00d4ff] hover:bg-white/5 transition-all"><ImageIcon size={32} /></button>
           <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if(f) { const r = new FileReader(); r.onloadend = () => setSelectedImage({ data: (r.result as string).split(',')[1], mimeType: f.type }); r.readAsDataURL(f); } }} />
@@ -240,13 +212,9 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
             placeholder={`Posez vos questions à JOSÉ...`} 
             className="flex-1 bg-transparent border-none px-8 py-4 text-white placeholder-slate-800 outline-none font-medium text-2xl italic tracking-tight"
           />
-          <button onClick={() => handleSend()} disabled={isLoading || (!input.trim() && !selectedImage)} className="w-20 h-20 rounded-[2rem] bg-[#00d4ff] text-slate-900 flex items-center justify-center shadow-[0_0_30px_#00d4ff44] hover:brightness-125 disabled:opacity-20 transition-all active:scale-90"><Send size={40} /></button>
+          <button onClick={() => handleSend()} disabled={isLoading} className="w-20 h-20 rounded-[2rem] bg-[#00d4ff] text-slate-900 flex items-center justify-center shadow-[0_0_30px_#00d4ff44] hover:brightness-125 disabled:opacity-20 transition-all active:scale-90"><Send size={40} /></button>
         </div>
       </div>
-
-      <style>{`
-        @keyframes scan { 0% { top: 0%; } 50% { top: 100%; } 100% { top: 0%; } }
-      `}</style>
     </div>
   );
 };

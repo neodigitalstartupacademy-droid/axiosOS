@@ -76,15 +76,15 @@ export const I18N = {
     report_ready: "Informe de Restauración Listo",
     legal_title: "Cumplimiento Legal",
     legal_accept: "Aceptar Protocolos",
-    legal_disclaimer: "La IA José no reemplaza a su médico. AXIOMA OS es una plataforma de apoyo nutricional."
+    legal_disclaimer: "La IA José no reemplaza a su médico. AXIOMA OS est una plataforma de apoyo nutricional."
   }
 };
 
 export const SYSTEM_CONFIG = {
   brand: "NDSA GMBC OS",
-  version: "6.0.0-IMPERIUM",
+  version: "6.5.0-IMPERIUM",
   founder: {
-    name: "Leader JOSÉ",
+    name: "ABADA M. José Gaétan",
     id: "067-2922111",
     officialShopUrl: "https://shopneolife.com/startupforworld/shop/atoz",
     status: "Fondateur Visionnaire"
@@ -92,7 +92,7 @@ export const SYSTEM_CONFIG = {
   legal: {
     tos_url: "https://axioma-os.com/terms",
     privacy_url: "https://axioma-os.com/privacy",
-    medical_disclaimer: "ATTENTION : JOSÉ est une IA d'analyse de données. En aucun cas ses rapports ne constituent une prescription médicale officielle. Consultez un professionnel de santé agréé pour toute décision médicale."
+    medical_disclaimer: "ATTENTION : JOSÉ est une IA d'analyse de données. En aucun cas ses rapports ne constituent une prescription médicale officielle."
   },
   ai: {
     name: "JOSÉ",
@@ -121,16 +121,9 @@ export const SYSTEM_CONFIG = {
           {
             id: "psy-cell-1",
             title: "La Psychiatrie Cellulaire : L'Esprit sur la Matière",
-            content: "La NDSA intègre les dernières découvertes psychiatriques : les émotions toxiques comme la colère, la médisance ou la haine ne sont pas que spirituelles, elles sont biochimiques. Elles génèrent un stress oxydatif qui 'verrouille' la membrane de vos cellules. Pour guérir, le corps a besoin de paix. Le pardon alcalinise votre sang et permet à la nutrition cellulaire de fonctionner. Un esprit fluide égale une membrane fluide.",
-            starkInsight: "Le stress est une arme chimique interne qui paralyse vos membranes.",
-            practicalExercise: "Identifiez une émotion toxique et pratiquez le 'Pardon Métabolique' pour fluidifier votre bio-système."
-          },
-          {
-            id: "path-ind-1",
-            title: "Conscientisation : Les Secrets de l'Insuccès",
-            content: "L'insuccès dans les affaires et les maladies chroniques ont la même source : l'asphyxie par les produits chimiques. Engrais bio-industriels, conservateurs, et résidus de médicaments s'accumulent dans vos tissus naturels. La NDSA éduque sur les solutions naturelles pour un corps naturel. Sortir de l'industrialisation alimentaire est le premier pas vers la richesse et la santé.",
-            starkInsight: "L'échec financier est souvent le miroir d'une bio-asphyxie environnementale.",
-            practicalExercise: "Faites l'inventaire chimique de votre foyer et remplacez une substance industrielle par une alternative naturelle."
+            content: "La NDSA intègre les dernières découvertes : les émotions toxiques comme la colère, la médisance ou la haine génèrent un stress oxydatif qui fige littéralement les membranes cellulaires. Un esprit fluide égale une membrane fluide.",
+            starkInsight: "La colère est un poison biochimique qui paralyse vos cellules.",
+            practicalExercise: "Pratiquez le 'Pardon Métabolique' pour fluidifier votre bio-système."
           }
         ] 
       },
@@ -141,36 +134,15 @@ export const SYSTEM_CONFIG = {
         lessons: [
           {
             id: "therm-0-danger",
-            title: "Le Danger des 0°C : Pourquoi le Froid vous Tue",
-            content: "La science de la nutrition NDSA révèle une erreur mondiale : consommer du froid. Votre corps fonctionne à 37°C. Introduire du glacé fige instantanément les lipides (graisses) de vos membranes cellulaires. Une cellule figée ne peut plus absorber de nutriments ni rejeter de toxines. C'est l'origine des maladies chroniques modernes. Restaurez votre fluidité avec le Tre-en-en et respectez votre température naturelle.",
-            starkInsight: "Chaque glaçon est un verrou posé sur vos mitochondries.",
-            practicalExercise: "Basculez vers des boissons à température ambiante ou tiède pendant 7 jours pour observer le retour de votre énergie."
-          }
-        ] 
-      },
-      { 
-        id: "econ-mlm", 
-        title: "Économie Digitale & MLM 2026", 
-        description: "Transformer le chômage en leadership mondial via l'IA.",
-        lessons: [
-          {
-            id: "amb-dig-1",
-            title: "L'Ambassadeur NDSA : Un Métier pour l'Humanité",
-            content: "Le MLM Digital NDSA est le remède au chômage et à la crise. En devenant Ambassadeur, vous utilisez l'IA José pour conscientiser le monde. Chaque université, chaque société, chaque foyer a besoin de ce savoir pour réduire les coûts de santé et augmenter la productivité. Bâtissez votre empire économique en rendant le monde plus saint et plus heureux.",
-            starkInsight: "Vous n'êtes pas un vendeur, vous êtes un Bio-Architecte de la liberté.",
-            practicalExercise: "Configurez votre Smart Link Elite et partagez un diagnostic avec une personne de votre entourage."
+            title: "Le Danger des 0°C : Pourquoi le Froid fige la vie",
+            content: "Votre corps fonctionne à 37°C. Consommer des boissons glacées (0°C) fige instantanément les lipides de vos membranes cellulaires. Une cellule figée ne peut plus absorber de nutriments ni rejeter de toxines.",
+            starkInsight: "Chaque glaçon est un verrou posé sur votre vitalité.",
+            practicalExercise: "Basculez vers des boissons à 37°C ou ambiantes pour restaurer l'énergie."
           }
         ] 
       }
     ],
-    premiumModules: [
-      { 
-        id: "m3", 
-        title: "Magnétisme Numérique AXIOMA", 
-        description: "Utilisez l'IA pour générer des leads en dormant.",
-        lessons: [] 
-      }
-    ]
+    premiumModules: []
   },
   socialViral: {
     template: "J'utilise NDSA GMBC OS et l'IA JOSÉ pour ma santé cellulaire. Rejoins mon équipe ! 🧬🚀",

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Fingerprint, Loader2, ShieldCheck, Zap, Layers, Volume2, Square } from 'lucide-react';
+import { Fingerprint, Loader2, ShieldCheck, Zap, Layers, Volume2, Square, UserCheck } from 'lucide-react';
 import { AuthUser } from '../types';
 import { SYSTEM_CONFIG } from '../constants';
 import { generateJoseAudio, decodeBase64, decodeAudioData } from '../services/geminiService';
@@ -27,20 +27,25 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
     }
     setIsScanning(true);
     setError('');
+    
+    // RECONNAISSANCE DU FONDATEUR PAR NOM OU EMAIL
+    const input = email.toLowerCase();
+    const isFounder = input.includes('jose') || input.includes('gaetan') || input.includes('067-2922111') || input.includes('abada');
+
     setTimeout(() => {
       const mockUser: AuthUser = {
-        id: 'u_' + Math.random().toString(36).substring(7),
-        name: email.split('@')[0],
+        id: isFounder ? 'founder_root' : 'u_' + Math.random().toString(36).substring(7),
+        name: isFounder ? SYSTEM_CONFIG.founder.name : email.split('@')[0],
         email: email,
-        neoLifeId: SYSTEM_CONFIG.founder.id,
-        role: email.includes('admin') ? 'ADMIN' : 'LEADER',
+        neoLifeId: isFounder ? SYSTEM_CONFIG.founder.id : 'MEMBER-' + Math.random().toString(36).substring(7),
+        role: isFounder ? 'ADMIN' : 'LEADER',
         joinedDate: new Date(),
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
+        avatar: isFounder ? "https://api.dicebear.com/7.x/avataaars/svg?seed=JoseGaetan" : `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
       };
       localStorage.setItem('ndsa_session', JSON.stringify(mockUser));
       onLogin(mockUser);
       setIsScanning(false);
-    }, 2500);
+    }, 2000);
   };
 
   const stopAudio = () => {
@@ -54,7 +59,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
   const readGuide = async () => {
     if (isReading) { stopAudio(); return; }
     setIsReading(true);
-    const text = "Bienvenue sur le Hub NDSA GMBC OS. Veuillez entrer votre identifiant digital dans le premier champ, et votre clé de cryptage dans le second. Cliquez ensuite sur le bouton synchroniser au centre de l'écran.";
+    const text = "Système Imperium activé. Bienvenue sur le Hub NDSA GMBC OS. Fondateur Gaétan, veuillez synchroniser vos identifiants pour accéder au Cockpit de Direction.";
     const base64 = await generateJoseAudio(text);
     if (base64) {
       if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -76,40 +81,37 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
       <div className="w-full max-w-xl bg-slate-900/40 backdrop-blur-3xl rounded-[4rem] border border-white/10 p-12 md:p-16 shadow-3xl relative z-10 animate-in zoom-in-95 duration-700">
         <button 
           onClick={readGuide}
-          aria-label="Écouter le guide vocal de connexion"
           className={`absolute top-10 right-10 p-4 rounded-2xl border transition-all ${isReading ? 'bg-[#00d4ff] text-slate-950 shadow-[0_0_15px_#00d4ff]' : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'}`}
         >
           {isReading ? <Square size={20} /> : <Volume2 size={20} />}
         </button>
 
         <div className="text-center space-y-8 mb-12">
-          <div className="w-24 h-24 bg-[#00d4ff]/10 border border-[#00d4ff]/20 rounded-3xl flex items-center justify-center mx-auto shadow-2xl relative overflow-hidden" aria-hidden="true">
+          <div className="w-24 h-24 bg-[#00d4ff]/10 border border-[#00d4ff]/20 rounded-3xl flex items-center justify-center mx-auto shadow-2xl relative overflow-hidden">
             <Layers size={44} className="text-[#00d4ff]" />
           </div>
           <header>
             <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter">{SYSTEM_CONFIG.brand}</h1>
-            <p className="text-[10px] text-[#00d4ff] font-black uppercase tracking-[0.4em] mt-2 italic">Accès Protocol Omega-7</p>
+            <p className="text-[10px] text-[#00d4ff] font-black uppercase tracking-[0.4em] mt-2 italic">Terminal de Synchronisation Master</p>
           </header>
         </div>
 
-        <form onSubmit={handleAuth} className="space-y-6" aria-label="Formulaire de connexion">
+        <form onSubmit={handleAuth} className="space-y-6">
           <div className="space-y-2">
-            <label htmlFor="email" className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Identifiant Digital</label>
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Identifiant / Email</label>
             <input 
-              id="email"
-              type="email" 
+              type="text" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="votre@email.com"
+              placeholder="ABADA Jose ou Email"
               className="w-full bg-slate-950 border border-white/10 px-8 py-6 rounded-3xl text-white font-bold outline-none focus:border-[#00d4ff] transition-all"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Clé de Cryptage</label>
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Clé de Cryptage</label>
             <input 
-              id="password"
               type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -119,17 +121,23 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
             />
           </div>
 
-          {error && <p role="alert" className="text-rose-500 text-[10px] font-black uppercase tracking-widest text-center animate-pulse">{error}</p>}
+          {error && <p className="text-rose-500 text-[10px] font-black uppercase tracking-widest text-center animate-pulse">{error}</p>}
 
           <button 
             type="submit" 
             disabled={isScanning}
             className="w-full py-8 bg-[#00d4ff] text-slate-950 font-black rounded-[2.5rem] uppercase tracking-[0.5em] text-xs shadow-2xl flex items-center justify-center gap-4 hover:brightness-110 active:scale-95 transition-all"
-            aria-busy={isScanning}
           >
-            {isScanning ? <><Loader2 className="animate-spin" size={20} /> SYNC...</> : <><Fingerprint size={20} /> SYNCHRONISER</>}
+            {isScanning ? <><Loader2 className="animate-spin" size={20} /> ACCÈS OMEGA...</> : <><UserCheck size={20} /> SYNCHRONISER</>}
           </button>
         </form>
+        
+        <div className="mt-10 p-5 bg-white/5 border border-white/5 rounded-2xl flex items-center gap-4">
+           <ShieldCheck size={18} className="text-emerald-500 shrink-0" />
+           <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed">
+             Le Cockpit de Direction est crypté. Accès exclusif via l'identifiant Fondateur : <span className="text-[#00d4ff]">067-2922111</span>.
+           </p>
+        </div>
       </div>
     </div>
   );
