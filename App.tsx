@@ -16,6 +16,7 @@ import { DiagnosticHistory } from './components/DiagnosticHistory';
 import { LegalDisclaimer } from './components/LegalDisclaimer';
 import { Language, AuthUser } from './types'; 
 import { generateJoseAudio, decodeBase64, decodeAudioData } from './services/geminiService';
+import { getCurrentSponsor } from './services/referralService';
 import { 
   LayoutDashboard, Bot, GraduationCap, Share2, Wallet, Menu,
   Zap, Settings, Layers, Cpu, Rocket, Volume2, Square, Clock, Trophy, ShieldCheck, User,
@@ -54,6 +55,13 @@ const App: React.FC = () => {
     const savedSession = localStorage.getItem('ndsa_session');
     const legalAccepted = localStorage.getItem('ndsa_legal_accepted');
     
+    // Check for Magic Link / Prospect arrival
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('mode') === 'welcome') {
+      setActiveTab('jose');
+      // Mode welcome switches to Jose immediately
+    }
+
     if (savedSession) {
       try {
         const user = JSON.parse(savedSession) as AuthUser;
@@ -96,14 +104,14 @@ const App: React.FC = () => {
     
     let brief = "";
     switch(activeTab) {
-      case 'stats': brief = "Bienvenue dans votre Cockpit de Direction. Voici un résumé de vos captures, volume de ventes et conversions de l'IA José."; break;
-      case 'jose': brief = "Vous êtes avec Coach José. Je suis prêt à décoder vos documents biologiques et ordonnances pour une restauration cellulaire optimale."; break;
-      case 'academy': brief = "Bienvenue à la Stark Academy. Forgez votre leadership et apprenez les secrets de la croissance exponentielle."; break;
-      case 'social': brief = "Activez votre Moteur de Viralité. Générez votre smart link et partagez votre impact sur les réseaux sociaux."; break;
-      case 'finance': brief = "Consultez vos flux financiers, commissions SaaS et volume MLM NeoLife. Gérez votre empire financier ici."; break;
-      case 'history': brief = "Accédez à vos Bio Archives. Tous vos diagnostics passés sont stockés en toute sécurité dans cette base de données."; break;
-      case 'profile': brief = "Gestion de votre identité leader. Modifiez vos informations et suivez votre progression Diamond."; break;
-      case 'admin': brief = "Master Console activée. Supervision globale du réseau et déploiement de nouveaux hubs."; break;
+      case 'stats': brief = "Bienvenue dans votre Cockpit de Direction. Voici un résumé de vos captures, volume de ventes et conversions de l'IA José. Votre empire digital est sous contrôle."; break;
+      case 'jose': brief = "Vous êtes avec Coach José. Je suis prêt à décoder vos documents biologiques, ordonnances et bilans pour une restauration cellulaire optimale selon les protocoles SAB."; break;
+      case 'academy': brief = "Bienvenue à la Stark Academy. Forgez votre leadership et apprenez les secrets de la croissance exponentielle et du magnétisme numérique."; break;
+      case 'social': brief = "Activez votre Moteur de Viralité AXIOMA. Générez votre smart link magique et partagez votre impact sur les réseaux sociaux pour capturer des leads."; break;
+      case 'finance': brief = "Consultez vos flux financiers, commissions SaaS récurrentes et volume MLM NeoLife. Gérez votre expansion financière ici."; break;
+      case 'history': brief = "Accédez à vos Bio Archives. Tous vos diagnostics passés et analyses cliniques sont stockés en toute sécurité dans votre base de données locale IndexedDB."; break;
+      case 'profile': brief = "Gestion de votre identité leader. Modifiez vos informations, synchronisez votre ID NeoLife et suivez votre progression vers le rang de Diamond Architect."; break;
+      case 'admin': brief = "Console Master activée. Supervision globale du réseau, monitoring des revenus SaaS et déploiement de nouveaux hubs White Label."; break;
       default: brief = `Interface ${activeTab} activée. Systèmes Bio-Sync en ligne. Langue : ${lang}.`;
     }
 
@@ -124,9 +132,16 @@ const App: React.FC = () => {
 
   if (isAuthLoading) return null;
   if (showLegal) return <LegalDisclaimer language={lang} onAccept={handleAcceptLegal} />;
-  if (!currentUser) return <AuthView onLogin={handleLogin} />;
+  
+  // If not logged in and not in welcome mode, show login
+  const params = new URLSearchParams(window.location.search);
+  if (!currentUser && params.get('mode') !== 'welcome') return <AuthView onLogin={handleLogin} />;
 
-  const myReferralLink = `${window.location.origin}${window.location.pathname}#ref=${currentUser.neoLifeId}`;
+  // Referral / Sponsor display logic
+  const sponsor = getCurrentSponsor();
+  const myReferralLink = currentUser 
+    ? `${window.location.origin}${window.location.pathname}#ref=${currentUser.neoLifeId}`
+    : `${window.location.origin}${window.location.pathname}#ref=${SYSTEM_CONFIG.founder.id}`;
 
   return (
     <div className="min-h-screen flex font-sans antialiased text-white selection:bg-[#00d4ff] selection:text-slate-950" style={{ background: SYSTEM_CONFIG.ui.backgroundGradient }}>
@@ -152,7 +167,7 @@ const App: React.FC = () => {
               { id: 'social', label: t.social, icon: Share2 },
               { id: 'finance', label: t.finance, icon: Wallet },
               { id: 'profile', label: "Mon Profil", icon: User },
-              ...(currentUser.role === 'ADMIN' ? [{ id: 'admin', label: t.admin, icon: Settings }] : []),
+              ...(currentUser?.role === 'ADMIN' ? [{ id: 'admin', label: t.admin, icon: Settings }] : []),
             ].map((item) => (
               <button key={item.id} onClick={() => { setActiveTab(item.id as TabType); setIsSidebarOpen(false); stopBriefing(); }} className={`w-full flex items-center gap-5 px-6 py-4 rounded-2xl text-[14px] font-black transition-all italic uppercase tracking-tight ${activeTab === item.id ? 'bg-[#00d4ff]/10 text-[#00d4ff] border border-[#00d4ff]/30 shadow-2xl' : 'text-slate-500 hover:text-white hover:bg-white/5 border border-transparent'}`}>
                 <item.icon size={20} /> {item.label}
@@ -164,7 +179,7 @@ const App: React.FC = () => {
             <p className="text-[9px] font-black text-slate-700 uppercase tracking-widest mb-4">Network Compliance</p>
             <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex items-center gap-3">
                <ShieldCheck size={16} className="text-emerald-500" />
-               <span className="text-[10px] font-bold text-emerald-500 uppercase">RGPD & Clinical Ready</span>
+               <span className="text-[10px] font-bold text-emerald-500 uppercase">SAB & Clinical Ready</span>
             </div>
           </div>
         </div>
@@ -188,7 +203,6 @@ const App: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-4">
-             {/* Global Language Switcher */}
              <div className="flex items-center bg-white/5 border border-white/10 rounded-2xl p-1">
                 {(['fr', 'en', 'it', 'es'] as Language[]).map(l => (
                   <button 
@@ -206,20 +220,20 @@ const App: React.FC = () => {
              </button>
              <button onClick={() => setIsBoosting(true)} className="p-4 bg-white/5 border border-white/10 text-white rounded-2xl hover:bg-[#00d4ff] hover:text-slate-950 transition-all group"><Zap size={20} /></button>
              <div onClick={() => setActiveTab('profile')} className="h-14 w-14 rounded-2xl flex items-center justify-center cursor-pointer overflow-hidden border-2 border-white/20 hover:scale-105 transition-transform">
-                <img src={currentUser.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                <img src={currentUser?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=guest`} alt="Avatar" className="w-full h-full object-cover" />
              </div>
           </div>
         </header>
 
         <div className="p-10 flex-1 overflow-y-auto no-scrollbar pb-32">
           {activeTab === 'stats' && <DashboardContent t={t} stats={{ prospects: 124, salesVolume: 5840, subscriptionMRR: 2150, commissions: 430, conversions: 18, activeAffiliates: 24 }} myReferralLink={myReferralLink} />}
-          {activeTab === 'jose' && <AssistantJose language={lang} currentSubscriberId={currentUser.neoLifeId} />}
+          {activeTab === 'jose' && <AssistantJose language={lang} currentSubscriberId={currentUser?.neoLifeId} />}
           {activeTab === 'history' && <DiagnosticHistory />}
           {activeTab === 'academy' && <AcademyView isLevel2Unlocked={isLevel2Unlocked} />}
           {activeTab === 'social' && <SocialSync />}
           {activeTab === 'finance' && <FinanceView />}
-          {activeTab === 'profile' && <ProfileView user={currentUser} onUpdate={(u) => setCurrentUser(u)} onLogout={() => { localStorage.removeItem('ndsa_session'); setCurrentUser(null); }} />}
-          {activeTab === 'admin' && currentUser.role === 'ADMIN' && <AdminMonitor stats={{ totalNetSaaS: 145200, aiEffectiveness: 98.5, orphanLeadsCount: 2450, totalActiveHubs: 42 }} />}
+          {activeTab === 'profile' && currentUser && <ProfileView user={currentUser} onUpdate={(u) => setCurrentUser(u)} onLogout={() => { localStorage.removeItem('ndsa_session'); setCurrentUser(null); }} />}
+          {activeTab === 'admin' && currentUser?.role === 'ADMIN' && <AdminMonitor stats={{ totalNetSaaS: 145200, aiEffectiveness: 98.5, orphanLeadsCount: 2450, totalActiveHubs: 42 }} />}
         </div>
       </main>
       
