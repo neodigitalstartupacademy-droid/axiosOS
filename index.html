@@ -5,155 +5,119 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>NDSA GMBC OS V8 - Stark Fusion Elite</title>
-    <!-- Shim process for browser environment -->
+    <!-- SHIM CRITIQUE POUR ÉVITER LES ERREURS DE BOOT -->
     <script>
       window.process = { env: { API_KEY: "" } };
+      window.addEventListener('error', function(e) {
+        if (e.message.indexOf('process is not defined') > -1) {
+          window.process = { env: { API_KEY: "" } };
+        }
+      });
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
       :root {
         --primary: #00d4ff;
-        --secondary: #10b981;
         --accent: #FFD700;
         --dark: #020617;
-        --glow: rgba(0, 212, 255, 0.5);
-        --imperium: rgba(255, 215, 0, 0.3);
-      }
-      * {
-        box-sizing: border-box;
-        -webkit-tap-highlight-color: transparent;
       }
       body {
         font-family: 'Inter', sans-serif;
         background-color: var(--dark);
         color: white;
-        margin: 0;
-        padding: 0;
-        height: 100dvh;
-        width: 100vw;
+        margin: 0; padding: 0;
+        height: 100dvh; width: 100vw;
         overflow: hidden;
-        -webkit-font-smoothing: antialiased;
         position: fixed;
-      }
-      #root {
-        height: 100%;
-        width: 100%;
       }
       .font-stark { font-family: 'Orbitron', sans-serif; }
-      
-      /* STARK BACKGROUND HUD EFFECTS */
       .stark-bg {
-        position: fixed;
-        inset: 0;
-        z-index: -1;
+        position: fixed; inset: 0; z-index: -1;
         background: radial-gradient(circle at 50% 50%, #051923 0%, #020617 100%);
       }
-      
       .stark-bg::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background-image: 
-          linear-gradient(rgba(0, 212, 255, 0.05) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(0, 212, 255, 0.05) 1px, transparent 1px);
-        background-size: 40px 40px;
-        mask-image: radial-gradient(circle at 50% 50%, black, transparent 90%);
-        animation: pulse-grid 8s ease-in-out infinite;
+        content: ''; position: absolute; inset: 0;
+        background-image: linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        animation: pulse-grid 10s ease-in-out infinite;
       }
-
-      .stark-bg::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-        background-size: 100% 2px, 3px 100%;
-        pointer-events: none;
-        z-index: 100;
-        opacity: 0.15;
+      @keyframes pulse-grid { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.5; } }
+      .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, rgba(2, 6, 23, 0.9) 110%); pointer-events: none; z-index: 50; }
+      
+      /* SPLASH SCREEN DE SECOURS */
+      #stark-loader {
+        position: fixed; inset: 0; z-index: 9999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: #020617; transition: opacity 0.5s ease-out;
       }
-
-      .vignette {
-        position: fixed;
-        inset: 0;
-        background: radial-gradient(circle, transparent 40%, rgba(2, 6, 23, 0.8) 100%);
-        pointer-events: none;
-        z-index: 50;
+      .loader-ring {
+        width: 80px; height: 80px; border: 4px solid rgba(0, 212, 255, 0.1);
+        border-top-color: var(--primary); border-radius: 50%;
+        animation: spin 1s linear infinite; margin-bottom: 20px;
       }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .loading-text { font-family: 'Orbitron', sans-serif; font-weight: 900; letter-spacing: 0.5em; color: var(--primary); font-size: 10px; animation: pulse 2s infinite; }
+      @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
-      @keyframes pulse-grid {
-        0%, 100% { opacity: 0.3; transform: scale(1); }
-        50% { opacity: 0.6; transform: scale(1.02); }
-      }
-
-      .no-scrollbar::-webkit-scrollbar { display: none; }
-      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-      .glass-card {
-        background: rgba(15, 23, 42, 0.4);
-        backdrop-filter: blur(30px) saturate(180%);
-        -webkit-backdrop-filter: blur(30px) saturate(180%);
-        border: 1px solid rgba(0, 212, 255, 0.15);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-      }
-
-      .gold-card {
-        background: rgba(12, 10, 9, 0.7);
-        backdrop-filter: blur(40px) saturate(200%);
-        -webkit-backdrop-filter: blur(40px) saturate(200%);
-        border: 1px solid rgba(255, 215, 0, 0.25);
-        box-shadow: 0 8px 60px 0 rgba(255, 215, 0, 0.05);
-      }
-
-      .gold-text-shimmer {
-        background: linear-gradient(90deg, #FFD700, #fef3c7, #FFD700);
-        background-size: 200% auto;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        animation: shimmer 4s linear infinite;
-      }
-
+      .glass-card { background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(25px); border: 1px solid rgba(0, 212, 255, 0.1); }
+      .gold-card { background: rgba(12, 10, 9, 0.85); border: 1px solid rgba(255, 215, 0, 0.4); box-shadow: 0 0 50px rgba(255, 215, 0, 0.15); }
+      .gold-text-shimmer { background: linear-gradient(90deg, #FFD700, #fff, #FFD700); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 4s linear infinite; }
       @keyframes shimmer { to { background-position: 200% center; } }
-      
-      .stark-btn {
-        background: var(--primary);
-        color: #020617;
-        font-weight: 900;
-        text-transform: uppercase;
-        letter-spacing: 0.2em;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      }
-      
-      .stark-btn:hover {
-        transform: scale(1.05) translateY(-2px);
-        box-shadow: 0 0 25px var(--glow);
-      }
-
-      .hud-line {
-        position: absolute;
-        height: 1px;
-        background: var(--primary);
-        opacity: 0.2;
-        pointer-events: none;
-      }
+      .gold-aura { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 200px rgba(255, 215, 0, 0.2); z-index: 10000; animation: aura-pulse 4s infinite alternate; }
+      @keyframes aura-pulse { from { opacity: 0.2; } to { opacity: 0.5; } }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
     <script type="importmap">
-    {
-      "imports": {
-        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-        "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
-        "react/": "https://esm.sh/react@^19.2.3/",
-        "react": "https://esm.sh/react@^19.2.3",
-        "recharts": "https://esm.sh/recharts@^3.6.0",
-        "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-        "jspdf": "https://esm.sh/jspdf@^2.5.1"
-      }
-    }
-    </script>
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react-dom": "https://esm.sh/react-dom@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+    "@google/genai": "https://esm.sh/@google/genai@1.3.1",
+    "lucide-react": "https://esm.sh/lucide-react@0.473.0",
+    "recharts": "https://esm.sh/recharts@2.15.0",
+    "jspdf": "https://esm.sh/jspdf@2.5.2",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
   </head>
   <body>
+    <div id="stark-loader">
+      <div class="loader-ring"></div>
+      <div class="loading-text">STARK ENGINE INITIALIZING...</div>
+    </div>
     <div class="stark-bg"></div>
     <div class="vignette"></div>
     <div id="root"></div>
+    
+    <script>
+      // Protocole anti-black screen de secours
+      (function() {
+          console.log("🚀 Initialisation du Bouclier Stark...");
+          setTimeout(() => {
+              const root = document.getElementById('root');
+              const loader = document.getElementById('stark-loader');
+              if (root.innerHTML === "" || root.offsetHeight === 0) {
+                  console.warn("⚠️ Écran noir détecté. Forçage de la membrane visuelle...");
+                  root.innerHTML = `
+                      <div style="background:#000; color:#FFD700; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Orbitron', sans-serif; text-align:center; padding:20px;">
+                          <h1 style="text-shadow: 0 0 20px #FFD700; font-size:24px; margin-bottom:10px;">STARK ENGINE V8.5 RECOVERY</h1>
+                          <p style="color:#64748b; font-size:12px; letter-spacing:2px;">RÉCUPÉRATION DES DONNÉES NEURALES...</p>
+                          <button onclick="location.reload()" style="margin-top:30px; background:#FFD700; color:#000; border:none; padding:15px 30px; cursor:pointer; font-weight:900; border-radius:10px; font-family:'Orbitron', sans-serif; letter-spacing:2px;">FORCER LA RELANCE</button>
+                      </div>
+                  `;
+                  if(loader) loader.style.display = 'none';
+              } else {
+                  if(loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 500);
+                  }
+              }
+          }, 4500);
+      })();
+    </script>
   </body>
 </html>

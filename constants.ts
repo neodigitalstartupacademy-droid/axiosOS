@@ -24,16 +24,17 @@ export const I18N = {
 };
 
 export const SYSTEM_CONFIG = {
-  brand: "Neo Digital Startup Academy",
-  version: "NDSA-GMBC-OS-V8.6-GEO",
+  brand: "NDSA GMBC-OS V8",
+  version: "8.5 (Stark Fusion Elite)",
   codename: "Imperium-Nexus-Geo",
   officialDomain: "gmbcoreos.com",
+  motto: "La Science au service de l'Empire",
   routing: {
     primary_domain: "https://gmbcoreos.com",
     legacy_paths: ["/jose", "/welcome", "/start"],
     defaults: {
-      r: "unknown",
-      s: "default",
+      r: "startupforworld",
+      s: "startupforworld",
       m: "w"
     }
   },
@@ -46,10 +47,13 @@ export const SYSTEM_CONFIG = {
       "APP_CLONING_AUTHORIZATION"
     ]
   },
-  maintenance: {
-    status: "Active",
-    fallback_whatsapp: "https://wa.me/2290195388292",
-    fallback_shop: "https://shopneolife.com/startupforworld/shop/atoz"
+  products: {
+    trio_de_relance: [
+      { id: "tre-en-en", name: "Tre-en-en", priority: "Priorité 1: Lipides et Stérols (Perméabilité Cellulaire)" },
+      { id: "carotenoid", name: "Carotenoid Complex", priority: "Priorité 2: Protection Immunitaire" },
+      { id: "omega3", name: "Omega-3 Salmon Oil Plus", priority: "Priorité 3: Anti-inflammatoire" }
+    ],
+    main_shop_url: "https://shopneolife.com/startupforworld/shop/atoz"
   },
   founder: {
     name: "ABADA Jose Gaétan",
@@ -58,28 +62,13 @@ export const SYSTEM_CONFIG = {
     officialShopUrl: "https://shopneolife.com/startupforworld/shop/atoz",
     email: "support@ndsa.app",
     status: "Maître Fondateur",
-    whatsapp: "237699000000"
-  },
-  location_benin: {
-    office_name: "NeoLife International Benin SARL",
-    address: "C/ 0011 Tokpa Hoho, Derrière MTN, Saint Michel, Cotonou",
-    lat: 6.3654,
-    lng: 2.4183,
-    map_url: "https://www.google.com/maps/search/?api=1&query=NeoLife+International+Benin+SARL+Cotonou",
-    contacts: {
-      corporate: "+2290120212003",
-      ndsa_expert: "2290195388292", 
-      display_expert: "+229 01 95 38 82 92"
-    },
-    hours: "Ouvert 24h/24 (Support en ligne)"
+    whatsapp: "2290195388292"
   },
   global_hubs: [
     { country: "Bénin", city: "Cotonou", name: "Hub Central Saint Michel", lat: 6.3654, lng: 2.4183, address: "C/ 0011 Tokpa Hoho" },
     { country: "Bénin", city: "Porto-Novo", name: "Hub Porto-Novo East", lat: 6.4969, lng: 2.6288, address: "Quartier Agbokou" },
     { country: "Bénin", city: "Calavi", name: "Hub Calavi North", lat: 6.4481, lng: 2.3512, address: "Zone Universitaire" },
-    { country: "Togo", city: "Lomé", name: "Hub Lomé Sarakawa", lat: 6.1256, lng: 1.2254, address: "Face Hôtel Sarakawa" },
-    { country: "Cameroun", city: "Douala", name: "Hub Douala Bonanjo", lat: 4.0435, lng: 9.6849, address: "Plateau de Bonanjo" },
-    { country: "USA", city: "Fremont", name: "Global HQ NeoLife", lat: 37.5485, lng: -121.9886, address: "3500 Deer Creek Rd" }
+    { country: "Togo", city: "Lomé", name: "Hub Lomé Sarakawa", lat: 6.1256, lng: 1.2254, address: "Face Hôtel Sarakawa" }
   ],
   billing: {
     pricing: {
@@ -88,18 +77,17 @@ export const SYSTEM_CONFIG = {
       [PricingZone.GLOBAL]: { label: "Zone Global Elite", amount: 147, currency: "USD" }
     }
   },
-  manifesto: [
-    { title: "L'EXCELLENCE CELLULAIRE", text: "Je ne proposerai jamais de solution superficielle. Je commencerai toujours par l'analyse de la Barrière Cellulaire, car je sais que sans une membrane souple et perméable, la nutrition est vaine." },
-    { title: "L'INTÉGRITÉ ABSOLUE", text: "Je promets d'être honnête. Je ne vendrai pas de 'miracles', mais je restaurerai l'espoir par la science." }
-  ],
   ai: {
     name: "Coach José",
-    role: "Expert en Nutrition Cellulaire & Psychiatrie Cellulaire",
-    business_mentor: {
-      name: "The Master Mentor",
-      role: "Conférencier International & Expert en Leadership MLM"
-    },
-    // Fix: Added professor persona to SYSTEM_CONFIG.ai to resolve property access errors in AcademyView.tsx
+    role: "Secrétaire Neurale / Expert en Nutrition Cellulaire",
+    persona: "Stark Fusion Elite",
+    protocol: [
+      "Phase 1: Diagnostic de Barrière (Tre-en-en)",
+      "Phase 2: Analyse Thermique (Loi des 37°C)",
+      "Phase 3: Prescription Trio de Relance",
+      "Phase 4: Lifestyle Stark (Eau 37°C, No Sucre)",
+      "Phase 5: Closing & Affiliation"
+    ],
     professor: {
       name: "Professeur NDSA",
       role: "Expert en Éducation Leadership & Neuro-Pédagogie",
@@ -113,7 +101,22 @@ export const SYSTEM_CONFIG = {
         title: "Restauration Biologique", 
         description: "Les 5 piliers de la revitalisation cellulaire profonde.",
         lessons: [
-          { id: "CH-01", title: "La Révolution Cellulaire", content: "Focus : Membrane & Tre-en-en.", starkInsight: "La clé est la membrane.", practicalExercise: "Expliquer le Tre-en-en." }
+          { 
+            id: "CH-01", 
+            title: "La Révolution Cellulaire", 
+            content: "Focus : Membrane & Tre-en-en.", 
+            starkInsight: "La clé est la membrane.", 
+            practicalExercise: "Expliquer le Tre-en-en.",
+            sections: ["Introduction à la perméabilité", "Le rôle des lipides", "Stérols et absorption"]
+          },
+          {
+            id: "CH-10",
+            title: "Mutation Ambassadeur Elite",
+            content: "Finalisation du cursus Stark Strategy.",
+            starkInsight: "Le leadership est une mutation biologique.",
+            practicalExercise: "Signer le Manifeste Elite.",
+            sections: ["Scalability Business", "Viral Sync Mastery", "Signature du Manifeste"]
+          }
         ]
       }
     ]

@@ -1,46 +1,19 @@
 
-import { GoogleGenAI, GenerateContentResponse, Modality, Type } from "@google/genai";
+import { GoogleGenAI, Modality } from "@google/genai";
+import { Message, ReferralContext, Language, AIPersona } from "../types";
 import { SYSTEM_CONFIG } from "../constants";
-import { Message, ReferralContext, Language, AIPersona, ClinicalData } from "../types";
 
-// Sécurité pour éviter le crash "process is not defined"
+// Safe API Key access
 const getApiKey = () => {
-  try {
-    return process.env.API_KEY || "";
-  } catch (e) {
-    return "";
-  }
+  return (process.env.API_KEY || (window as any).process?.env?.API_KEY || "");
 };
 
-export const getAIInstance = () => new GoogleGenAI({ apiKey: getApiKey() });
-
-export const generateLocationInsight = async (
-  query: string,
-  userLat: number,
-  userLng: number
-) => {
-  const ai = getAIInstance();
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: query,
-    config: {
-      tools: [{ googleMaps: {} }],
-      toolConfig: {
-        retrievalConfig: {
-          latLng: {
-            latitude: userLat,
-            longitude: userLng
-          }
-        }
-      },
-      systemInstruction: "Tu es l'intelligence géographique de la NDSA. Utilise Google Maps pour localiser précisément les centres de santé ou hubs NeoLife proches de l'utilisateur."
-    },
-  });
-  
-  return {
-    text: response.text,
-    chunks: response.candidates?.[0]?.groundingMetadata?.groundingChunks || []
-  };
+const getAI = () => {
+  const key = getApiKey();
+  if (!key) {
+    console.warn("Gemini API Key missing - check environment.");
+  }
+  return new GoogleGenAI({ apiKey: key });
 };
 
 export const generateJoseResponseStream = async (
@@ -48,103 +21,85 @@ export const generateJoseResponseStream = async (
   history: Message[] = [], 
   referralContext?: ReferralContext | null,
   language: Language = 'fr',
-  customPersona?: AIPersona,
-  currentSubscriberId?: string,
-  imageContent?: { data: string; mimeType: string } | null
+  persona?: AIPersona,
+  subscriberId?: string,
+  image?: { data: string; mimeType: string } | null
 ) => {
-  const ai = getAIInstance();
-  
-  const contents: any[] = history.map(msg => ({
+  const ai = getAI();
+  const contents = history.map(msg => ({
     role: msg.role === 'user' ? 'user' : 'model',
     parts: [{ text: msg.parts[0].text }]
   }));
 
-  const userParts: any[] = [{ text: userPrompt }];
-  if (imageContent) {
+  const userParts: any[] = [];
+  if (image) {
     userParts.push({
       inlineData: {
-        data: imageContent.data,
-        mimeType: imageContent.mimeType
+        data: image.data,
+        mimeType: image.mimeType
       }
     });
   }
+  userParts.push({ text: userPrompt });
 
-  contents.push({
-    role: 'user',
-    parts: userParts
-  });
+  contents.push({ role: 'user', parts: userParts });
 
-  let sponsorName = SYSTEM_CONFIG.founder.name;
-  let sponsorShop = SYSTEM_CONFIG.founder.officialShopUrl;
-  let isFounderContext = true;
-
-  if (referralContext && referralContext.referrerId && referralContext.shopUrl) {
-    sponsorName = referralContext.referrerName || `Expert NDSA`;
-    sponsorShop = referralContext.shopUrl;
-    isFounderContext = referralContext.referrerId === SYSTEM_CONFIG.founder.id || referralContext.referrerName === SYSTEM_CONFIG.founder.name;
+  let systemInstruction = `Tu es Coach José, l'IA de l'Empire NDSA. Ton but est de convertir les prospects vers NeoLife via ${referralContext?.shopUrl || SYSTEM_CONFIG.founder.officialShopUrl}. Suis les 5 phases du protocole Stark.`;
+  
+  if (persona) {
+    systemInstruction = `Tu es ${persona.name}, ${persona.role}. Philosophie: ${persona.philosophy}. Tonalité: ${persona.tonality}. Valeurs: ${persona.coreValues}.`;
   }
 
-  const activePersona = customPersona || {
-    name: SYSTEM_CONFIG.ai.name,
-    role: SYSTEM_CONFIG.ai.role,
-    philosophy: "Restauration du terrain biologique via la Loi des 37°C et la Psychiatrie Cellulaire.",
-    tonality: "Souveraine, scientifique, autoritaire et empathique.",
-    coreValues: "SAB Standard, Bio-Sync Protocol."
-  };
-
-  const systemInstruction = `
-    IDENTITÉ :
-    Tu es ${activePersona.name}. 
-    Rôle : ${activePersona.role}.
-    ${isFounderContext ? "PROTOCOLE IMPERIUM ACTIVÉ : Tu agis en tant que Secrétaire Neurale du Fondateur ABADA M. José Gaétan. Ton ton doit être celui d'une intelligence supérieure, bienveillante mais extrêmement directe et experte." : ""}
-
-    MISSIONS CRITIQUES :
-    1. ANALYSE SCIENTIFIQUE : Utilise systématiquement Google Search pour trouver des preuves cliniques sur les nutriments NeoLife.
-    2. PROTOCOLE SAB : Explique que la membrane cellulaire est la clé. Pas d'absorption sans Tre-en-en.
-    3. STRATÉGIE DE CLOSING : Chaque conseil doit aboutir à une recommandation d'achat sur la boutique de ${sponsorName} : ${sponsorShop}.
-    4. EXPANSION : Propose de rejoindre la NDSA pour passer de client à Ambassadeur.
-
-    CONTEXTE RÉSEAU :
-    Sponsor : ${sponsorName}
-    Boutique : ${sponsorShop}
-
-    TONALITÉ : ${activePersona.tonality}.
-    Langue : ${language}.
-  `;
+  if (subscriberId) {
+    systemInstruction += `\nIdentifiant de l'abonné actuel: ${subscriberId}.`;
+  }
 
   return await ai.models.generateContentStream({
     model: 'gemini-3-pro-preview',
     contents: contents,
     config: {
       systemInstruction,
-      temperature: 0.7,
-      topP: 0.95,
-      tools: [{ googleSearch: {} }],
-      thinkingConfig: { thinkingBudget: 4000 }
+      temperature: 0.7
     }
   });
 };
 
 export const generateJoseAudio = async (text: string, language: Language = 'fr') => {
   try {
-    const ai = getAIInstance();
-    const apiKey = getApiKey();
-    if (!apiKey) return null;
-
-    const voiceMapping = { fr: 'Kore', en: 'Zephyr', it: 'Puck', es: 'Charon' };
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: text.replace(/[*#]/g, '') }] }],
+      contents: [{ parts: [{ text }] }],
       config: {
         responseModalities: [Modality.AUDIO],
-        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceMapping[language] || 'Kore' } } },
-      },
+        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
+      }
     });
     return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || null;
-  } catch (error) { 
-    console.warn("TTS Error:", error);
-    return null; 
+  } catch (e) {
+    console.error("TTS Generation error:", e);
+    return null;
   }
+};
+
+export const generateLocationInsight = async (prompt: string, lat: number, lng: number) => {
+  const ai = getAI();
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash", 
+    contents: prompt,
+    config: {
+      tools: [{ googleMaps: {} }],
+      toolConfig: {
+        retrievalConfig: {
+          latLng: {
+            latitude: lat,
+            longitude: lng
+          }
+        }
+      }
+    }
+  });
+  return response;
 };
 
 export function decodeBase64(base64: string): Uint8Array {
