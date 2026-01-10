@@ -25,8 +25,7 @@ export const I18N = {
 
 export const SYSTEM_CONFIG = {
   brand: "Neo Digital Startup Academy",
-  version: "NDSA-GMBC-OS-V7.2-TUTOR",
-  /* Fix: Added officialDomain for affiliate link generation */
+  version: "NDSA-GMBC-OS-V7.5-INTERACTIVE",
   officialDomain: "ndsa.app",
   founder: {
     name: "ABADA Jose Gaétan",
@@ -35,7 +34,6 @@ export const SYSTEM_CONFIG = {
     officialShopUrl: "https://shopneolife.com/startupforworld/shop/atoz",
     email: "support@ndsa.app",
     status: "Maître Fondateur",
-    /* Fix: Added whatsapp contact for expert referral redirection */
     whatsapp: "237699000000"
   },
   ai: {
@@ -48,8 +46,8 @@ export const SYSTEM_CONFIG = {
     },
     professor: {
       name: "Pr. NDSA",
-      role: "Professeur Émérite de l'Academy",
-      philosophy: "Maïeutique digitale et excellence MLM."
+      role: "Tuteur IA Adaptatif",
+      philosophy: "Maïeutique digitale et validation des acquis par l'expérience."
     }
   },
   academy: {
@@ -57,40 +55,40 @@ export const SYSTEM_CONFIG = {
       { 
         id: "m1-leadership", 
         title: "Le Mental du Diamond", 
-        description: "Devenir le leader que votre réseau attend.",
+        description: "Devenir le leader charismatique que votre réseau mérite.",
         lessons: [
           {
             id: "l1-mindset",
             title: "L'Art de l'Auto-Discipline",
-            content: "Le succès en MLM NeoLife commence par la maîtrise de soi.",
+            content: "Le succès commence par la maîtrise de soi.",
             sections: [
-              "Le concept de l'Entreprise de Soi : Pourquoi vous êtes votre propre PDG.",
-              "La loi de la duplication mentale : Vos pensées deviennent votre réseau.",
-              "Le DMO (Daily Method of Operation) : La routine des 1% de l'industrie.",
-              "Évaluation Finale : Quiz de validation des acquis."
+              "INTRODUCTION : Pourquoi 95% des distributeurs échouent par manque de structure mentale.",
+              "LE CONCEPT DU PDG : Vous n'êtes pas un vendeur, vous êtes le CEO d'une multinationale personnelle.",
+              "LA LOI DU RYTHME : Comment votre DMO (Daily Method of Operation) crée votre chèque.",
+              "L'ÉVALUATION : Quiz final sur la posture du leader."
             ],
-            starkInsight: "Votre chèque est le reflet exact de votre croissance personnelle.",
-            practicalExercise: "Établissez votre DMO pour les 30 prochains jours."
+            starkInsight: "Le leadership ne se donne pas, il se prend par l'exemplarité.",
+            practicalExercise: "Écrivez vos 3 non-négociables du matin."
           }
         ]
       },
       { 
         id: "m2-science", 
-        title: "Bio-Science NeoLife", 
-        description: "Maîtriser le SAB et la Nutrition Cellulaire.",
+        title: "Bio-Science & SAB", 
+        description: "Maîtriser la science NeoLife pour des closings scientifiques.",
         lessons: [
           {
             id: "l2-sab",
-            title: "Le Standard SAB",
-            content: "Comprendre le Scientific Advisory Board.",
+            title: "La Membrane Cellulaire",
+            content: "Comprendre la fondation de la vie.",
             sections: [
-              "Origines du SAB : L'héritage du Dr. Arthur Furst.",
-              "La différence NeoLife : Whole Food Nutrition vs Synthétique.",
-              "Le Tre-en-en : La clé de la perméabilité membranaire.",
-              "Validation : Cas pratique sur un conseil client."
+              "LE TRE-EN-EN : Pourquoi c'est le produit le plus important au monde.",
+              "PERMÉABILITÉ : La différence entre nourrir une cellule et simplement manger.",
+              "SAB STANDARD : L'héritage scientifique du Dr. Arthur Furst.",
+              "ÉTUDE DE CAS : Comment expliquer le Tre-en-en à un prospect sceptique."
             ],
-            starkInsight: "On ne vend pas des vitamines, on restaure des fonctions biologiques.",
-            practicalExercise: "Expliquez le Tre-en-en en 30 secondes à un inconnu."
+            starkInsight: "Si la membrane est figée, le meilleur complément est inutile.",
+            practicalExercise: "Expliquez le concept de la membrane en 2 minutes."
           }
         ]
       }
