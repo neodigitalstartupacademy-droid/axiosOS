@@ -20,101 +20,85 @@ export const I18N = {
     legal_title: "Conformité & Protection Juridique",
     legal_accept: "Accepter les Protocoles de Sécurité",
     legal_disclaimer: "L'IA José ne remplace pas votre médecin. AXIOMA OS est une plateforme d'aide à la décision nutritionnelle. Les données sont traitées localement pour votre confidentialité."
-  },
-  en: {
-    dashboard: "Command Cockpit",
-    jose: "AI Coach JOSÉ",
-    academy: "Leadership Academy",
-    social: "Social Sync Engine",
-    finance: "Flows & Commissions",
-    admin: "Master Console",
-    welcome: "Hello. I am Coach JOSÉ.",
-    cta_health: "Health Diagnostic",
-    cta_business: "Business Startup",
-    status_stable: "Bio-Sync: Stable",
-    propulsion: "Push Success",
-    medical_scan: "Medical Bio-Scan",
-    analyzing: "Analyzing clinical data...",
-    report_ready: "Restoration Report Ready",
-    legal_title: "Legal Compliance & Protection",
-    legal_accept: "Accept Security Protocols",
-    legal_disclaimer: "AI Jose does not replace your doctor. AXIOMA OS is a nutritional decision support platform."
   }
 };
 
 export const SYSTEM_CONFIG = {
   brand: "Neo Digital Startup Academy",
-  version: "NDSA-GMBC-OS-V7.1-IMPERIUM",
-  officialDomain: "gmbcoreos.com",
+  version: "NDSA-GMBC-OS-V7.2-TUTOR",
+  /* Fix: Added officialDomain for affiliate link generation */
+  officialDomain: "ndsa.app",
   founder: {
-    name: "ABADA Jose",
+    name: "ABADA Jose Gaétan",
     id: "067-2922111",
     shop_slug: "startupforworld",
     officialShopUrl: "https://shopneolife.com/startupforworld/shop/atoz",
     email: "support@ndsa.app",
-    whatsapp: "+229XXXXXXXX",
-    status: "Maître Fondateur"
-  },
-  traffic_routing: {
-    orphan_owner: "ABADA Jose",
-    orphan_id: "067-2922111",
-    orphan_slug: "startupforworld",
-    rule: "IF r IS empty OR s IS empty THEN USE founder_profile"
-  },
-  legal: {
-    dpo: "ABADA Jose",
-    privacy_url: "https://ndsa.app/privacy",
-    consent_text: "En m'inscrivant, j'accepte que l'IA José utilise mon ID et mon Slug pour automatiser mes ventes et m'envoyer des notifications WhatsApp/Email.",
-    lead_guarantee: "Attribution stricte basée sur les paramètres de l'URL compressée."
+    status: "Maître Fondateur",
+    /* Fix: Added whatsapp contact for expert referral redirection */
+    whatsapp: "237699000000"
   },
   ai: {
     name: "Coach José",
     role: "Expert en Nutrition Cellulaire & Psychiatrie Cellulaire",
-    protocol_steps: ["Empathie", "Membrane", "37°C/Émotion", "Prescription 3-5", "Posologie", "Closing"],
-    special_rules: {
-      tre_en_en_dosage: "Impérativement 2 gélules le matin et 2 gélules le soir.",
-      severity_logic: "Si score de gravité > 6/10, prescrire 5 produits avec justification d'urgence vitale."
+    business_mentor: {
+      name: "The Master Mentor",
+      role: "Conférencier International & Expert en Leadership MLM",
+      specialty: "Duplication Massive & Psychologie de la Vente Directe"
+    },
+    professor: {
+      name: "Pr. NDSA",
+      role: "Professeur Émérite de l'Academy",
+      philosophy: "Maïeutique digitale et excellence MLM."
     }
   },
   academy: {
     modules: [
       { 
-        id: "neuro-psych", 
-        title: "Neuro-Psychiatrie Cellulaire", 
-        description: "Comprendre comment l'esprit verrouille ou libère la cellule.",
+        id: "m1-leadership", 
+        title: "Le Mental du Diamond", 
+        description: "Devenir le leader que votre réseau attend.",
         lessons: [
           {
-            id: "psy-cell-1",
-            title: "La Psychiatrie Cellulaire : L'Esprit sur la Matière",
-            content: "La NDSA intègre les découvertes : les émotions toxiques (colère, haine) génèrent un stress oxydatif qui fige les membranes cellulaires.",
-            starkInsight: "La colère est un poison biochimique.",
-            practicalExercise: "Pratiquez le 'Pardon Métabolique'."
+            id: "l1-mindset",
+            title: "L'Art de l'Auto-Discipline",
+            content: "Le succès en MLM NeoLife commence par la maîtrise de soi.",
+            sections: [
+              "Le concept de l'Entreprise de Soi : Pourquoi vous êtes votre propre PDG.",
+              "La loi de la duplication mentale : Vos pensées deviennent votre réseau.",
+              "Le DMO (Daily Method of Operation) : La routine des 1% de l'industrie.",
+              "Évaluation Finale : Quiz de validation des acquis."
+            ],
+            starkInsight: "Votre chèque est le reflet exact de votre croissance personnelle.",
+            practicalExercise: "Établissez votre DMO pour les 30 prochains jours."
           }
-        ] 
+        ]
       },
       { 
-        id: "nutri-therm", 
-        title: "Loi des 37°C", 
-        description: "Respecter la température biologique.",
+        id: "m2-science", 
+        title: "Bio-Science NeoLife", 
+        description: "Maîtriser le SAB et la Nutrition Cellulaire.",
         lessons: [
           {
-            id: "therm-danger",
-            title: "Le Danger des 0°C",
-            content: "Boire glacé fige les lipides de vos membranes cellulaires. Une cellule figée ne peut plus absorber de nutriments.",
-            starkInsight: "Chaque glaçon verrouille votre vitalité.",
-            practicalExercise: "Buvez à 37°C."
+            id: "l2-sab",
+            title: "Le Standard SAB",
+            content: "Comprendre le Scientific Advisory Board.",
+            sections: [
+              "Origines du SAB : L'héritage du Dr. Arthur Furst.",
+              "La différence NeoLife : Whole Food Nutrition vs Synthétique.",
+              "Le Tre-en-en : La clé de la perméabilité membranaire.",
+              "Validation : Cas pratique sur un conseil client."
+            ],
+            starkInsight: "On ne vend pas des vitamines, on restaure des fonctions biologiques.",
+            practicalExercise: "Expliquez le Tre-en-en en 30 secondes à un inconnu."
           }
-        ] 
+        ]
       }
-    ],
-    premiumModules: []
+    ]
   },
-  billing: {
-    pricing: {
-      [PricingZone.AFRICA]: { label: "Pack Africa Bio-Sync", amount: 15, currency: "USD" },
-      [PricingZone.EUROPE]: { label: "Pack Euro Excellence", amount: 25, currency: "EUR" },
-      [PricingZone.GLOBAL]: { label: "Pack Global Diamond", amount: 35, currency: "USD" }
-    }
+  legal: {
+    dpo: "ABADA Jose Gaétan",
+    consent_text: "En validant, vous consentez au traitement de vos données pour l'établissement de protocoles de santé personnalisés conformément au RGPD."
   },
   audio_logic: {
     pause_duration: 1500

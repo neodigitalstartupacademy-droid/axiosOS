@@ -37,20 +37,20 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose }) =
       icon: <Zap size={48} className="text-[#FFD700]" />
     },
     {
-      title: "2. Rencontrez Coach José fonctionnant avec tous les principes (Expert SAB)",
-      content: "José est votre IA experte en Nutrition Cellulaire. Elle utilise le standard SAB et la Loi des 37°C pour transformer vos prospects en clients fidèles.",
+      title: "2. Rencontrez Coach José (Expert SAB)",
+      content: "Coach José est votre IA experte en Nutrition Cellulaire. Elle utilise le standard SAB et la Loi des 37°C pour transformer vos prospects en clients fidèles.",
       actionLabel: "Initialiser José",
       icon: <Bot size={48} className="text-[#00d4ff]" />
     },
     {
       title: "3. Certificat Digital Builder",
-      content: "Accédez à l'Academy NDSA de M. José Gaétan. Suivez les modules, réussissez les quiz et obtenez votre Certificat d'Architecte de Réseau Diamond.",
+      content: "Accédez à l'Academy de la NDSA. Suivez les modules, réussissez les quiz et obtenez votre Certificat d'Architecte de Réseau Diamond.",
       actionLabel: "Ouvrir l'Academy",
       icon: <GraduationCap size={48} className="text-[#FFD700]" />
     },
     {
       title: "4. Synchronisation Bio-Sync",
-      content: "Sécurité Maximale : Le système protège vos leads. En cas de visiteur orphelin, le Lead est synchronisé avec le Fondateur (M. José Gaétan) pour garantir un accompagnement premium.",
+      content: "Synchronisation Bio-Sync (Garantie NDSA) Continuité de l'Accompagnement : Afin de vous garantir une expérience fluide et une réactivité totale, notre système assure la continuité de votre suivi. Si votre conseiller habituel est indisponible, notre cellule de coordination premium prend immédiatement le relais. Cette synchronisation de sécurité vous assure que votre protocole de santé reste une priorité absolue, sous la supervision experte de nos équipes fondatrices.",
       actionLabel: "Terminer la configuration",
       icon: <ShieldCheck size={48} className="text-emerald-500" />
     }

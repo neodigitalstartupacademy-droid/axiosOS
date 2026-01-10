@@ -44,7 +44,8 @@ interface AdminMonitorProps {
   stats: AdminMonitorStats;
 }
 
-export const AdminMonitor: React.FC<AdminMonitorStats> = ({ stats }) => {
+/* Fix: Component prop definition updated to match stats property passed from parent */
+export const AdminMonitor: React.FC<AdminMonitorProps> = ({ stats }) => {
   const [activeTab, setActiveTab] = useState<'monitor' | 'factory'>('monitor');
   const [showFactory, setShowFactory] = useState(false);
   const [factoryStep, setFactoryStep] = useState(1);
@@ -431,7 +432,6 @@ export const AdminMonitor: React.FC<AdminMonitorStats> = ({ stats }) => {
                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Instance Health</p>
                     <p className="text-xl font-black text-emerald-400 italic">OPTIMAL</p>
                   </div>
-                  {/* Fixed syntax error on line 501 below */}
                   <button onClick={() => { stopAudio(); setFactoryStep(1); setShowFactory(true); }} className="px-10 py-5 bg-[#00d4ff] text-slate-950 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-3xl hover:scale-105 active:scale-95 transition-all">Lancer Nouveau Clone</button>
                </div>
              </div>

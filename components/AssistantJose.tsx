@@ -4,11 +4,11 @@ import { generateJoseResponseStream } from '../services/geminiService';
 import { voiceService } from '../services/voiceService';
 import { Message, Language, AIPersona, ReferralContext } from '../types'; 
 import { SYSTEM_CONFIG, I18N as I18N_CONST } from '../constants';
-import { ConversionNotification } from './ConversionNotification';
+import { jsPDF } from 'jspdf';
 import { 
   Send, Bot, Play, Square, User, Image as ImageIcon, Microscope, Rocket, HelpCircle, 
   ChevronRight, Activity, Headphones, Sparkles, Zap, Brain, ThermometerSnowflake, Droplets, 
-  Terminal, Cpu, ShieldCheck, BarChart3, Fingerprint, Layers, Download, FileText, HeartPulse, ShoppingCart, MessageCircle, Volume2, X, ExternalLink
+  Terminal, Cpu, ShieldCheck, BarChart3, Fingerprint, Layers, Download, FileText, HeartPulse, ShoppingCart, MessageCircle, Volume2, X, ExternalLink, Loader2
 } from 'lucide-react';
 
 interface AssistantJoseProps {
@@ -23,8 +23,8 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
   const [activeSpeechKey, setActiveSpeechKey] = useState<string | null>(null);
   const [referralContext, setReferralContext] = useState<ReferralContext | null>(null);
   const [selectedImage, setSelectedImage] = useState<{ data: string; mimeType: string } | null>(null);
-  const [showLeadNotification, setShowLeadNotification] = useState(false);
   const [groundingSources, setGroundingSources] = useState<any[]>([]);
+  const [isExporting, setIsExporting] = useState<string | null>(null);
   
   const persona: AIPersona = {
     name: SYSTEM_CONFIG.ai.name,
@@ -38,7 +38,7 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const suggestions = [
-    { label: "Bilan Vitalité", prompt: "Analyse mon terrain biologique (SAB) et mes membranes cellulaires.", icon: HeartPulse },
+    { label: "Analyse Membrane Cellulaire", prompt: "Analyse mes membranes cellulaires et mon terrain biologique (SAB).", icon: Microscope },
     { label: "Loi des 37°C", prompt: "Explique-moi l'impact de l'eau glacée sur ma biochimie à 37°C.", icon: ThermometerSnowflake },
     { label: "Stress Cellulaire", prompt: "Comment mes émotions figent-elles mes lipides membranaires ?", icon: Brain },
     { label: "Commander", prompt: "Où commander mon Trio de Relance chez mon conseiller ?", icon: ShoppingCart },
@@ -50,7 +50,6 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
     });
 
     const activeRef = sessionStorage.getItem('ndsa_active_ref') || SYSTEM_CONFIG.founder.id;
-    const activeSlug = sessionStorage.getItem('ndsa_active_slug') || SYSTEM_CONFIG.founder.shop_slug;
     const activeShop = sessionStorage.getItem('ndsa_active_shop') || SYSTEM_CONFIG.founder.officialShopUrl;
 
     setReferralContext({ 
@@ -60,29 +59,26 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
       shopUrl: activeShop
     });
 
-    const params = new URLSearchParams(window.location.search);
-    const mode = params.get('m');
-
     if (messages.length === 0) {
-      if (mode === 'w') {
-        handleAutoWelcome(activeRef);
-      } else {
-        setMessages([{ 
-          id: 'welcome', 
-          role: 'model', 
-          parts: [{ text: "Bonjour Leader. Je suis Coach José. Analyse biologique ou stratégie de réseau : sur quoi focalisons-nous votre puissance aujourd'hui ?" }], 
-          timestamp: new Date(), 
-          status: 'read' 
-        }]);
-      }
+      setMessages([{ 
+        id: 'welcome', 
+        role: 'model', 
+        parts: [{ text: "Bonjour Leader. Je suis Coach José. Analyse biologique ou stratégie de réseau : sur quoi focalisons-nous votre puissance aujourd'hui ?" }], 
+        timestamp: new Date(), 
+        status: 'read' 
+      }]);
     }
     return () => unsubVoice();
   }, [language]);
 
-  const handleAutoWelcome = async (refId: string) => {
-    const welcomePrompt = `Bonjour ! Je suis José, votre expert en Bio-Sync. Bienvenue dans l'univers NDSA. Je suis prêt à scanner vos besoins biologiques immédiatement. Souhaitez-vous lancer le scan ?`;
-    await handleSend(welcomePrompt, true);
-  };
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [messages, isLoading]);
 
   const handleSend = async (text?: string, isAuto = false) => {
     const finalInput = text || input;
@@ -90,9 +86,14 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
     
     voiceService.stop();
     const userMsgId = 'input_' + Date.now();
-    if (!isAuto) {
-        setMessages(prev => [...prev, { id: userMsgId, role: 'user', parts: [{ text: finalInput || "[SCAN IMAGE]" }], timestamp: new Date(), status: 'read' }]);
+    
+    // Si c'est un bouton de suggestion, on affiche le message de l'utilisateur
+    if (text) {
+      setMessages(prev => [...prev, { id: userMsgId, role: 'user', parts: [{ text: finalInput }], timestamp: new Date(), status: 'read' }]);
+    } else if (!isAuto) {
+      setMessages(prev => [...prev, { id: userMsgId, role: 'user', parts: [{ text: finalInput || "[SCAN IMAGE]" }], timestamp: new Date(), status: 'read' }]);
     }
+    
     setInput('');
     setIsLoading(true);
     setGroundingSources([]);
@@ -108,19 +109,15 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
       for await (const chunk of stream) {
         fullText += chunk.text || "";
         setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, parts: [{ text: fullText }] } : m));
-        
-        // Extraction des sources Google Search
         const chunks = (chunk as any).candidates?.[0]?.groundingMetadata?.groundingChunks;
-        if (chunks) {
-            setGroundingSources(prev => [...prev, ...chunks]);
-        }
+        if (chunks) setGroundingSources(prev => [...prev, ...chunks]);
       }
+      
       setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, status: 'read' } : m));
+      
+      // LECTURE AUTOMATIQUE DE L'ANALYSE
       voiceService.play(fullText, `msg_${aiMsgId}`, language as Language);
       
-      if (fullText.includes('boutique') || fullText.includes('http')) {
-        setShowLeadNotification(true);
-      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -128,8 +125,45 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
     }
   };
 
+  const handleExportPDF = async (message: Message) => {
+    setIsExporting(message.id);
+    try {
+      const doc = new jsPDF();
+      const margin = 20;
+      let y = 30;
+
+      doc.setFillColor(15, 23, 42); 
+      doc.rect(0, 0, 210, 50, 'F');
+      
+      doc.setTextColor(0, 212, 255); 
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(22);
+      doc.text("RAPPORT D'ANALYSE COACH JOSÉ", margin, 25);
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.text("NEO DIGITAL STARTUP ACADEMY - PROTOCOLE BIOLOGIQUE", margin, 35);
+      doc.text(`DATE : ${new Date().toLocaleDateString()} | SOURCE : GMBC-OS V7`, margin, 42);
+
+      y = 70;
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      
+      const content = message.parts[0].text;
+      const splitText = doc.splitTextToSize(content, 170);
+      doc.text(splitText, margin, y);
+      
+      doc.save(`Analyse_NDSA_${Date.now()}.pdf`);
+    } catch (e) {
+      console.error("PDF Export failed", e);
+    } finally {
+      setIsExporting(null);
+    }
+  };
+
   return (
-    <div className="flex h-screen bg-[#020617] text-white overflow-hidden font-sans">
+    <div className="flex h-full bg-[#020617] text-white overflow-hidden font-sans relative">
       
       {/* SIDEBAR CLINIQUE */}
       <aside className="hidden xl:flex w-80 flex-col border-r border-white/5 bg-black/40 backdrop-blur-3xl p-8 gap-10 overflow-y-auto no-scrollbar">
@@ -146,7 +180,6 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
           </div>
         </div>
 
-        {/* BIO-PULSE VISUALIZER */}
         <div className="h-32 bg-slate-900/50 rounded-3xl border border-white/5 p-4 flex items-end justify-center gap-1.5">
             {[...Array(12)].map((_, i) => (
                 <div key={i} className="w-1 bg-[#00d4ff] rounded-full" style={{ 
@@ -170,40 +203,42 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
       </aside>
 
       {/* NEXUS CENTRAL */}
-      <main className="flex-1 flex flex-col relative">
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 md:px-24 py-20 space-y-24 no-scrollbar scroll-smooth">
+      <main className="flex-1 flex flex-col relative h-full">
+        {/* ZONE DE MESSAGES */}
+        <div 
+          ref={scrollRef} 
+          className="flex-1 overflow-y-auto px-6 md:px-24 pt-10 pb-52 space-y-16 no-scrollbar scroll-smooth"
+        >
           {messages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-10 duration-700`}>
-              <div className={`flex gap-10 w-full ${msg.role === 'user' ? 'max-w-[80%] flex-row-reverse' : 'max-w-full'}`}>
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border mt-2 shadow-2xl ${msg.role === 'user' ? 'bg-slate-900 border-white/5' : 'bg-[#00d4ff]/10 border-[#00d4ff]/20'}`}>
-                   {msg.role === 'user' ? <User size={24} className="text-slate-600" /> : <Bot size={28} className="text-[#00d4ff]" />}
+              <div className={`flex gap-8 w-full ${msg.role === 'user' ? 'max-w-[80%] flex-row-reverse' : 'max-w-full'}`}>
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border mt-1 shadow-2xl ${msg.role === 'user' ? 'bg-slate-900 border-white/5' : 'bg-[#00d4ff]/10 border-[#00d4ff]/20'}`}>
+                   {msg.role === 'user' ? <User size={20} className="text-slate-600" /> : <Bot size={24} className="text-[#00d4ff]" />}
                 </div>
 
-                <div className="flex flex-col space-y-8 w-full">
-                  <div className={`text-2xl md:text-3xl font-light leading-[1.6] tracking-tight whitespace-pre-line ${msg.role === 'user' ? 'text-[#00d4ff]/80 italic text-right' : 'text-slate-100'}`}>
+                <div className="flex flex-col space-y-6 w-full">
+                  <div className={`text-lg md:text-xl font-light leading-relaxed tracking-tight whitespace-pre-line ${msg.role === 'user' ? 'text-[#00d4ff]/80 italic text-right' : 'text-slate-100'}`}>
                     {msg.parts[0].text}
                   </div>
                   
-                  {msg.role === 'model' && (
-                    <div className="flex flex-wrap items-center gap-6">
+                  {msg.role === 'model' && msg.parts[0].text.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-4">
                       <button 
                         onClick={() => voiceService.play(msg.parts[0].text, `msg_${msg.id}`, language as Language)} 
-                        className={`flex items-center gap-4 px-6 py-3 rounded-xl border font-stark text-[10px] font-black uppercase tracking-[0.2em] transition-all ${voiceService.isCurrentlyReading(`msg_${msg.id}`) ? 'bg-[#00d4ff] text-slate-950 border-[#00d4ff]' : 'bg-white/5 border-white/10 text-slate-500'}`}
+                        className={`flex items-center gap-3 px-5 py-2.5 rounded-xl border font-stark text-[9px] font-black uppercase tracking-widest transition-all ${voiceService.isCurrentlyReading(`msg_${msg.id}`) ? 'bg-[#00d4ff] text-slate-950 border-[#00d4ff]' : 'bg-white/5 border-white/10 text-slate-500 hover:text-white'}`}
                       >
-                        {voiceService.isCurrentlyReading(`msg_${msg.id}`) ? <Square size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
-                        {voiceService.isCurrentlyReading(`msg_${msg.id}`) ? "SYNTHÈSE EN COURS" : "LIRE L'ANALYSE"}
+                        {voiceService.isCurrentlyReading(`msg_${msg.id}`) ? <Square size={12} fill="currentColor" /> : <Play size={12} fill="currentColor" />}
+                        {voiceService.isCurrentlyReading(`msg_${msg.id}`) ? "ARRÊTER" : "RÉÉCOUTER"}
                       </button>
 
-                      {groundingSources.length > 0 && (
-                          <div className="flex items-center gap-3">
-                              <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Sources:</span>
-                              {groundingSources.slice(0, 3).map((s, idx) => (
-                                  <a key={idx} href={s.web?.uri} target="_blank" className="p-2 bg-white/5 border border-white/10 rounded-lg text-[#00d4ff] hover:bg-[#00d4ff]/10 transition-all">
-                                      <ExternalLink size={14} />
-                                  </a>
-                              ))}
-                          </div>
-                      )}
+                      <button 
+                        onClick={() => handleExportPDF(msg)}
+                        disabled={isExporting === msg.id}
+                        className="flex items-center gap-3 px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black text-slate-400 uppercase tracking-widest hover:bg-white/10 hover:text-emerald-400 transition-all"
+                      >
+                        {isExporting === msg.id ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                        EXPORTER PDF
+                      </button>
                     </div>
                   )}
                 </div>
@@ -211,52 +246,72 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
             </div>
           ))}
           {isLoading && (
-            <div className="flex justify-start py-8">
-              <div className="flex gap-2">
-                <div className="w-2 h-2 bg-[#00d4ff] rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-[#00d4ff] rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                <div className="w-2 h-2 bg-[#00d4ff] rounded-full animate-bounce [animation-delay:0.4s]"></div>
+            <div className="flex justify-start py-4">
+              <div className="flex gap-2 p-4 bg-white/5 rounded-2xl">
+                <div className="w-1.5 h-1.5 bg-[#00d4ff] rounded-full animate-bounce"></div>
+                <div className="w-1.5 h-1.5 bg-[#00d4ff] rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                <div className="w-1.5 h-1.5 bg-[#00d4ff] rounded-full animate-bounce [animation-delay:0.4s]"></div>
               </div>
             </div>
           )}
-          <div className="h-[40vh]"></div>
         </div>
 
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-5xl px-8 z-40">
-           <div className="glass-card rounded-[3rem] border border-white/10 p-5 shadow-3xl bg-slate-900/80 flex flex-col gap-5">
-              <div className="flex gap-3 overflow-x-auto no-scrollbar px-2">
+        {/* BARRE DE DIALOGUE FIXÉE (DOCK NEXUS) */}
+        <div className="absolute bottom-0 left-0 w-full p-6 md:p-8 pointer-events-none z-50">
+           <div className="max-w-5xl mx-auto glass-card rounded-[2.5rem] border border-white/10 p-4 shadow-3xl bg-slate-900/95 backdrop-blur-3xl pointer-events-auto flex flex-col gap-4">
+              
+              {/* SUGGESTIONS */}
+              <div className="flex gap-2 overflow-x-auto no-scrollbar px-2">
                  {suggestions.map((sug, i) => (
-                   <button key={i} onClick={() => handleSend(sug.prompt)} className="shrink-0 px-6 py-3 bg-white/5 border border-white/5 rounded-full flex items-center gap-3 hover:bg-[#00d4ff]/10 transition-all">
-                      <sug.icon size={12} className="text-slate-500" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{sug.label}</span>
+                   <button 
+                    key={i} 
+                    onClick={() => handleSend(sug.prompt)} 
+                    className="shrink-0 px-5 py-2.5 bg-white/5 border border-white/5 rounded-full flex items-center gap-3 hover:bg-[#00d4ff]/10 hover:border-[#00d4ff]/40 transition-all group"
+                   >
+                      <sug.icon size={12} className="text-slate-500 group-hover:text-[#00d4ff]" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-white">{sug.label}</span>
                    </button>
                  ))}
               </div>
 
-              <div className="flex items-center gap-5">
-                <button onClick={() => fileInputRef.current?.click()} className="p-5 bg-white/5 border border-white/10 rounded-[2rem] text-slate-500 hover:text-[#00d4ff] transition-all">
-                   <ImageIcon size={24} />
+              {/* INPUT */}
+              <div className="flex items-center gap-4 bg-black/40 rounded-[2rem] border border-white/5 p-2 px-6 focus-within:border-[#00d4ff]/30 transition-all">
+                <button 
+                  onClick={() => fileInputRef.current?.click()} 
+                  className="p-2 text-slate-500 hover:text-[#00d4ff] transition-all"
+                >
+                   <ImageIcon size={22} />
                 </button>
-                <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if(f) { const r = new FileReader(); r.onloadend = () => setSelectedImage({ data: (r.result as string).split(',')[1], mimeType: f.type }); r.readAsDataURL(f); } }} />
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  hidden 
+                  accept="image/*" 
+                  onChange={(e) => { 
+                    const f = e.target.files?.[0]; 
+                    if(f) { 
+                      const r = new FileReader(); 
+                      r.onloadend = () => setSelectedImage({ data: (r.result as string).split(',')[1], mimeType: f.type }); 
+                      r.readAsDataURL(f); 
+                    } 
+                  }} 
+                />
                 
-                <div className="flex-1 relative">
-                  <textarea 
-                    value={input} 
-                    onChange={(e) => setInput(e.target.value)} 
-                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
-                    placeholder="Symptôme, analyse de sang, question..." 
-                    className="w-full bg-transparent border-none text-white placeholder-slate-700 outline-none font-medium text-xl italic resize-none py-4 leading-tight no-scrollbar"
-                    rows={1}
-                  />
-                  {selectedImage && (
-                    <div className="absolute -top-12 left-0 bg-[#00d4ff] text-slate-900 px-4 py-1.5 rounded-full text-[9px] font-black uppercase animate-bounce">
-                       Image Chargée
-                    </div>
-                  )}
-                </div>
+                <input 
+                  type="text"
+                  value={input} 
+                  onChange={(e) => setInput(e.target.value)} 
+                  onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                  placeholder="Symptôme, analyse, question..." 
+                  className="flex-1 bg-transparent border-none text-white placeholder-slate-800 outline-none font-medium text-lg italic py-4"
+                />
 
-                <button onClick={() => handleSend()} disabled={isLoading} className="w-16 h-16 bg-[#00d4ff] text-slate-950 rounded-[2rem] flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all">
-                   <Send size={24} />
+                <button 
+                  onClick={() => handleSend()} 
+                  disabled={isLoading} 
+                  className="w-14 h-14 bg-[#00d4ff] text-slate-950 rounded-2xl flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                >
+                   <Send size={20} />
                 </button>
               </div>
            </div>

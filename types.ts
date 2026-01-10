@@ -8,6 +8,18 @@ export enum PricingZone {
 export type Language = 'fr' | 'en' | 'it' | 'es';
 export type TimeFormat = '24h' | '12h' | 'seconds';
 
+export interface Resource {
+  id: string;
+  title: string;
+  type: 'BOOK' | 'VIDEO' | 'AUDIO';
+  author: string;
+  description: string;
+  price: number | 'FREE';
+  currency: string;
+  link: string;
+  thumbnail?: string;
+}
+
 export interface AuthUser {
   id: string;
   name: string;
@@ -20,72 +32,31 @@ export interface AuthUser {
   joinedDate: Date;
 }
 
-export interface Biomarkers {
-  glycemia_mmol_l?: number;
-  cholesterol_total_mmol_l?: number;
-  hdl_mmol_l?: number;
-  ldl_mmol_l?: number;
-  triglycerides_mmol_l?: number;
-  systolic_bp?: number;
-  diastolic_bp?: number;
-  bmi?: number;
-}
-
-export interface RestorationProtocol {
-  product: string;
-  dosage: string;
-  duration_days: number;
-}
-
-export interface ClinicalData {
-  patient: {
-    age?: number;
-    sex?: string;
-  };
-  biomarkers: Biomarkers;
-  analysis: string;
-  protocol: RestorationProtocol[];
-  risk_flags: string[];
-  timestamps: {
-    created_at: string;
-  };
-}
-
-export interface DiagnosticReport {
-  id: string;
-  date: Date;
-  title: string;
-  type: 'BLOOD_WORK' | 'PRESCRIPTION' | 'HEALTH_CHECK';
-  summary: string;
-  fullContent: string;
-  status: 'STABLE' | 'ALERT' | 'OPTIMIZED';
-  image?: string;
-  clinicalData?: ClinicalData;
-}
-
-export interface AIPersona {
-  name: string;
-  role: string;
-  philosophy: string;
-  tonality: string;
-  coreValues: string;
-}
-
 export interface Lesson {
   id: string;
   title: string;
   content: string; 
   starkInsight: string;
   practicalExercise: string;
+  sections?: string[]; // Segments de cours pour l'IA Professor
 }
 
-// Added AcademyModule interface to resolve the import error in AcademyView.tsx
 export interface AcademyModule {
   id: string;
   title: string;
   description: string;
   lessons: Lesson[];
+  resources?: Resource[];
   isPremium?: boolean;
+}
+
+export interface CourseProgress {
+  userId: string;
+  lessonId: string;
+  completedSections: number;
+  totalSections: number;
+  isCompleted: boolean;
+  score?: number;
 }
 
 export interface Message {
@@ -103,6 +74,41 @@ export interface ReferralContext {
   language?: Language;
 }
 
+export interface AIPersona {
+  name: string;
+  role: string;
+  philosophy: string;
+  tonality: string;
+  coreValues: string;
+}
+
+/* Fix: Adding missing ClinicalData interface for bio-scans */
+export interface ClinicalData {
+  biomarkers: {
+    glycemia_mmol_l?: number;
+    cholesterol_total_mmol_l?: number;
+    bmi?: number;
+  };
+  protocol: Array<{
+    product: string;
+    dosage: string;
+    duration_days: number;
+  }>;
+}
+
+/* Fix: Adding missing DiagnosticReport interface for history tracking */
+export interface DiagnosticReport {
+  id: string;
+  title: string;
+  type: 'BLOOD_WORK' | 'TEXT_ANALYSIS';
+  date: Date;
+  status: 'ALERT' | 'NORMAL';
+  fullContent: string;
+  clinicalData?: ClinicalData;
+  image?: string;
+}
+
+/* Fix: Adding missing AdminMonitorStats interface for master console */
 export interface AdminMonitorStats {
   totalNetSaaS: number;
   aiEffectiveness: number;
@@ -110,6 +116,7 @@ export interface AdminMonitorStats {
   totalActiveHubs: number;
 }
 
+/* Fix: Adding missing WhiteLabelInstance interface for white-label factory */
 export interface WhiteLabelInstance {
   id: string;
   clientName: string;
@@ -118,10 +125,10 @@ export interface WhiteLabelInstance {
   currency: string;
   primaryColor: string;
   catalogType: 'neolife' | 'custom';
-  logoUrl: string;
+  logoUrl?: string;
   setupFee: number;
   royaltyRate: number;
   isLocked: boolean;
   deploymentDate: Date;
-  status: 'ACTIVE' | 'PENDING' | 'LOCKED';
+  status: 'ACTIVE' | 'LOCKED';
 }
