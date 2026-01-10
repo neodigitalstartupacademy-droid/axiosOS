@@ -38,77 +38,53 @@ export const I18N = {
     report_ready: "Restoration Report Ready",
     legal_title: "Legal Compliance & Protection",
     legal_accept: "Accept Security Protocols",
-    legal_disclaimer: "AI José does not replace your doctor. AXIOMA OS is a nutritional decision support platform. Data is processed locally for your privacy."
-  },
-  it: {
-    dashboard: "Cabina di Comando",
-    jose: "Coach JOSÉ AI",
-    academy: "Academy Leadership",
-    social: "Motore Social Sync",
-    finance: "Flussi e Commissioni",
-    admin: "Master Console",
-    welcome: "Buongiorno. Sono il Coach JOSÉ.",
-    cta_health: "Diagnosi Salute",
-    cta_business: "Startup Business",
-    status_stable: "Bio-Sync: Stabile",
-    propulsion: "Propulsa Successo",
-    medical_scan: "Bio-Scan Medico",
-    analyzing: "Analisi dati clinici...",
-    report_ready: "Rapporto Restauro Pronto",
-    legal_title: "Conformità Legale",
-    legal_accept: "Accetta Protocolli di Sicurezza",
-    legal_disclaimer: "L'IA José non sostituisce il tuo medico. AXIOMA OS è una piattaforma di supporto nutrizionale."
-  },
-  es: {
-    dashboard: "Cabina de Mando",
-    jose: "Coach JOSÉ AI",
-    academy: "Academy Leadership",
-    social: "Motor Social Sync",
-    finance: "Flujos y Comisiones",
-    admin: "Consola Maestra",
-    welcome: "Hola. Soy el Coach JOSÉ.",
-    cta_health: "Diagnóstico de Salud",
-    cta_business: "Startup de Negocios",
-    status_stable: "Bio-Sync: Estable",
-    propulsion: "Propulsar Éxito",
-    medical_scan: "Bio-Scan Médico",
-    analyzing: "Analizando datos clínicos...",
-    report_ready: "Informe de Restauración Listo",
-    legal_title: "Cumplimiento Legal",
-    legal_accept: "Aceptar Protocolos",
-    legal_disclaimer: "La IA José no reemplaza a su médico. AXIOMA OS est una plataforma de apoyo nutricional."
+    legal_disclaimer: "AI Jose does not replace your doctor. AXIOMA OS is a nutritional decision support platform."
   }
 };
 
 export const SYSTEM_CONFIG = {
-  brand: "NDSA GMBC OS",
-  version: "6.5.0-IMPERIUM",
+  brand: "Neo Digital Startup Academy",
+  version: "NDSA-GMBC-OS-V7-PROD",
   founder: {
-    name: "ABADA M. José Gaétan",
+    name: "ABADA Jose",
     id: "067-2922111",
+    shop_slug: "startupforworld",
     officialShopUrl: "https://shopneolife.com/startupforworld/shop/atoz",
-    status: "Fondateur Visionnaire"
+    email: "support@ndsa.app",
+    whatsapp: "+229XXXXXXXX",
+    status: "Maître Fondateur"
+  },
+  traffic_routing: {
+    orphan_owner: "ABADA Jose",
+    orphan_id: "067-2922111",
+    orphan_slug: "startupforworld",
+    rule: "IF param_r IS empty OR param_s IS empty THEN USE default_orphan_owner"
   },
   legal: {
-    tos_url: "https://axioma-os.com/terms",
-    privacy_url: "https://axioma-os.com/privacy",
-    medical_disclaimer: "ATTENTION : JOSÉ est une IA d'analyse de données. En aucun cas ses rapports ne constituent une prescription médicale officielle."
+    dpo: "ABADA Jose",
+    privacy_url: "https://ndsa.app/privacy",
+    consent_text: "En m'inscrivant, j'accepte que l'IA José utilise mon ID et mon Slug pour automatiser mes ventes et m'envoyer des notifications WhatsApp/Email.",
+    lead_guarantee: "Attribution stricte basée sur les paramètres de l'URL compressée."
+  },
+  email_automation: {
+    subject: "Félicitations ! Votre IA Coach José est désormais à votre service 🚀",
+    sender_name: "NDSA - ABADA Jose",
+    support_contact: "support@ndsa.app",
+    trigger: "on_social_engine_setup_complete"
+  },
+  audio_logic: {
+    voice_engine: "TTS",
+    mode: "Exclusive_Single_Stream",
+    pause_duration: 1500, // ms
+    visual_feedback: true
   },
   ai: {
-    name: "JOSÉ",
-    role: "Bio-Architecte & Expert en Nutrition Cellulaire",
-    disclaimer: "⚠️ Je suis JOSÉ. Je décode vos bio-données. Consultez toujours un médecin pour un avis clinique officiel.",
-  },
-  ui: {
-    backgroundGradient: "linear-gradient(135deg, #020617 0%, #0f172a 100%)",
-    primaryColor: "#00d4ff",
-    accentColor: "#fbbf24"
-  },
-  billing: {
-    pricing: {
-      [PricingZone.AFRICA]: { amount: 10, currency: "USD", label: "Plan Émergence" },
-      [PricingZone.EUROPE]: { amount: 15, currency: "EUR", label: "Plan Excellence" },
-      [PricingZone.GLOBAL]: { amount: 20, currency: "USD", label: "Plan Empire" }
+    name: "José",
+    role: "Expert en Nutrition Cellulaire & Psychiatrie Cellulaire",
+    protocol_steps: ["Empathie", "Membrane", "37°C/Émotion", "Prescription 3-5", "Posologie", "Closing"],
+    special_rules: {
+      tre_en_en_dosage: "Impérativement 2 gélules le matin et 2 gélules le soir.",
+      severity_logic: "Si score de gravité > 6/10, prescrire 5 produits avec justification d'urgence vitale."
     }
   },
   academy: {
@@ -121,32 +97,35 @@ export const SYSTEM_CONFIG = {
           {
             id: "psy-cell-1",
             title: "La Psychiatrie Cellulaire : L'Esprit sur la Matière",
-            content: "La NDSA intègre les dernières découvertes : les émotions toxiques comme la colère, la médisance ou la haine génèrent un stress oxydatif qui fige littéralement les membranes cellulaires. Un esprit fluide égale une membrane fluide.",
-            starkInsight: "La colère est un poison biochimique qui paralyse vos cellules.",
-            practicalExercise: "Pratiquez le 'Pardon Métabolique' pour fluidifier votre bio-système."
+            content: "La NDSA intègre les découvertes : les émotions toxiques (colère, haine) génèrent un stress oxydatif qui fige les membranes cellulaires.",
+            starkInsight: "La colère est un poison biochimique.",
+            practicalExercise: "Pratiquez le 'Pardon Métabolique'."
           }
         ] 
       },
       { 
         id: "nutri-therm", 
-        title: "Thermique & Vitalité Fondamentale", 
-        description: "Le respect de la température biologique pour une absorption maximale.",
+        title: "Loi des 37°C", 
+        description: "Respecter la température biologique.",
         lessons: [
           {
-            id: "therm-0-danger",
-            title: "Le Danger des 0°C : Pourquoi le Froid fige la vie",
-            content: "Votre corps fonctionne à 37°C. Consommer des boissons glacées (0°C) fige instantanément les lipides de vos membranes cellulaires. Une cellule figée ne peut plus absorber de nutriments ni rejeter de toxines.",
-            starkInsight: "Chaque glaçon est un verrou posé sur votre vitalité.",
-            practicalExercise: "Basculez vers des boissons à 37°C ou ambiantes pour restaurer l'énergie."
+            id: "therm-danger",
+            title: "Le Danger des 0°C",
+            content: "Boire glacé fige les lipides de vos membranes cellulaires. Une cellule figée ne peut plus absorber de nutriments.",
+            starkInsight: "Chaque glaçon verrouille votre vitalité.",
+            practicalExercise: "Buvez à 37°C."
           }
         ] 
       }
     ],
     premiumModules: []
   },
-  socialViral: {
-    template: "J'utilise NDSA GMBC OS et l'IA JOSÉ pour ma santé cellulaire. Rejoins mon équipe ! 🧬🚀",
-    responseScript: "Bonjour ! Utilisez ce lien pour votre diagnostic : ",
-    structure: "HOOK / BRIDGE / CTA"
+  // Added billing configuration for FinanceView
+  billing: {
+    pricing: {
+      [PricingZone.AFRICA]: { label: "Pack Africa Bio-Sync", amount: 15, currency: "USD" },
+      [PricingZone.EUROPE]: { label: "Pack Euro Excellence", amount: 25, currency: "EUR" },
+      [PricingZone.GLOBAL]: { label: "Pack Global Diamond", amount: 35, currency: "USD" }
+    }
   }
 };

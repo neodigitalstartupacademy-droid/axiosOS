@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-    Zap, Share2, Check, Copy, Globe, Fingerprint, MessageSquare, Volume2, Square, ShoppingCart, Rocket, Linkedin, Instagram, Sparkles
+    Zap, Share2, Check, Copy, Globe, Fingerprint, MessageSquare, Volume2, Square, ShoppingCart, Rocket, Linkedin, Instagram, Sparkles, ShieldCheck, Lock
 } from 'lucide-react';
 import { SYSTEM_CONFIG } from '../constants';
 import { generateJoseAudio, decodeBase64, decodeAudioData } from '../services/geminiService';
@@ -9,20 +9,26 @@ import { generateJoseAudio, decodeBase64, decodeAudioData } from '../services/ge
 export const SocialSync: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [customId, setCustomId] = useState("");
-  const [shopUrl, setShopUrl] = useState("");
+  const [shopSlug, setShopSlug] = useState("");
   const [isReading, setIsReading] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const activeSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
   useEffect(() => {
     const savedId = localStorage.getItem('ndsa_personal_id');
-    const savedShop = localStorage.getItem('ndsa_personal_shop');
+    const savedSlug = localStorage.getItem('ndsa_personal_slug');
+    
     setCustomId(savedId || SYSTEM_CONFIG.founder.id);
-    setShopUrl(savedShop || SYSTEM_CONFIG.founder.officialShopUrl);
+    
+    if (!savedSlug) {
+      setShopSlug(SYSTEM_CONFIG.founder.shop_slug);
+    } else {
+      setShopSlug(savedSlug);
+    }
   }, []);
 
-  const encodedShop = btoa(shopUrl || SYSTEM_CONFIG.founder.officialShopUrl);
-  const smartLink = `${window.location.origin}${window.location.pathname}?ref=${customId || SYSTEM_CONFIG.founder.id}&shop=${encodedShop}&mode=welcome`;
+  // GÉNÉRATION DU LIEN FURTIF (Compact & Anti-Block)
+  const smartLink = `${window.location.origin}${window.location.pathname}?r=${customId || SYSTEM_CONFIG.founder.id}&s=${shopSlug}&m=w`;
   
   const stopAudio = () => {
     if (activeSourceRef.current) {
@@ -35,7 +41,7 @@ export const SocialSync: React.FC = () => {
   const handleRead = async () => {
     if (isReading) { stopAudio(); return; }
     setIsReading(true);
-    const textToRead = `Voici votre Social Link Engine v7. Propagez votre Aura digitale sur LinkedIn, Instagram et au-delà. JOSÉ s'occupe de la conversion.`;
+    const textToRead = `Système de Lien Furtif activé. Le mode Stealth remplace les URLs complètes par des Slugs pour éviter les filtres de Facebook. Si vos paramètres r ou s sont manquants, le lead est automatiquement attribué à ABADA Jose.`;
     const base64 = await generateJoseAudio(textToRead);
     if (base64) {
       if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -58,13 +64,13 @@ export const SocialSync: React.FC = () => {
   };
 
   const shareTo = (platform: 'whatsapp' | 'facebook' | 'linkedin' | 'instagram') => {
-    const shareMessage = `Bonjour ! Découvre la nutrition cellulaire NeoLife avec l'IA JOSÉ. C'est le futur du MLM digital ! Diagnostic ici :`;
+    const shareMessage = `Bonjour ! Découvre ton diagnostic de vitalité gratuit avec Coach JOSÉ. Cliquez ici :`;
     let url = "";
     switch(platform) {
       case 'whatsapp': url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareMessage + " " + smartLink)}`; break;
       case 'facebook': url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(smartLink)}`; break;
       case 'linkedin': url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(smartLink)}`; break;
-      case 'instagram': navigator.clipboard.writeText(smartLink); alert("Lien copié pour Instagram !"); return;
+      case 'instagram': navigator.clipboard.writeText(smartLink); alert("Lien Furtif copié pour Instagram !"); return;
     }
     if (url) window.open(url, '_blank');
   };
@@ -77,36 +83,46 @@ export const SocialSync: React.FC = () => {
         <div className="relative z-10 flex flex-col gap-24">
           <div className="space-y-10">
             <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-4 px-8 py-3.5 bg-[#00d4ff]/10 border border-[#00d4ff]/20 rounded-full text-[12px] font-black text-[#00d4ff] uppercase tracking-[0.5em] italic shadow-2xl">
-                <Zap size={20} className="animate-pulse" /> Social Engine Active
+              <div className="inline-flex items-center gap-4 px-8 py-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[12px] font-black text-emerald-400 uppercase tracking-[0.5em] italic shadow-2xl">
+                <ShieldCheck size={20} className="animate-pulse" /> Stealth Mode active
               </div>
               <button onClick={handleRead} className={`w-20 h-20 rounded-[2rem] border transition-all flex items-center justify-center ${isReading ? 'bg-[#00d4ff] text-slate-950 animate-pulse' : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'}`}>
                 {isReading ? <Square size={28} /> : <Volume2 size={28} />}
               </button>
             </div>
-            <h2 className="text-[9rem] font-black text-white tracking-tighter italic uppercase leading-[0.8] drop-shadow-2xl">AURA <span className="text-[#00d4ff]">LINK</span></h2>
+            <h2 className="text-[9rem] font-black text-white tracking-tighter italic uppercase leading-[0.8] drop-shadow-2xl">STEALTH <span className="text-[#00d4ff]">SYNC</span></h2>
             <p className="text-slate-400 text-3xl font-medium leading-relaxed max-w-4xl italic opacity-90">
-              Diffusez votre impact bio-cellulaire. JOSÉ capture chaque clic et guide vos prospects vers la restauration.
+              Votre lien intelligent contourne les filtres Meta. Attribution garantie par le moteur de routage NDSA.
             </p>
+          </div>
+
+          <div className="bg-slate-900/40 p-10 rounded-[4rem] border border-white/5 space-y-8">
+             <div className="flex items-center gap-4 text-[#FFD700]">
+                <Lock size={20} />
+                <span className="text-xs font-black uppercase tracking-widest">Orphan Lead Rule</span>
+             </div>
+             <p className="text-sm text-slate-500 italic font-medium leading-relaxed">
+               Si les paramètres <strong>r</strong> ou <strong>s</strong> sont absents de l'URL, le prospect est automatiquement redirigé vers l'instance de <strong>{SYSTEM_CONFIG.founder.name}</strong> pour assurer un suivi master.
+             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
              <div className="space-y-8">
                 <label className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] ml-6 flex items-center gap-4">
-                  <Fingerprint size={16} className="text-[#00d4ff]" /> ID Distributeur
+                  <Fingerprint size={16} className="text-[#00d4ff]" /> ID Distributeur (r)
                 </label>
                 <input type="text" value={customId} onChange={e => { setCustomId(e.target.value); localStorage.setItem('ndsa_personal_id', e.target.value); }} className="w-full bg-black/40 border border-white/5 px-10 py-8 rounded-[3rem] text-white font-black italic text-2xl outline-none focus:border-[#00d4ff] transition-all shadow-inner" />
              </div>
              <div className="space-y-8">
                 <label className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] ml-6 flex items-center gap-4">
-                  <ShoppingCart size={16} className="text-[#00d4ff]" /> Official Shop URL
+                  <ShoppingCart size={16} className="text-[#00d4ff]" /> Shop Slug (s)
                 </label>
-                <input type="text" value={shopUrl} onChange={e => { setShopUrl(e.target.value); localStorage.setItem('ndsa_personal_shop', e.target.value); }} className="w-full bg-black/40 border border-white/5 px-10 py-8 rounded-[3rem] text-white font-black italic text-xl outline-none focus:border-[#00d4ff] transition-all shadow-inner" />
+                <input type="text" value={shopSlug} onChange={e => { setShopSlug(e.target.value); localStorage.setItem('ndsa_personal_slug', e.target.value); }} className="w-full bg-black/40 border border-white/5 px-10 py-8 rounded-[3rem] text-white font-black italic text-xl outline-none focus:border-[#00d4ff] transition-all shadow-inner placeholder:text-slate-800" placeholder="startupforworld" />
              </div>
           </div>
 
           <div className="space-y-10">
-             <label className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] ml-6">Smart Link Elite</label>
+             <label className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] ml-6">Compact Stealth Link</label>
              <div className="flex flex-col sm:flex-row gap-8">
                 <div className="flex-1 bg-black/60 border border-[#00d4ff]/20 px-12 py-10 rounded-[3.5rem] text-[#00d4ff] font-mono text-lg truncate flex items-center shadow-inner tracking-tight">{smartLink}</div>
                 <button onClick={copySmartLink} className="p-10 bg-[#00d4ff] text-slate-950 rounded-[3.5rem] transition-all shadow-[0_0_50px_#00d4ff44] hover:scale-110 active:scale-95 flex items-center justify-center gap-6">
@@ -128,19 +144,6 @@ export const SocialSync: React.FC = () => {
              ))}
           </div>
         </div>
-      </div>
-      
-      <div className="bg-white/5 p-24 rounded-[7rem] border border-white/5 backdrop-blur-3xl relative overflow-hidden group">
-         <div className="flex flex-col lg:flex-row items-center gap-16">
-            <div className="w-32 h-32 bg-[#00d4ff]/10 rounded-[3rem] flex items-center justify-center text-[#00d4ff] shadow-3xl group-hover:scale-110 transition-transform"><Rocket size={64} /></div>
-            <div className="flex-1 space-y-6 text-center lg:text-left">
-              <h3 className="text-5xl font-stark font-black text-white italic uppercase tracking-tighter">Vecteur d'Expansion</h3>
-              <p className="text-slate-400 text-3xl leading-relaxed italic opacity-90">
-                Chaque partage renforce le maillage de votre empire. JOSÉ analyse les origines des flux pour optimiser vos futures campagnes de psychiatrie cellulaire.
-              </p>
-            </div>
-            <Sparkles size={80} className="text-[#00d4ff] opacity-10 animate-pulse hidden lg:block" />
-         </div>
       </div>
     </div>
   );

@@ -132,7 +132,7 @@ export const FinanceView: React.FC = () => {
             <div className="p-3 bg-amber-100 rounded-2xl text-amber-600 shadow-inner">
               <TrendingUp size={24} />
             </div>
-            <span className="text-[9px] font-black text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-100 uppercase">Comm %</span>
+            <span className="text-[9px] font-black text-amber-600 bg-amber-500 px-3 py-1 rounded-full border border-amber-100 uppercase">Comm %</span>
           </div>
           <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Commissions Directes</p>
           <h3 className="text-3xl font-black text-slate-900 mt-2">$256.00</h3>
@@ -176,7 +176,8 @@ export const FinanceView: React.FC = () => {
             </div>
             
             <div className="space-y-3">
-              {Object.entries(SYSTEM_CONFIG.billing.pricing).map(([zone, data]) => (
+              {/* Added explicit casting and optional chaining to fix compilation errors related to missing 'billing' and 'unknown' property access */}
+              {(SYSTEM_CONFIG as any).billing?.pricing && Object.entries((SYSTEM_CONFIG as any).billing.pricing).map(([zone, data]: [string, any]) => (
                 <div key={zone} className="flex items-center justify-between p-5 border border-slate-100 rounded-2xl hover:bg-slate-50 transition-all group">
                   <div className="flex items-center gap-4">
                     <div className={`w-3 h-3 rounded-full ${zone === 'AFRICA' ? 'bg-amber-400' : zone === 'EUROPE' ? 'bg-blue-400' : 'bg-purple-400'}`}></div>

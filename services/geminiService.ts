@@ -36,35 +36,40 @@ export const generateJoseResponseStream = async (
     parts: userParts
   });
 
-  // RÉCUPÉRATION DES INFOS DU PARRAIN (SPONSOR)
+  // LOGIQUE DE ROUTAGE ORPHELIN (STEALTH ROUTING)
   let sponsorName = SYSTEM_CONFIG.founder.name;
   let sponsorShop = SYSTEM_CONFIG.founder.officialShopUrl;
   let sponsorId = SYSTEM_CONFIG.founder.id;
 
-  if (referralContext && referralContext.referrerId) {
+  if (referralContext && referralContext.referrerId && referralContext.shopUrl) {
     sponsorName = referralContext.referrerName || `Leader ${referralContext.referrerId}`;
-    sponsorShop = referralContext.shopUrl || SYSTEM_CONFIG.founder.officialShopUrl;
+    sponsorShop = referralContext.shopUrl;
     sponsorId = referralContext.referrerId;
   }
 
   const systemInstruction = `
     TON IDENTITÉ :
-    Tu es l'Expert NDSA, l'Assistant Neural de M. ABADA José Gaétan. 
-    Ton approche est psychologique, scientifique et impériale. Ton nom est JOSÉ IMPERIUM 2026.
+    Tu es JOSÉ, l'IA experte souveraine conçue par ABADA Jose pour la NDSA.
+    Rôle : Expert en Nutrition Cellulaire & Psychiatrie Cellulaire.
 
-    PROTOCOLE DE NUTRITION CELLULAIRE NDSA (STRUCTURE STRICTE) :
-    
-    ÉTAPE 0 : EXPLIQUER LE MAL. Décris d'abord le mécanisme biologique de la souffrance du patient. Il doit comprendre la racine cellulaire de son problème avant de voir la solution.
-    ÉTAPE 1 : ANALYSE DE LA BARRIÈRE CELLULAIRE. Explique l'état des membranes (lipides/stérols). Démontre pourquoi la cellule est verrouillée : rien n'entre (nutriments), rien ne sort (toxines).
-    ÉTAPE 2 : FACTEURS CRITIQUES. 
-       - PSYCHIATRIE CELLULAIRE : Impact du stress, de la colère et des émotions toxiques sur le verrouillage des membranes.
-       - LOI DES 37°C : Danger vital du froid/glacé qui fige les lipides.
-       - Identification des carences et aliments/médicaments à éviter.
-    ÉTAPE 3 : LE TRIO DE RELANCE. Recommande les 3 produits NeoLife prioritaires (ex: Tre-en-en, Salmon Oil Plus, Carotenoid Complex) pour restaurer l'autorité cellulaire.
-    ÉTAPE 4 : POSOLOGIE & HABITUDES. Conseils précis de consommation. INTERDICTION ABSOLUE de boire glacé.
-    ÉTAPE 5 : CONCLUSION CLOSING. Invite à commander sur la boutique officielle : ${sponsorShop} (ID Distributeur: ${sponsorId}) ou à devenir Ambassadeur NDSA.
+    PROTOCOLE OPÉRATIONNEL EN 6 ÉTAPES (STRICT) :
+    1. EMPATHIE : Écoute active et validation émotionnelle.
+    2. MEMBRANE : Explique le durcissement membranaire (lipides saturés).
+    3. LOI DES 37°C / ÉMOTION : 
+       - Le corps fonctionne à 37°C. Le froid (0°C) fige les membranes.
+       - La Psychiatrie Cellulaire identifie les émotions toxiques qui bloquent la cellule.
+    4. PRESCRIPTION (SCORE 1-10) :
+       - SI SCORE <= 6 : Trio de base (3 produits).
+       - SI SCORE > 6 : Protocole étendu (5 produits) avec JUSTIFICATION D'URGENCE VITALE (AVC, nécrose, etc.).
+    5. POSOLOGIE : Règle Tre-en-en : 2 gélules le matin et 2 gélules le soir.
+    6. CLOSING : Redirection vers la boutique de ${sponsorName} : ${sponsorShop}
 
-    TON STYLE : Autorité clinique, empathie Stark, emojis futuristes.
+    MATRICE DE PATHOLOGIE NDSA :
+    - Hypertension : Trio (Tre-en-en, Lipotropic, Omega-3). Étendu (+ Garlic, + Magnesium).
+    - Diabète : Trio (Tre-en-en, Fibre, Botanical Balance). Étendu (+ Carotenoid, + Zinc).
+    - Infertilité : Trio (Tre-en-en, Masculine/Feminine Herbal, Zinc). Étendu (+ Vitamin E, + Omega-3).
+
+    CONSIGNE D'ACCESSIBILITÉ : Sépare bien tes étapes pour une lecture fluide par les membres.
     Langue : ${language}.
   `;
 
@@ -77,37 +82,6 @@ export const generateJoseResponseStream = async (
       topP: 0.95,
     }
   });
-};
-
-export const analyzeClinicalData = async (imageContent: { data: string; mimeType: string }): Promise<ClinicalData | null> => {
-  const ai = getAIInstance();
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview',
-    contents: [
-      {
-        parts: [
-          { inlineData: { data: imageContent.data, mimeType: imageContent.mimeType } },
-          { text: `Analyse clinique selon Protocole de Nutrition Cellulaire NDSA. JSON STRICT.` }
-        ]
-      }
-    ],
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        required: ["patient", "biomarkers", "analysis", "protocol", "risk_flags", "timestamps"],
-        properties: {
-          patient: { type: Type.OBJECT, properties: { age: { type: Type.NUMBER }, sex: { type: Type.STRING } } },
-          biomarkers: { type: Type.OBJECT, properties: { glycemia_mmol_l: { type: Type.NUMBER }, cholesterol_total_mmol_l: { type: Type.NUMBER }, bmi: { type: Type.NUMBER } } },
-          analysis: { type: Type.STRING },
-          protocol: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { product: { type: Type.STRING }, dosage: { type: Type.STRING }, duration_days: { type: Type.NUMBER } } } },
-          risk_flags: { type: Type.ARRAY, items: { type: Type.STRING } },
-          timestamps: { type: Type.OBJECT, properties: { created_at: { type: Type.STRING } } }
-        }
-      }
-    }
-  });
-  try { return JSON.parse(response.text?.trim() || '{}'); } catch (e) { return null; }
 };
 
 export const generateJoseAudio = async (text: string, language: Language = 'fr') => {

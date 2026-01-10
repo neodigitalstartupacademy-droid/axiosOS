@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, CheckCircle, FileText, ExternalLink, ShieldCheck, Volume2, Square } from 'lucide-react';
+import { ShieldAlert, CheckCircle, FileText, ExternalLink, ShieldCheck, Volume2, Square, Lock } from 'lucide-react';
 import { I18N, SYSTEM_CONFIG } from '../constants';
 import { Language } from '../types';
 import { voiceService } from '../services/voiceService';
@@ -22,7 +22,7 @@ export const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ language, onAc
   }, []);
 
   const handleRead = () => {
-    const textToRead = `${t.legal_title}. ${t.legal_disclaimer}. Veuillez accepter les protocoles de sécurité.`;
+    const textToRead = `${t.legal_title}. ${t.legal_disclaimer}. Responsable des données : ${SYSTEM_CONFIG.legal.dpo}. ${SYSTEM_CONFIG.legal.consent_text}`;
     voiceService.play(textToRead, 'legal_brief', language);
   };
 
@@ -38,7 +38,18 @@ export const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ language, onAc
             <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter">{t.legal_title}</h2>
             <p className="text-slate-400 text-lg font-medium italic leading-relaxed">{t.legal_disclaimer}</p>
           </div>
-          <button onClick={() => { voiceService.stop(); onAccept(); }} className="w-full p-5 bg-[#00d4ff] text-slate-950 rounded-2xl flex items-center justify-center gap-3 text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl hover:brightness-110 active:scale-95 transition-all">
+          
+          <div className="bg-white/5 p-6 rounded-2xl border border-white/5 text-left space-y-4">
+             <div className="flex items-center gap-3 text-emerald-400 font-black text-[10px] uppercase tracking-widest">
+                <Lock size={14} /> Protection des Données (RGPD/NDSA)
+             </div>
+             <p className="text-[11px] text-slate-500 leading-relaxed italic">
+               DPO : <strong>{SYSTEM_CONFIG.legal.dpo}</strong>. <br/>
+               {SYSTEM_CONFIG.legal.consent_text}
+             </p>
+          </div>
+
+          <button onClick={() => { voiceService.stop(); onAccept(); }} className="w-full p-6 bg-[#00d4ff] text-slate-950 rounded-2xl flex items-center justify-center gap-3 text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl hover:brightness-110 active:scale-95 transition-all">
             {t.legal_accept} <CheckCircle size={18} />
           </button>
         </div>

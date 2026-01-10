@@ -31,28 +31,28 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose }) =
 
   const steps = [
     {
-      title: "1. Rencontrez Coach José (Expert Universel)",
-      content: "Coach José est l'IA Universelle de la NDSA (Neo Digital Startup Academy). Il ne remplace pas votre médecin, il amplifie son expertise. José gère les diagnostics complexes de nutrition cellulaire 24h/24 pour transformer vos prospects en clients convaincus.",
-      actionLabel: "Initialiser la connexion",
-      icon: <Bot size={48} className="text-[#FFD700]" />
-    },
-    {
-      title: "2. Activez Social Sync (Automatisation)",
-      content: "La technologie Social Sync permet de diffuser automatiquement vos diagnostics sur Facebook, Instagram et WhatsApp. Chaque diagnostic généré par José devient un post viral rattaché à votre lien personnel.",
-      actionLabel: "Lancer la synchronisation",
+      title: "1. Activation du Hub (5 min)",
+      content: "L'activation de votre instance GMBC-OS est instantanée. Renseignez votre ID NeoLife et votre lien boutique pour permettre à José de travailler pour vous immédiatement.",
+      actionLabel: "Démarrer l'activation",
       icon: <Zap size={48} className="text-[#FFD700]" />
     },
     {
-      title: "3. Academy NDSA (Leadership)",
-      content: "Accédez aux secrets du Fondateur ABADA José. Apprenez comment bâtir une infrastructure digitale qui travaille pour vous. Transformez-vous de simple distributeur en Architecte de Réseau Diamond.",
+      title: "2. Rencontrez José (Expert SAB)",
+      content: "José est votre IA experte en Nutrition Cellulaire. Elle utilise le standard SAB et la Loi des 37°C pour transformer vos prospects en clients fidèles.",
+      actionLabel: "Initialiser José",
+      icon: <Bot size={48} className="text-[#00d4ff]" />
+    },
+    {
+      title: "3. Certificat Digital Builder",
+      content: "Accédez à l'Academy NDSA de M. José Gaétan. Suivez les modules, réussissez les quiz et obtenez votre Certificat d'Architecte de Réseau Diamond.",
       actionLabel: "Ouvrir l'Academy",
       icon: <GraduationCap size={48} className="text-[#FFD700]" />
     },
     {
-      title: "4. Règle Bio-Sync (Protection)",
-      content: "Sécurité maximale : Si un visiteur arrive sans lien de parrainage, le système synchronise automatiquement le lead avec le Fondateur (ABADA José) pour garantir un accompagnement officiel sans perte de donnée.",
-      actionLabel: "Prêt pour le déploiement",
-      icon: <ShieldCheck size={48} className="text-[#FFD700]" />
+      title: "4. Synchronisation Bio-Sync",
+      content: "Sécurité Maximale : Le système protège vos leads. En cas de visiteur orphelin, le Lead est synchronisé avec le Fondateur (M. José Gaétan) pour garantir un accompagnement premium.",
+      actionLabel: "Terminer la configuration",
+      icon: <ShieldCheck size={48} className="text-emerald-500" />
     }
   ];
 
@@ -139,7 +139,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose }) =
                     {steps[currentStep].title}
                   </h3>
                   <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-100 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                    <CheckCircle2 size={12} className="text-blue-500" /> Guide de Bienvenue
+                    <CheckCircle2 size={12} className="text-blue-500" /> NDSA Protocole
                   </div>
                 </div>
                 <p className="text-slate-600 text-xl leading-relaxed font-medium max-w-2xl">
@@ -173,17 +173,17 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose }) =
                 </div>
               </div>
               <div>
-                <h2 className="text-5xl font-black text-slate-900 tracking-tighter mb-4">Bienvenue dans l'ère GMBC OS</h2>
+                <h2 className="text-5xl font-black text-slate-900 tracking-tighter mb-4">Prêt pour l'ère NDSA</h2>
                 <p className="text-slate-500 text-xl font-medium max-w-2xl mx-auto italic leading-relaxed">
-                  "Vous avez les clés de l'empire digital. José est synchronisé. Le monde attend votre diagnostic."
-                  <br /><span className="text-slate-900 font-black italic block mt-6 not-italic uppercase tracking-widest text-xs">— ABADA José</span>
+                  "Votre Hub digital est prêt. José est activée. Transformez des vies et bâtissez votre empire dès maintenant."
+                  <br /><span className="text-slate-900 font-black italic block mt-6 not-italic uppercase tracking-widest text-xs">— ABADA M. José Gaétan</span>
                 </p>
               </div>
               <button 
                 onClick={handleClose}
                 className="w-full py-8 bg-slate-900 text-white font-black rounded-[2.5rem] uppercase tracking-[0.4em] text-sm shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] hover:brightness-125 active:scale-95 transition-all flex items-center justify-center gap-4"
               >
-                ENTRER DANS MON EMPIRE <ArrowRight size={24} className="text-blue-400" />
+                ACTIVER MON EMPIRE <ArrowRight size={24} className="text-blue-400" />
               </button>
             </div>
           )}

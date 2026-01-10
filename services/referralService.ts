@@ -46,19 +46,27 @@ export const NDSA_CORE_CONFIG = {
 
 export const getCurrentSponsor = () => {
     const params = new URLSearchParams(window.location.search);
-    const ref = params.get('ref');
+    
+    // Support des params furtifs (r, s) et legacy (ref, shop)
+    const ref = params.get('r') || params.get('ref');
+    const slug = params.get('s');
     const shop = params.get('shop');
 
-    if (ref && shop) {
-        try {
-            const decodedShop = atob(shop);
-            if (decodedShop.includes('neolife.com')) {
-                return { id: ref, shop: decodedShop, name: "Ton Partenaire Indépendant" };
-            }
-        } catch (e) {
-            console.warn("Lien mal formé, retour au compte Fondateur.");
+    if (ref) {
+        let finalShop = NDSA_CORE_CONFIG.FOUNDER.shop;
+        
+        if (slug) {
+            finalShop = `https://shopneolife.com/${slug}/shop/atoz`;
+        } else if (shop) {
+            try {
+                const decoded = atob(shop);
+                if (decoded.includes('neolife.com')) finalShop = decoded;
+            } catch(e) {}
         }
+        
+        return { id: ref, shop: finalShop, name: "Ton Partenaire Indépendant" };
     }
+    
     return { 
         ...NDSA_CORE_CONFIG.FOUNDER, 
         isFounder: true 
@@ -82,9 +90,8 @@ export const getAIPrompt = (visitorFirstName: string = "mon ami") => {
     `;
 };
 
-export const createMagicLink = (userId: string, userShop: string) => {
+export const createMagicLink = (userId: string, shopSlug: string) => {
     const base = window.location.origin;
-    const cleanShop = userShop.trim();
-    const encodedShop = btoa(cleanShop); 
-    return `${base}?ref=${userId}&shop=${encodedShop}&mode=welcome`;
+    // Utilisation du format FURTIF compact
+    return `${base}?r=${userId}&s=${shopSlug}&m=w`;
 };
