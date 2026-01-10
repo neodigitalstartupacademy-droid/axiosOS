@@ -5,7 +5,6 @@ import {
 } from 'lucide-react';
 import { SYSTEM_CONFIG } from '../constants';
 import { generateJoseAudio, decodeBase64, decodeAudioData } from '../services/geminiService';
-// Added import for voiceService to fix compilation error on line 42
 import { voiceService } from '../services/voiceService';
 
 export const SocialSync: React.FC = () => {
@@ -19,7 +18,6 @@ export const SocialSync: React.FC = () => {
   const activeSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
   useEffect(() => {
-    // RECUPÉRATION DES DONNÉES LOCALES
     const savedId = localStorage.getItem('ndsa_personal_id');
     const savedSlug = localStorage.getItem('ndsa_personal_slug');
     
@@ -27,18 +25,15 @@ export const SocialSync: React.FC = () => {
     setShopSlug(savedSlug || "");
   }, []);
 
-  // GÉNÉRATION DU LIEN FURTIF (PROTOCOL V2 - gmbcoreos.com/jose)
   const effectiveId = customId || SYSTEM_CONFIG.founder.id;
   const effectiveSlug = shopSlug || SYSTEM_CONFIG.founder.shop_slug;
   const smartLink = `https://${SYSTEM_CONFIG.officialDomain}/jose?r=${effectiveId}&s=${effectiveSlug}&m=w`;
   
   const handleGenerate = () => {
     setIsGenerating(true);
-    // Persistance locale
     localStorage.setItem('ndsa_personal_id', customId);
     localStorage.setItem('ndsa_personal_slug', shopSlug);
     
-    // Simulation de compilation Stark
     setTimeout(() => {
         setIsGenerating(false);
         voiceService.play("Signal d'affiliation synchronisé. Votre lien furtif est maintenant opérationnel sur le réseau global.", 'gen_link');
@@ -91,73 +86,74 @@ export const SocialSync: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[1500px] mx-auto space-y-12 pb-24 animate-in fade-in duration-1000">
+    <div className="max-w-[1400px] mx-auto space-y-8 pb-16 animate-in fade-in duration-1000">
       
-      {/* HEADER & TELEMETRY */}
-      <div className="flex flex-col xl:flex-row justify-between items-start gap-12 px-4">
-        <div className="space-y-6 flex-1">
-          <div className="flex items-center gap-4">
-             <div className="px-5 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center gap-3">
-                <Radio size={14} className="text-blue-400 animate-pulse" />
-                <span className="text-[10px] font-black text-blue-400 uppercase tracking-[0.4em]">Signal Status: Broadcast Ready</span>
+      {/* HEADER & TELEMETRY - COMPACTED */}
+      <div className="flex flex-col xl:flex-row justify-between items-start gap-8 px-4">
+        <div className="space-y-4 flex-1">
+          <div className="flex flex-wrap items-center gap-3">
+             <div className="px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center gap-2">
+                <Radio size={12} className="text-blue-400 animate-pulse" />
+                <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.3em]">Broadcast Ready</span>
              </div>
-             <div className="px-5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-3">
-                <ShieldCheck size={14} className="text-emerald-400" />
-                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.4em]">Affiliation Furtive Active</span>
+             <div className="px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-2">
+                <ShieldCheck size={12} className="text-emerald-400" />
+                <span className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.3em]">Stealth Mode</span>
              </div>
           </div>
-          <h2 className="text-7xl md:text-9xl font-black text-white italic uppercase tracking-tighter leading-none">
+          <h2 className="text-4xl md:text-6xl font-black text-white italic uppercase tracking-tighter leading-none">
             Affiliate <span className="text-blue-500">Engine</span>
           </h2>
-          <p className="text-slate-500 font-medium text-xl max-w-3xl italic leading-relaxed">
-            Configurez vos identifiants de distributeur pour générer votre lien d'affiliation unique sur <strong>{SYSTEM_CONFIG.officialDomain}</strong>.
+          <p className="text-slate-500 font-medium text-lg max-w-2xl italic leading-relaxed">
+            Configurez vos identifiants pour générer votre lien d'affiliation sur <strong>{SYSTEM_CONFIG.officialDomain}</strong>.
           </p>
         </div>
 
-        <div className="w-full xl:w-[450px] aspect-[4/3] glass-card rounded-[3.5rem] p-8 flex flex-col items-center justify-center gap-8 relative overflow-hidden">
+        {/* TELEMETRY RADAR - REDUCED SIZE */}
+        <div className="w-full xl:w-[350px] aspect-video xl:aspect-square glass-card rounded-[2.5rem] p-6 flex flex-col items-center justify-center gap-4 relative overflow-hidden">
            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent"></div>
-           <div className="w-48 h-48 rounded-full border border-blue-500/20 relative flex items-center justify-center">
-              <div className="w-full h-[1px] bg-blue-500/40 absolute top-1/2 left-0 -rotate-45 origin-center animate-[spin_4s_linear_infinite]"></div>
-              <Activity size={48} className="text-blue-500" />
+           <div className="w-32 h-32 rounded-full border border-blue-500/20 relative flex items-center justify-center">
+              <div className="w-full h-[1px] bg-blue-500/40 absolute top-1/2 left-0 -rotate-45 origin-center animate-[spin_6s_linear_infinite]"></div>
+              <Activity size={32} className="text-blue-500" />
            </div>
-           <div className="text-center space-y-2">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em]">Network Distribution</p>
-              <p className="text-3xl font-black text-white italic tracking-tighter">BIO-SYNC ACTIVE</p>
+           <div className="text-center space-y-1">
+              <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.4em]">Signal Propagation</p>
+              <p className="text-xl font-black text-white italic tracking-tighter">BIO-SYNC ACTIVE</p>
            </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* CONFIGURATION PANEL */}
-        <div className="lg:col-span-4 space-y-8">
-           <div className="glass-card p-10 rounded-[3rem] border border-white/5 bg-slate-900/40 space-y-12">
-              <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center text-blue-400"><Fingerprint size={24} /></div>
+        {/* CONFIGURATION PANEL - COMPACTED */}
+        <div className="lg:col-span-4">
+           <div className="glass-card p-8 rounded-3xl border border-white/5 bg-slate-900/40 space-y-8">
+              <div className="flex items-center gap-3">
+                 <div className="w-10 h-10 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center justify-center text-blue-400"><Fingerprint size={20} /></div>
                  <div>
-                    <h3 className="font-stark text-xs font-black text-white uppercase tracking-widest leading-none">Configurateur DNA</h3>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase mt-1">Identifiants Personnels</p>
+                    <h3 className="font-stark text-[10px] font-black text-white uppercase tracking-widest leading-none">Configuration DNA</h3>
+                    <p className="text-[8px] text-slate-500 font-bold uppercase mt-1">Séquençage Identité</p>
                  </div>
               </div>
 
-              <div className="space-y-8">
-                 <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-2">ID Distributeur NeoLife</label>
+              <div className="space-y-6">
+                 <div className="space-y-3">
+                    <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-1">ID NeoLife</label>
                     <input 
                       type="text" 
                       value={customId} 
                       onChange={e => setCustomId(e.target.value)}
-                      className="w-full bg-black/40 border border-white/10 px-8 py-6 rounded-2xl text-white font-black italic text-xl outline-none focus:border-blue-500 transition-all shadow-inner"
+                      className="w-full bg-black/40 border border-white/10 px-6 py-4 rounded-xl text-white font-black italic text-lg outline-none focus:border-blue-500 transition-all shadow-inner"
                       placeholder="Ex: 067-2922111"
                     />
                  </div>
-                 <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-2">Slug Boutique NeoLife</label>
+                 <div className="space-y-3">
+                    <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-1">Slug Boutique</label>
                     <input 
                       type="text" 
                       value={shopSlug} 
                       onChange={e => setShopSlug(e.target.value)}
-                      className="w-full bg-black/40 border border-white/10 px-8 py-6 rounded-2xl text-white font-black italic text-xl outline-none focus:border-blue-500 transition-all shadow-inner"
+                      className="w-full bg-black/40 border border-white/10 px-6 py-4 rounded-xl text-white font-black italic text-lg outline-none focus:border-blue-500 transition-all shadow-inner"
                       placeholder="Ex: startupforworld"
                     />
                  </div>
@@ -165,64 +161,54 @@ export const SocialSync: React.FC = () => {
                  <button 
                    onClick={handleGenerate}
                    disabled={isGenerating}
-                   className="w-full py-6 bg-blue-500 text-slate-950 font-black rounded-2xl uppercase tracking-widest text-xs shadow-2xl flex items-center justify-center gap-3 hover:brightness-110 active:scale-95 transition-all"
+                   className="w-full py-5 bg-blue-500 text-slate-950 font-black rounded-xl uppercase tracking-widest text-[10px] shadow-xl flex items-center justify-center gap-3 hover:brightness-110 active:scale-95 transition-all"
                  >
-                   {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <RefreshCw size={18} />}
-                   {isGenerating ? "Compilation..." : "GÉNÉRER MON SIGNAL"}
+                   {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                   {isGenerating ? "Compilation..." : "Synchroniser"}
                  </button>
-              </div>
-
-              <div className="p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex items-start gap-4">
-                 <Lock size={16} className="text-emerald-500 shrink-0 mt-1" />
-                 <p className="text-[9px] text-slate-500 font-bold leading-relaxed italic uppercase">
-                   Le protocole furtif synchronise automatiquement Coach José avec vos identifiants pour chaque closing.
-                 </p>
               </div>
            </div>
         </div>
 
-        {/* PROMINENT LINK DISPLAY (THE ARTIFACT) */}
-        <div className="lg:col-span-8 flex flex-col gap-8">
-           <div className="flex-1 glass-card p-12 rounded-[3.5rem] border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent flex flex-col justify-center items-center relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-full h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-[shimmer_3s_infinite]"></div>
+        {/* PROMINENT LINK DISPLAY - REFINED */}
+        <div className="lg:col-span-8 flex flex-col gap-6">
+           <div className="flex-1 glass-card p-8 rounded-[2.5rem] border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent flex flex-col justify-center items-center relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-[shimmer_4s_infinite]"></div>
               
-              <div className="relative z-10 w-full space-y-12 text-center">
-                 <div className="w-24 h-24 bg-blue-500 text-slate-950 rounded-full flex items-center justify-center mx-auto shadow-[0_0_60px_#3b82f644]">
-                    <LinkIcon size={40} />
+              <div className="relative z-10 w-full space-y-8 text-center">
+                 <div className="w-16 h-16 bg-blue-500 text-slate-950 rounded-2xl flex items-center justify-center mx-auto shadow-2xl">
+                    <LinkIcon size={28} />
                  </div>
 
-                 <div className="space-y-6">
-                    <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.5em]">Lien d'Affiliation Personnalisé</h4>
-                    <div className="bg-black/80 p-10 rounded-[2.5rem] border border-white/5 shadow-2xl relative group-hover:border-blue-500/30 transition-all overflow-hidden">
-                       <p className="text-2xl md:text-4xl font-mono text-blue-400 truncate tracking-tighter italic">
+                 <div className="space-y-4">
+                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Signal Furtif Certifié</h4>
+                    <div className="bg-black/60 p-6 md:p-8 rounded-3xl border border-white/5 shadow-inner relative group-hover:border-blue-500/30 transition-all overflow-hidden max-w-full">
+                       <p className="text-lg md:text-2xl font-mono text-blue-400 truncate tracking-tighter italic">
                           {smartLink}
                        </p>
-                       <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-500 text-slate-950 text-[9px] font-black uppercase rounded-lg">
-                          SIGNAL FURTIF ACTIF
-                       </div>
                     </div>
                  </div>
 
-                 <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-4">
+                 <div className="flex items-center justify-center gap-4 pt-2">
                     <button 
                       onClick={copySmartLink}
-                      className="w-full md:w-auto px-16 py-8 bg-white text-slate-950 rounded-[2.5rem] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-4 hover:scale-105 active:scale-95 transition-all shadow-3xl"
+                      className="px-10 py-5 bg-white text-slate-950 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-2xl"
                     >
-                      {copied ? <Check size={24} className="text-emerald-600" /> : <Copy size={24} />}
-                      {copied ? "SIGNAL COPIÉ !" : "COPIER MON LIEN"}
+                      {copied ? <Check size={18} className="text-emerald-600" /> : <Copy size={18} />}
+                      {copied ? "COPIÉ" : "COPIER LE SIGNAL"}
                     </button>
                     <button 
                       onClick={handleRead}
-                      className={`w-20 h-20 rounded-[1.5rem] border transition-all flex items-center justify-center ${isReading ? 'bg-blue-500 border-blue-500 text-slate-950' : 'bg-white/5 border-white/10 text-slate-500'}`}
+                      className={`w-14 h-14 rounded-xl border transition-all flex items-center justify-center ${isReading ? 'bg-blue-500 border-blue-500 text-slate-950' : 'bg-white/5 border-white/10 text-slate-500'}`}
                     >
-                      {isReading ? <Square size={24} /> : <Volume2 size={24} />}
+                      {isReading ? <Square size={18} /> : <Volume2 size={18} />}
                     </button>
                  </div>
               </div>
            </div>
 
-           {/* PROPAGATION DOCK */}
-           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+           {/* PROPAGATION DOCK - DENSIFIED */}
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { id: 'whatsapp', name: 'WhatsApp', color: 'bg-emerald-600', hover: 'hover:bg-emerald-500', icon: MessageSquare },
                 { id: 'linkedin', name: 'LinkedIn', color: 'bg-blue-700', hover: 'hover:bg-blue-600', icon: Linkedin },
@@ -232,12 +218,12 @@ export const SocialSync: React.FC = () => {
                 <button 
                   key={p.id} 
                   onClick={() => shareTo(p.id as any)}
-                  className={`${p.color} ${p.hover} p-10 rounded-[3rem] text-white flex flex-col items-center justify-center gap-4 transition-all hover:-translate-y-2 shadow-2xl group`}
+                  className={`${p.color} ${p.hover} p-6 rounded-3xl text-white flex flex-col items-center justify-center gap-3 transition-all hover:-translate-y-1 shadow-lg group`}
                 >
-                  <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-transform">
-                    <p.icon size={28} />
+                  <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform">
+                    <p.icon size={20} />
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em]">{p.name}</span>
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em]">{p.name}</span>
                 </button>
               ))}
            </div>

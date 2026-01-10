@@ -8,16 +8,13 @@ export enum PricingZone {
 export type Language = 'fr' | 'en' | 'it' | 'es';
 export type TimeFormat = '24h' | '12h' | 'seconds';
 
-export interface Resource {
-  id: string;
-  title: string;
-  type: 'BOOK' | 'VIDEO' | 'AUDIO';
-  author: string;
-  description: string;
-  price: number | 'FREE';
-  currency: string;
-  link: string;
-  thumbnail?: string;
+export interface LeaderDNA {
+  archetype: string;
+  strategy: number;
+  empathy: number;
+  technical: number;
+  influence: number;
+  vision: string;
 }
 
 export interface AuthUser {
@@ -30,6 +27,19 @@ export interface AuthUser {
   bio?: string;
   country?: string;
   joinedDate: Date;
+  dna?: LeaderDNA;
+}
+
+export interface Resource {
+  id: string;
+  title: string;
+  type: 'BOOK' | 'VIDEO' | 'AUDIO';
+  author: string;
+  description: string;
+  price: number | 'FREE';
+  currency: string;
+  link: string;
+  thumbnail?: string;
 }
 
 export interface Lesson {
@@ -38,7 +48,7 @@ export interface Lesson {
   content: string; 
   starkInsight: string;
   practicalExercise: string;
-  sections?: string[]; // Segments de cours pour l'IA Professor
+  sections?: string[]; 
 }
 
 export interface AcademyModule {
@@ -82,7 +92,6 @@ export interface AIPersona {
   coreValues: string;
 }
 
-/* Fix: Adding missing ClinicalData interface for bio-scans */
 export interface ClinicalData {
   biomarkers: {
     glycemia_mmol_l?: number;
@@ -96,7 +105,6 @@ export interface ClinicalData {
   }>;
 }
 
-/* Fix: Adding missing DiagnosticReport interface for history tracking */
 export interface DiagnosticReport {
   id: string;
   title: string;
@@ -108,7 +116,6 @@ export interface DiagnosticReport {
   image?: string;
 }
 
-/* Fix: Adding missing AdminMonitorStats interface for master console */
 export interface AdminMonitorStats {
   totalNetSaaS: number;
   aiEffectiveness: number;
@@ -116,7 +123,6 @@ export interface AdminMonitorStats {
   totalActiveHubs: number;
 }
 
-/* Fix: Adding missing WhiteLabelInstance interface for white-label factory */
 export interface WhiteLabelInstance {
   id: string;
   clientName: string;
