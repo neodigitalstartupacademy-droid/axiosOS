@@ -3,8 +3,12 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>NDSA GMBC OS V8 - Stark Fusion Elite</title>
+    <!-- Shim process for browser environment -->
+    <script>
+      window.process = { env: { API_KEY: "" } };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -14,16 +18,27 @@
         --accent: #FFD700;
         --dark: #020617;
         --glow: rgba(0, 212, 255, 0.5);
+        --imperium: rgba(255, 215, 0, 0.3);
+      }
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
       }
       body {
         font-family: 'Inter', sans-serif;
         background-color: var(--dark);
         color: white;
-        overflow-x: hidden;
+        margin: 0;
+        padding: 0;
+        height: 100dvh;
+        width: 100vw;
+        overflow: hidden;
         -webkit-font-smoothing: antialiased;
-        background-image: 
-          radial-gradient(circle at 50% -20%, rgba(0, 212, 255, 0.15) 0%, transparent 50%),
-          radial-gradient(circle at 0% 100%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+        position: fixed; /* Empêche le rebond élastique sur iOS */
+      }
+      #root {
+        height: 100%;
+        width: 100%;
       }
       .font-stark { font-family: 'Orbitron', sans-serif; }
       
@@ -44,22 +59,33 @@
         mask-image: radial-gradient(circle at 50% 50%, black, transparent 80%);
       }
 
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
       .glass-card {
         background: rgba(15, 23, 42, 0.6);
         backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
         border: 1px solid rgba(0, 212, 255, 0.1);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-      .glass-card:hover {
-        border-color: rgba(0, 212, 255, 0.3);
-        box-shadow: 0 0 40px rgba(0, 212, 255, 0.1);
       }
 
-      @keyframes pulse-glow {
-        0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.2); }
-        50% { box-shadow: 0 0 40px rgba(0, 212, 255, 0.4); }
+      .gold-card {
+        background: rgba(12, 10, 9, 0.85);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        border: 1px solid rgba(255, 215, 0, 0.2);
       }
+
+      .gold-text-shimmer {
+        background: linear-gradient(90deg, #FFD700, #fef3c7, #FFD700);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: shimmer 4s linear infinite;
+      }
+
+      @keyframes shimmer { to { background-position: 200% center; } }
+      
       .stark-btn {
         background: var(--primary);
         color: #020617;
@@ -67,34 +93,6 @@
         text-transform: uppercase;
         letter-spacing: 0.2em;
         transition: all 0.3s ease;
-        animation: pulse-glow 3s infinite;
-      }
-      .stark-btn:hover {
-        transform: scale(1.02) translateY(-2px);
-        filter: brightness(1.1);
-      }
-
-      ::-webkit-scrollbar { width: 3px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
-
-      .hologram-scan {
-        position: relative;
-        overflow: hidden;
-      }
-      .hologram-scan::after {
-        content: '';
-        position: absolute;
-        top: -100%;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(to bottom, transparent, rgba(0, 212, 255, 0.2), transparent);
-        animation: scan 3s linear infinite;
-      }
-      @keyframes scan {
-        0% { top: -100%; }
-        100% { top: 100%; }
       }
     </style>
     <script type="importmap">

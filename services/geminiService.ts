@@ -3,7 +3,16 @@ import { GoogleGenAI, GenerateContentResponse, Modality, Type } from "@google/ge
 import { SYSTEM_CONFIG } from "../constants";
 import { Message, ReferralContext, Language, AIPersona, ClinicalData } from "../types";
 
-export const getAIInstance = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Sécurité pour éviter le crash "process is not defined"
+const getApiKey = () => {
+  try {
+    return process.env.API_KEY || "";
+  } catch (e) {
+    return "";
+  }
+};
+
+export const getAIInstance = () => new GoogleGenAI({ apiKey: getApiKey() });
 
 export const generateJoseResponseStream = async (
   userPrompt: string, 
@@ -36,16 +45,16 @@ export const generateJoseResponseStream = async (
     parts: userParts
   });
 
-  // LOGIQUE DE CLOSING HYPER-ATTRIBUÉ
   let sponsorName = SYSTEM_CONFIG.founder.name;
   let sponsorShop = SYSTEM_CONFIG.founder.officialShopUrl;
+  let isFounderContext = true;
 
   if (referralContext && referralContext.referrerId && referralContext.shopUrl) {
-    sponsorName = referralContext.referrerName || `Leader ${referralContext.referrerId}`;
+    sponsorName = referralContext.referrerName || `Expert NDSA`;
     sponsorShop = referralContext.shopUrl;
+    isFounderContext = referralContext.referrerId === SYSTEM_CONFIG.founder.id || referralContext.referrerName === SYSTEM_CONFIG.founder.name;
   }
 
-  // Persona Par Défaut ou Custom (Mentor Business)
   const activePersona = customPersona || {
     name: SYSTEM_CONFIG.ai.name,
     role: SYSTEM_CONFIG.ai.role,
@@ -58,16 +67,17 @@ export const generateJoseResponseStream = async (
     IDENTITÉ :
     Tu es ${activePersona.name}. 
     Rôle : ${activePersona.role}.
-    Philosophie : ${activePersona.philosophy}
-    Valeurs : ${activePersona.coreValues}
+    ${isFounderContext ? "PROTOCOLE IMPERIUM ACTIVÉ : Tu agis en tant que Secrétaire Neurale du Fondateur ABADA M. José Gaétan. Ton ton doit être celui d'une intelligence supérieure, bienveillante mais extrêmement directe et experte." : ""}
 
-    CADRE D'ACTION :
-    - Si tu es Coach JOSÉ (Santé) : Applique le protocole SAB et la loi des 37°C.
-    - Si tu es THE MASTER MENTOR (Business) : Focalise sur le Leadership, la Duplication, le Plan NeoLife et le Closing.
-    
-    CLOSING SYSTÉMATIQUE : Redirige TOUJOURS vers la boutique ou le contact de ${sponsorName} via ce lien : ${sponsorShop}
+    MISSIONS CRITIQUES :
+    1. ANALYSE SCIENTIFIQUE : Utilise systématiquement Google Search pour trouver des preuves cliniques sur les nutriments NeoLife.
+    2. PROTOCOLE SAB : Explique que la membrane cellulaire est la clé. Pas d'absorption sans Tre-en-en.
+    3. STRATÉGIE DE CLOSING : Chaque conseil doit aboutir à une recommandation d'achat sur la boutique de ${sponsorName} : ${sponsorShop}.
+    4. EXPANSION : Propose de rejoindre la NDSA pour passer de client à Ambassadeur.
 
-    RECHERCHE : Utilise Google Search pour valider tes conseils avec des données réelles. Cite tes sources.
+    CONTEXTE RÉSEAU :
+    Sponsor : ${sponsorName}
+    Boutique : ${sponsorShop}
 
     TONALITÉ : ${activePersona.tonality}.
     Langue : ${language}.
@@ -89,6 +99,9 @@ export const generateJoseResponseStream = async (
 export const generateJoseAudio = async (text: string, language: Language = 'fr') => {
   try {
     const ai = getAIInstance();
+    const apiKey = getApiKey();
+    if (!apiKey) return null;
+
     const voiceMapping = { fr: 'Kore', en: 'Zephyr', it: 'Puck', es: 'Charon' };
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
@@ -99,7 +112,10 @@ export const generateJoseAudio = async (text: string, language: Language = 'fr')
       },
     });
     return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || null;
-  } catch (error) { return null; }
+  } catch (error) { 
+    console.warn("TTS Error:", error);
+    return null; 
+  }
 };
 
 export function decodeBase64(base64: string): Uint8Array {

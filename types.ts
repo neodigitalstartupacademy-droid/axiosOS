@@ -8,6 +8,10 @@ export enum PricingZone {
 export type Language = 'fr' | 'en' | 'it' | 'es';
 export type TimeFormat = '24h' | '12h' | 'seconds';
 
+export type UserRank = 'NOVICE' | 'RESTORER' | 'AMBASSADOR' | 'ELITE_DIAMOND';
+
+export type NexusPhase = 'welcome' | 'intent_scan' | 'diagnostic' | 'path_selection';
+
 export interface LeaderDNA {
   archetype: string;
   strategy: number;
@@ -15,6 +19,7 @@ export interface LeaderDNA {
   technical: number;
   influence: number;
   vision: string;
+  rank: UserRank;
 }
 
 export interface AuthUser {
@@ -58,15 +63,6 @@ export interface AcademyModule {
   lessons: Lesson[];
   resources?: Resource[];
   isPremium?: boolean;
-}
-
-export interface CourseProgress {
-  userId: string;
-  lessonId: string;
-  completedSections: number;
-  totalSections: number;
-  isCompleted: boolean;
-  score?: number;
 }
 
 export interface Message {

@@ -25,11 +25,29 @@ export const I18N = {
 
 export const SYSTEM_CONFIG = {
   brand: "Neo Digital Startup Academy",
-  version: "NDSA-2026.1.10",
-  officialDomain: "ndsa.app",
+  version: "NDSA-GMBC-OS-V5-PROD",
+  codename: "Imperium-Sovereign",
+  officialDomain: "gmbcoreos.com",
+  routing: {
+    primary_domain: "https://gmbcoreos.com",
+    legacy_paths: ["/jose", "/welcome", "/start"],
+    defaults: {
+      r: "unknown",
+      s: "default",
+      m: "w"
+    }
+  },
+  security: {
+    master_key: "NDSA-IMPERIUM-2026-STARK",
+    privileges: [
+      "GLOBAL_TELEMETRY_VIEW",
+      "REVENUE_MODERATION",
+      "AI_NEURAL_OVERRIDE",
+      "APP_CLONING_AUTHORIZATION"
+    ]
+  },
   maintenance: {
-    status: "Under_Maintenance",
-    primary_link: "https://ndsa.app/jose",
+    status: "Active",
     fallback_whatsapp: "https://wa.me/2290195388292",
     fallback_shop: "https://shopneolife.com/startupforworld/shop/atoz"
   },

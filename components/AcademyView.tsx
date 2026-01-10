@@ -1,16 +1,17 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { SYSTEM_CONFIG } from '../constants';
-import { Lesson, Resource, Message } from '../types';
+import { Lesson, Resource, Message, AuthUser } from '../types';
 import { voiceService } from '../services/voiceService';
-import { generateJoseAudio, decodeBase64, decodeAudioData, generateJoseResponseStream } from '../services/geminiService';
+import { generateJoseResponseStream } from '../services/geminiService';
+import { storageService } from '../services/storageService';
 import { jsPDF } from 'jspdf';
 import { 
   BookOpen, ChevronRight, Play, Trophy, ArrowLeft,
   Square, ChevronLeft, Book, Video, Send, Bot, User,
   GraduationCap, Award, Download, Loader2, Star, CheckCircle2,
   BrainCircuit, Sparkles, BookMarked, ShieldCheck, Flame, Globe, MapPin, Edit3,
-  Clock, History
+  Clock, History, Dna
 } from 'lucide-react';
 
 interface LessonProgress {
@@ -19,16 +20,13 @@ interface LessonProgress {
   messages: Message[];
 }
 
-interface SavedProgress {
-  lessons: Record<string, LessonProgress>;
-  lastActiveLessonId: string | null;
+interface AcademyViewProps {
+  user?: AuthUser | null;
+  onUpdateUser?: (user: AuthUser) => void;
 }
 
-export const AcademyView: React.FC = () => {
-  const [activeView, setActiveView] = useState<'curriculum' | 'resources' | 'mentor'>('curriculum');
-  const [selectedModuleIdx, setSelectedModuleIdx] = useState(0);
+export const AcademyView: React.FC<AcademyViewProps> = ({ user, onUpdateUser }) => {
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
-  
   const [currentSectionIdx, setCurrentSectionIdx] = useState(0);
   const [professorMessages, setProfessorMessages] = useState<Message[]>([]);
   const [isProfessorLoading, setIsProfessorLoading] = useState(false);
@@ -36,219 +34,216 @@ export const AcademyView: React.FC = () => {
   const [isLessonCompleted, setIsLessonCompleted] = useState(false);
   const [showManifesto, setShowManifesto] = useState(false);
   const [signatureName, setSignatureName] = useState('');
-  const [activeSpeechKey, setActiveSpeechKey] = useState<string | null>(null);
-
-  // Persistence State
   const [lessonsProgress, setLessonsProgress] = useState<Record<string, LessonProgress>>({});
-  const [lastActiveLessonId, setLastActiveLessonId] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const userId = user?.id || 'guest';
 
-  // Retrieve User ID for scoped storage
-  const session = localStorage.getItem('ndsa_session');
-  const userId = session ? JSON.parse(session).id : 'guest';
-  const STORAGE_KEY = `ndsa_academy_progress_v2_${userId}`;
-
-  // 1. Load progress on mount
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed: SavedProgress = JSON.parse(saved);
-        setLessonsProgress(parsed.lessons || {});
-        setLastActiveLessonId(parsed.lastActiveLessonId || null);
-      } catch (e) {
-        console.error("Erreur de chargement des progrès académiques", e);
-      }
-    }
-
-    const unsubVoice = voiceService.subscribe((isSpeaking, key) => {
-      setActiveSpeechKey(isSpeaking ? key : null);
+    storageService.getItem('academy_progress', userId).then(saved => {
+        if (saved) setLessonsProgress(saved.lessons || {});
     });
-    return () => unsubVoice();
   }, [userId]);
 
-  // 2. Auto-scroll chat
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [professorMessages]);
 
   const allModules = SYSTEM_CONFIG.academy.modules;
-  const currentModule = allModules[selectedModuleIdx];
 
-  const saveProgressToStorage = (updates: { lessons?: Record<string, Partial<LessonProgress>>; lastActiveLessonId?: string | null }) => {
-    const currentSaved = localStorage.getItem(STORAGE_KEY);
-    let existing: SavedProgress = { lessons: {}, lastActiveLessonId: null };
-    if (currentSaved) {
-      try {
-        existing = JSON.parse(currentSaved);
-      } catch (e) {}
-    }
-
-    // Merge lessons
-    const newLessons = { ...existing.lessons };
-    if (updates.lessons) {
-      Object.entries(updates.lessons).forEach(([id, progress]) => {
-        newLessons[id] = {
-          ...existing.lessons[id],
-          ...progress,
-          messages: progress.messages !== undefined ? progress.messages : (existing.lessons[id]?.messages || [])
-        } as LessonProgress;
-      });
-    }
-
-    const merged: SavedProgress = {
-      lessons: newLessons,
-      lastActiveLessonId: updates.lastActiveLessonId !== undefined ? updates.lastActiveLessonId : existing.lastActiveLessonId
-    };
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-    setLessonsProgress(merged.lessons);
-    setLastActiveLessonId(merged.lastActiveLessonId);
-  };
-
-  const startLesson = async (lesson: Lesson, resume = false) => {
+  const startLesson = async (lesson: Lesson) => {
     voiceService.stop();
     const saved = lessonsProgress[lesson.id];
     
-    if (resume && saved && saved.messages.length > 0) {
+    if (saved && saved.messages.length > 0) {
       setActiveLesson(lesson);
       setCurrentSectionIdx(saved.currentSectionIdx);
       setProfessorMessages(saved.messages);
       setIsLessonCompleted(saved.isCompleted);
-      setShowManifesto(false);
-      
-      saveProgressToStorage({ lastActiveLessonId: lesson.id });
     } else {
-      const startIdx = 0;
-      const completed = saved?.isCompleted || false;
-
       setActiveLesson(lesson);
-      setCurrentSectionIdx(startIdx);
-      setIsLessonCompleted(completed);
-      setShowManifesto(false);
+      setCurrentSectionIdx(0);
+      setIsLessonCompleted(false);
       
-      const initialText = `Salutations Leader. Je suis le Professeur NDSA. Prêt pour le chapitre : "${lesson.title}" ? Voici le premier segment d'étude : \n\n ${lesson.sections?.[0] || lesson.content} \n\n Une question ou passons-nous à la suite ?`;
-      
-      const initMsg: Message = {
-        id: 'init_' + Date.now(),
-        role: 'model',
-        parts: [{ text: initialText }],
-        timestamp: new Date()
-      };
-
-      const initialMessages = [initMsg];
-      setProfessorMessages(initialMessages);
-      
-      // Initial save
-      saveProgressToStorage({ 
-        lastActiveLessonId: lesson.id,
-        lessons: { 
-          [lesson.id]: { 
-            currentSectionIdx: startIdx, 
-            isCompleted: completed,
-            messages: initialMessages
-          } 
-        }
-      });
-
-      voiceService.play(initialText, initMsg.id);
+      const welcomeText = `Bonjour Leader. Je suis le Professeur NDSA. Prêt pour le chapitre "${lesson.title}" ? Voici le segment initial : \n\n ${lesson.sections?.[0] || lesson.content}`;
+      const initMsg: Message = { id: 'init_' + Date.now(), role: 'model', parts: [{ text: welcomeText }], timestamp: new Date() };
+      setProfessorMessages([initMsg]);
+      voiceService.play(welcomeText, initMsg.id);
     }
   };
 
-  const handleProfessorInteraction = async (forceNext = false) => {
-    const textToSend = forceNext ? "Passons à la suite." : userInput;
-    if (!textToSend.trim() || !activeLesson) return;
+  const finalizeCH10 = async () => {
+    if (!user || !onUpdateUser) return;
+    const updatedDNA = { ...user.dna, rank: 'AMBASSADOR' as const };
+    onUpdateUser({ ...user, dna: updatedDNA as any });
+    setIsLessonCompleted(true);
+    setShowManifesto(false);
+  };
 
-    const userMsg: Message = { id: 'user_' + Date.now(), role: 'user', parts: [{ text: textToSend }], timestamp: new Date() };
-    const updatedMessagesWithUser = [...professorMessages, userMsg];
-    setProfessorMessages(updatedMessagesWithUser);
+  const handleInteraction = async () => {
+    if (!userInput.trim() || !activeLesson) return;
+    const userMsg: Message = { id: 'u_' + Date.now(), role: 'user', parts: [{ text: userInput }], timestamp: new Date() };
+    setProfessorMessages(prev => [...prev, userMsg]);
     setUserInput('');
     setIsProfessorLoading(true);
-    voiceService.stop();
-
-    const sections = activeLesson.sections || [activeLesson.content];
-    const isLastSection = currentSectionIdx === sections.length - 1;
-    const nextSectionText = sections[currentSectionIdx + 1];
 
     try {
-      const stream = await generateJoseResponseStream(`[ACADEMY_MODE] Cours: ${activeLesson.title}. Segment Actuel: ${sections[currentSectionIdx]}. Segment Suivant: ${nextSectionText || 'FIN DU COURS'}. Instruction: Si l'étudiant veut avancer, valide son acquis et donne le segment suivant.`, updatedMessagesWithUser, null, 'fr', {
+      const stream = await generateJoseResponseStream(`[ACADEMY_MODE] Cours: ${activeLesson.title}. Segment: ${activeLesson.sections?.[currentSectionIdx]}`, professorMessages, null, 'fr', {
         name: SYSTEM_CONFIG.ai.professor.name,
         role: SYSTEM_CONFIG.ai.professor.role,
         philosophy: SYSTEM_CONFIG.ai.professor.philosophy,
-        tonality: "Érudit, direct, mentorat Stark.",
+        tonality: "Érudit, direct, exigeant.",
         coreValues: "Excellence NDSA."
       });
 
-      let aiMsgId = 'ai_' + Date.now();
       let fullText = "";
-      
-      // Temporary AI message
-      const tempAiMsg: Message = { id: aiMsgId, role: 'model', parts: [{ text: "" }], timestamp: new Date() };
-      setProfessorMessages(prev => [...prev, tempAiMsg]);
+      const aiMsgId = 'ai_' + Date.now();
+      setProfessorMessages(prev => [...prev, { id: aiMsgId, role: 'model', parts: [{ text: "" }], timestamp: new Date() }]);
 
       for await (const chunk of stream) {
         fullText += chunk.text || "";
         setProfessorMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, parts: [{ text: fullText }] } : m));
       }
 
-      const finalMessages = [...updatedMessagesWithUser, { id: aiMsgId, role: 'model', parts: [{ text: fullText }], timestamp: new Date() }];
       voiceService.play(fullText, aiMsgId);
-      
-      const shouldAdvance = forceNext || 
-        fullText.toLowerCase().includes('section suivante') || 
-        fullText.toLowerCase().includes('passons à') || 
-        fullText.toLowerCase().includes('segment suivant');
-
-      let nextIdx = currentSectionIdx;
-      let completed = isLessonCompleted;
-
-      if (shouldAdvance) {
-        if (!isLastSection) {
-            nextIdx = currentSectionIdx + 1;
-            setCurrentSectionIdx(nextIdx);
-        } else {
-            if (activeLesson.id === 'CH-10') {
-              setShowManifesto(true);
-            } else {
-              completed = true;
-              setIsLessonCompleted(true);
-            }
-        }
-      }
-
-      // Final save for this interaction
-      saveProgressToStorage({ 
-        lessons: { 
-          [activeLesson.id]: { 
-            currentSectionIdx: nextIdx, 
-            isCompleted: completed,
-            messages: finalMessages
-          } 
-        } 
-      });
-
-    } catch (e) { 
-      console.error(e); 
-    } finally { 
-      setIsProfessorLoading(false); 
-    }
+    } catch (e) { console.error(e); } finally { setIsProfessorLoading(false); }
   };
 
-  const generateCertificate = () => {
-    if (!activeLesson) return;
-    const sessionData = localStorage.getItem('ndsa_session');
-    const userName = signatureName || (sessionData ? JSON.parse(sessionData).name : "Leader NDSA");
+  return (
+    <div className="space-y-10 animate-in fade-in duration-700 pb-24">
+      {!activeLesson ? (
+        <div className="space-y-10">
+          <header className="px-6 space-y-4">
+             <div className="flex items-center gap-3">
+                <Dna className="text-blue-500 animate-pulse" size={32} />
+                <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500 font-stark">Neural Mutation Sequencer</h2>
+             </div>
+             <h1 className="text-5xl md:text-7xl font-black text-white italic uppercase tracking-tighter leading-none">Academy <span className="text-blue-500">Elite</span></h1>
+          </header>
 
-    const doc = new jsPDF({ orientation: 'landscape' });
-    doc.setFillColor(1, 4, 9);
-    doc.rect(0, 0, 297, 210, 'F');
-    doc.setDrawColor(255, 215, 0);
-    doc.setLineWidth(2);
-    doc.rect(10, 10, 277, 190);
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
+            {allModules.map(module => (
+              <div key={module.id} className="glass-card p-10 rounded-[3rem] border border-white/5 space-y-8 group hover:border-blue-500/30 transition-all">
+                <div className="flex justify-between items-start">
+                   <div className="space-y-2">
+                      <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">{module.title}</h3>
+                      <p className="text-slate-500 text-sm italic">{module.description}</p>
+                   </div>
+                   <Award className="text-blue-500 group-hover:scale-110 transition-transform" size={32} />
+                </div>
+                <div className="space-y-3">
+                   {module.lessons.map(lesson => (
+                     <button key={lesson.id} onClick={() => startLesson(lesson)} className="w-full p-6 bg-slate-900/60 border border-white/5 rounded-2xl flex items-center justify-between hover:bg-blue-500/10 transition-all group/btn">
+                        <div className="flex items-center gap-5">
+                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-xs border ${lessonsProgress[lesson.id]?.isCompleted ? 'bg-emerald-500 text-slate-950 border-emerald-500' : 'bg-slate-800 text-slate-500 border-white/10'}`}>
+                              {lessonsProgress[lesson.id]?.isCompleted ? <CheckCircle2 size={20} /> : lesson.id}
+                           </div>
+                           <span className="font-black uppercase tracking-widest text-[11px] text-white">{lesson.title}</span>
+                        </div>
+                        <ChevronRight size={18} className="text-slate-700 group-hover/btn:translate-x-1 transition-transform" />
+                     </button>
+                   ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col h-[85vh] bg-[#020617] rounded-[3rem] border border-blue-500/20 overflow-hidden relative animate-in zoom-in-95 duration-500">
+           <header className="h-20 px-10 border-b border-white/10 flex items-center justify-between bg-black/40">
+              <button onClick={() => { voiceService.stop(); setActiveLesson(null); }} className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all">
+                 <ArrowLeft size={16} /> Exit Terminal
+              </button>
+              <div className="text-center">
+                 <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest leading-none mb-1">Active DNA Synthesis</p>
+                 <h4 className="text-sm font-black text-white italic uppercase tracking-tighter">{activeLesson.title}</h4>
+              </div>
+              <div className="flex gap-1.5">
+                 {(activeLesson.sections || [1,2,3]).map((_, i) => (
+                    <div key={i} className={`w-8 h-1 rounded-full transition-all duration-700 ${i <= currentSectionIdx ? 'bg-blue-500 shadow-[0_0_10px_#00d4ff]' : 'bg-white/5'}`}></div>
+                 ))}
+              </div>
+           </header>
 
-    doc.setTextColor(255, 215, 0);
-    doc.setFontSize(50);
-    
+           <main className="flex-1 flex flex-col relative overflow-hidden">
+              <div ref={scrollRef} className="flex-1 overflow-y-auto px-8 md:px-20 pt-12 pb-44 space-y-12 no-scrollbar scroll-smooth">
+                 {professorMessages.map(msg => (
+                    <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-4 duration-500`}>
+                       <div className={`flex gap-6 w-full ${msg.role === 'user' ? 'max-w-[75%] flex-row-reverse' : 'max-w-full'}`}>
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border mt-1 ${msg.role === 'user' ? 'bg-slate-900 border-white/10' : 'bg-blue-500/10 border-blue-500/30'}`}>
+                             {msg.role === 'user' ? <User size={20} className="text-slate-600" /> : <Bot size={24} className="text-blue-400" />}
+                          </div>
+                          <div className="space-y-4 w-full">
+                             <div className={`text-lg font-light leading-relaxed tracking-tight whitespace-pre-line ${msg.role === 'user' ? 'text-blue-300 italic text-right' : 'text-slate-100'}`}>
+                                {msg.parts[0].text}
+                             </div>
+                             {msg.role === 'model' && (
+                               <button onClick={() => voiceService.play(msg.parts[0].text, msg.id)} className={`px-5 py-2 rounded-xl border font-stark text-[8px] font-black uppercase tracking-widest flex items-center gap-3 transition-all ${voiceService.isCurrentlyReading(msg.id) ? 'bg-blue-500 text-slate-950 border-blue-500' : 'bg-white/5 border-white/10 text-slate-500 hover:text-white'}`}>
+                                  {voiceService.isCurrentlyReading(msg.id) ? <Square size={10} fill="currentColor" /> : <Play size={10} fill="currentColor" />}
+                                  {voiceService.isCurrentlyReading(msg.id) ? "Stop" : "Vocaliser"}
+                               </button>
+                             )}
+                          </div>
+                       </div>
+                    </div>
+                 ))}
+                 {isProfessorLoading && (
+                    <div className="flex items-center gap-4 p-8 bg-white/5 rounded-[2.5rem] border border-white/5 animate-pulse max-w-sm">
+                       <Loader2 className="animate-spin text-blue-500" size={24} />
+                       <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] italic">Analyse Pédagogique...</p>
+                    </div>
+                 )}
+              </div>
+
+              <div className="absolute bottom-10 left-0 w-full px-10 pointer-events-none">
+                 <div className="max-w-4xl mx-auto glass-card rounded-[2.5rem] p-3 pointer-events-auto border border-white/10 shadow-3xl">
+                    <div className="flex items-center gap-5 bg-black/60 rounded-[2rem] border border-white/5 px-8 focus-within:border-blue-500/50 transition-all">
+                       <input 
+                          type="text" 
+                          value={userInput} 
+                          onChange={e => setUserInput(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && handleInteraction()}
+                          placeholder="Interagir avec le Professeur..." 
+                          className="flex-1 bg-transparent border-none text-white outline-none font-medium text-lg italic py-5 placeholder:text-slate-800"
+                       />
+                       <button onClick={handleInteraction} disabled={isProfessorLoading} className="w-14 h-14 bg-blue-500 text-slate-950 rounded-2xl flex items-center justify-center shadow-2xl active:scale-95 transition-all">
+                          <Send size={24} />
+                       </button>
+                    </div>
+                 </div>
+              </div>
+           </main>
+
+           {showManifesto && (
+              <div className="absolute inset-0 bg-slate-950/98 backdrop-blur-2xl z-[200] flex items-center justify-center p-12 animate-in fade-in zoom-in-95 duration-1000">
+                 <div className="max-w-3xl w-full glass-card p-16 rounded-[5rem] border-4 border-amber-500/20 text-center space-y-12 shadow-[0_0_100px_rgba(255,215,0,0.1)]">
+                    <div className="relative inline-block">
+                       <Award size={100} className="text-amber-500 mx-auto animate-bounce" />
+                       <div className="absolute -top-4 -right-4 w-12 h-12 bg-slate-950 rounded-full flex items-center justify-center border-2 border-amber-500 shadow-xl"><Star className="text-amber-500" size={24} /></div>
+                    </div>
+                    <div className="space-y-6">
+                       <h2 className="text-6xl font-black text-white italic uppercase tracking-tighter gold-text-shimmer">MANIFESTE ELITE</h2>
+                       <p className="text-slate-400 text-xl italic leading-relaxed max-w-xl mx-auto">
+                          En signant, vous franchissez le seuil. Vous n'êtes plus un distributeur, vous devenez un <strong>Ambassadeur Souverain</strong> de la NDSA.
+                       </p>
+                    </div>
+                    <div className="space-y-6">
+                       <input 
+                          type="text" 
+                          value={signatureName}
+                          onChange={e => setSignatureName(e.target.value)}
+                          placeholder="Signature Neurale (Votre Nom Complet)..." 
+                          className="w-full bg-slate-900 border-2 border-white/10 px-10 py-6 rounded-[2rem] text-white font-black italic text-center outline-none focus:border-amber-500 transition-all text-xl"
+                       />
+                       <button onClick={finalizeCH10} disabled={!signatureName} className="w-full py-8 bg-amber-500 text-slate-950 font-black rounded-[2.5rem] uppercase tracking-[0.4em] text-xs shadow-3xl hover:brightness-110 active:scale-95 transition-all">
+                          INITIALISER MUTATION DNA
+                       </button>
+                    </div>
+                 </div>
+              </div>
+           )}
+        </div>
+      )}
+    </div>
+  );
+};

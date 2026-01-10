@@ -1,9 +1,14 @@
 
-import { DiagnosticReport } from '../types';
+import { DiagnosticReport, AuthUser } from '../types';
 
-const DB_NAME = 'ndsa_biologs_db';
-const DB_VERSION = 1;
-const STORE_NAME = 'reports';
+const DB_NAME = 'ndsa_master_vault_v8';
+const DB_VERSION = 2;
+const STORES = {
+  REPORTS: 'reports',
+  USER_DNA: 'user_dna',
+  ACADEMY_PROGRESS: 'academy_progress',
+  CHATS: 'chats'
+};
 
 export const storageService = {
   async init(): Promise<IDBDatabase> {
@@ -11,22 +16,35 @@ export const storageService = {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-        }
+        Object.values(STORES).forEach(store => {
+          if (!db.objectStoreNames.contains(store)) {
+            db.createObjectStore(store, { keyPath: 'id' });
+          }
+        });
       };
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
   },
 
-  async saveReport(report: DiagnosticReport): Promise<void> {
+  async saveItem(storeName: string, item: any): Promise<void> {
     const db = await this.init();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, 'readwrite');
-      const store = transaction.objectStore(STORE_NAME);
-      const request = store.put(report);
+      const transaction = db.transaction(storeName, 'readwrite');
+      const store = transaction.objectStore(storeName);
+      const request = store.put(item);
       request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  },
+
+  async getItem(storeName: string, id: string): Promise<any> {
+    const db = await this.init();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(storeName, 'readonly');
+      const store = transaction.objectStore(storeName);
+      const request = store.get(id);
+      request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
   },
@@ -34,14 +52,11 @@ export const storageService = {
   async getAllReports(): Promise<DiagnosticReport[]> {
     const db = await this.init();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, 'readonly');
-      const store = transaction.objectStore(STORE_NAME);
+      const transaction = db.transaction(STORES.REPORTS, 'readonly');
+      const store = transaction.objectStore(STORES.REPORTS);
       const request = store.getAll();
       request.onsuccess = () => {
-        const results = request.result.map(r => ({
-          ...r,
-          date: new Date(r.date)
-        }));
+        const results = (request.result || []).map(r => ({ ...r, date: new Date(r.date) }));
         resolve(results.sort((a, b) => b.date.getTime() - a.date.getTime()));
       };
       request.onerror = () => reject(request.error);
@@ -50,35 +65,11 @@ export const storageService = {
 
   async deleteReport(id: string): Promise<void> {
     const db = await this.init();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, 'readwrite');
-      const store = transaction.objectStore(STORE_NAME);
-      const request = store.delete(id);
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
-    });
+    const transaction = db.transaction(STORES.REPORTS, 'readwrite');
+    transaction.objectStore(STORES.REPORTS).delete(id);
   },
 
-  async compressImage(base64: string, maxWidth = 1280, quality = 0.7): Promise<string> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = `data:image/jpeg;base64,${base64}`;
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-
-        if (width > maxWidth) {
-          height = (maxWidth / width) * height;
-          width = maxWidth;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', quality).split(',')[1]);
-      };
-    });
+  async saveReport(report: DiagnosticReport): Promise<void> {
+    await this.saveItem(STORES.REPORTS, report);
   }
 };
