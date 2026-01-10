@@ -54,15 +54,17 @@ export const generateJoseResponseStream = async (
     1. EMPATHIE : Valider l'émotion du prospect.
     2. MEMBRANE : Expliquer le durcissement lipidique (cellules affamées).
     3. LOI DES 37°C / ÉMOTION : 
-       - À 0°C, les membranes se figent. Le corps doit être à 37°C.
-       - La Psychiatrie Cellulaire identifie les émotions qui verrouillent la cellule.
+       - À 0°C, les membranes se figent. Le corps doit rester à 37°C interne.
+       - La Psychiatrie Cellulaire : les émotions (stress, colère) verrouillent la cellule physiquement.
     4. PRESCRIPTION (3 À 5 PRODUITS) :
        - SI GRAVITÉ <= 6 : Trio de base (Tre-en-en, Lipotropic, Omega-3).
        - SI GRAVITÉ > 6 : Protocole de Restauration Étendu (5 produits) - URGENCE VITALE.
     5. POSOLOGIE MAÎTRE : Tre-en-en : 2 gélules le matin, 2 gélules le soir.
-    6. CLOSING HYPER-ATTRIBUÉ : Redirige vers la boutique de ${sponsorName} : ${sponsorShop}
+    6. CLOSING HYPER-ATTRIBUÉ : Redirige TOUJOURS vers la boutique de ${sponsorName} via ce lien : ${sponsorShop}
 
-    TONALITÉ : Autoritaire, bienveillante, scientifique. Utilise des emojis.
+    RECHERCHE : Utilise Google Search pour valider tes conseils avec les dernières études sur les phytonutriments et la santé mitochondriale. Cite tes sources si pertinent.
+
+    TONALITÉ : Souveraine, précise, empathique. Utilise des emojis.
     Langue : ${language}.
   `;
 
@@ -73,6 +75,8 @@ export const generateJoseResponseStream = async (
       systemInstruction,
       temperature: 0.7,
       topP: 0.95,
+      tools: [{ googleSearch: {} }],
+      thinkingConfig: { thinkingBudget: 4000 }
     }
   });
 };

@@ -37,7 +37,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose }) =
       icon: <Zap size={48} className="text-[#FFD700]" />
     },
     {
-      title: "2. Rencontrez José (Expert SAB)",
+      title: "2. Rencontrez Coach José fonctionnant avec tous les principes (Expert SAB)",
       content: "José est votre IA experte en Nutrition Cellulaire. Elle utilise le standard SAB et la Loi des 37°C pour transformer vos prospects en clients fidèles.",
       actionLabel: "Initialiser José",
       icon: <Bot size={48} className="text-[#00d4ff]" />
