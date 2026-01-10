@@ -31,13 +31,7 @@ class VoiceService {
   }
 
   async play(text: string, key: string, lang: Language = 'fr') {
-    // ANTI-OVERLAP: DO NOT trigger if already playing the same key
-    if (this.currentKey === key && this.globalAudioIsPlaying) {
-      this.stop();
-      return;
-    }
-
-    // KILL PREVIOUS STREAM
+    // ANTI-OVERLAP (Mutex Logic): Stop everything before playing something new
     this.stop();
 
     // SPLIT TEXT INTO PARAGRAPHS FOR ACCESSIBILITY PAUSES
@@ -57,6 +51,7 @@ class VoiceService {
       this.notify(true, key);
 
       for (const p of paragraphs) {
+        // Double check global flag to support sudden stop() calls
         if (!this.globalAudioIsPlaying) break;
 
         const base64 = await generateJoseAudio(p, lang);

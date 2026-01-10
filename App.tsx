@@ -44,14 +44,13 @@ const App: React.FC = () => {
     const shopSlug = params.get('s');
     const mode = params.get('m') || params.get('mode');
     
-    const isWelcome = mode === 'w' || mode === 'welcome' || referrerId !== null;
-
-    // RULE: IF param_r IS empty OR param_s IS empty THEN USE default_orphan_owner (ABADA Jose)
+    // RÈGLE DES ORPHELINS : SI r OU s MANQUENT -> ATTRIBUTION FONDATEUR
     if (referrerId && shopSlug) {
       sessionStorage.setItem('ndsa_active_ref', referrerId);
       sessionStorage.setItem('ndsa_active_slug', shopSlug);
       sessionStorage.setItem('ndsa_active_shop', `https://shopneolife.com/${shopSlug}/shop/atoz`);
-    } else if (isWelcome) {
+    } else {
+      // ORPHAN PROTECTION
       sessionStorage.setItem('ndsa_active_ref', SYSTEM_CONFIG.founder.id);
       sessionStorage.setItem('ndsa_active_slug', SYSTEM_CONFIG.founder.shop_slug);
       sessionStorage.setItem('ndsa_active_shop', SYSTEM_CONFIG.founder.officialShopUrl);
@@ -62,12 +61,15 @@ const App: React.FC = () => {
       try {
         const user = JSON.parse(savedSession) as AuthUser;
         setCurrentUser(user);
-        if (!isWelcome) setActiveTab('jose');
         if (!localStorage.getItem(`ndsa_onboarding_${user.id}`)) setShowOnboarding(true);
       } catch (e) {}
     }
     
-    if (isWelcome) setActiveTab('jose');
+    // LOGIQUE DE BIENVENUE (PULSE)
+    if (mode === 'w' || mode === 'welcome' || referrerId !== null) {
+      setActiveTab('jose');
+    }
+    
     setIsAuthLoading(false);
     return () => unsubVoice();
   }, []);
@@ -84,6 +86,7 @@ const App: React.FC = () => {
   const isWelcomeMode = params.get('m') === 'w' || params.get('r') !== null;
   const isMasterFounder = currentUser?.neoLifeId === SYSTEM_CONFIG.founder.id;
 
+  // Si on est en mode bienvenue, on laisse l'accès à José sans auth forcée
   if (!currentUser && !isWelcomeMode) return <AuthView onLogin={handleLogin} />;
 
   return (
@@ -97,7 +100,7 @@ const App: React.FC = () => {
             </div>
             <div className="text-center">
               <h1 className="font-stark font-black text-xl tracking-tighter uppercase leading-none">{SYSTEM_CONFIG.brand}</h1>
-              <p className="font-stark text-[8px] text-emerald-400 font-bold tracking-widest uppercase mt-2 opacity-50 italic">V7 MASTER</p>
+              <p className="font-stark text-[8px] text-emerald-400 font-bold tracking-widest uppercase mt-2 opacity-50 italic">V7.1 MASTER</p>
             </div>
           </div>
 
@@ -158,6 +161,7 @@ const App: React.FC = () => {
           </div>
         </div>
       </main>
+      {showOnboarding && <OnboardingWizard onClose={() => setShowOnboarding(false)} />}
     </div>
   );
 };

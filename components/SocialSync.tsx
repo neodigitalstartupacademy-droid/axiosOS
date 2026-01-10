@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-    Zap, Share2, Check, Copy, Globe, Fingerprint, MessageSquare, Volume2, Square, ShoppingCart, Rocket, Linkedin, Instagram, Sparkles, ShieldCheck, Lock
+    Zap, Share2, Check, Copy, Globe, Fingerprint, MessageSquare, Volume2, Square, ShoppingCart, Rocket, Linkedin, Instagram, Sparkles, ShieldCheck, Lock, ChevronRight, Share, Cpu, Target, Link as LinkIcon, Radio, Activity, ShieldAlert, Network
 } from 'lucide-react';
 import { SYSTEM_CONFIG } from '../constants';
 import { generateJoseAudio, decodeBase64, decodeAudioData } from '../services/geminiService';
@@ -18,17 +18,14 @@ export const SocialSync: React.FC = () => {
     const savedId = localStorage.getItem('ndsa_personal_id');
     const savedSlug = localStorage.getItem('ndsa_personal_slug');
     
-    setCustomId(savedId || SYSTEM_CONFIG.founder.id);
-    
-    if (!savedSlug) {
-      setShopSlug(SYSTEM_CONFIG.founder.shop_slug);
-    } else {
-      setShopSlug(savedSlug);
-    }
+    setCustomId(savedId || "");
+    setShopSlug(savedSlug || "");
   }, []);
 
-  // GÉNÉRATION DU LIEN FURTIF (Compact & Anti-Block)
-  const smartLink = `${window.location.origin}${window.location.pathname}?r=${customId || SYSTEM_CONFIG.founder.id}&s=${shopSlug}&m=w`;
+  // GÉNÉRATION DU LIEN FURTIF (PROTOCOL V2 - gmbcoreos.com/jose)
+  const effectiveId = customId || SYSTEM_CONFIG.founder.id;
+  const effectiveSlug = shopSlug || SYSTEM_CONFIG.founder.shop_slug;
+  const smartLink = `https://${SYSTEM_CONFIG.officialDomain}/jose?r=${effectiveId}&s=${effectiveSlug}&m=w`;
   
   const stopAudio = () => {
     if (activeSourceRef.current) {
@@ -41,7 +38,7 @@ export const SocialSync: React.FC = () => {
   const handleRead = async () => {
     if (isReading) { stopAudio(); return; }
     setIsReading(true);
-    const textToRead = `Système de Lien Furtif activé. Le mode Stealth remplace les URLs complètes par des Slugs pour éviter les filtres de Facebook. Si vos paramètres r ou s sont manquants, le lead est automatiquement attribué à ABADA Jose.`;
+    const textToRead = `Activation du Viral Sync Hub sur ${SYSTEM_CONFIG.officialDomain}. Votre moteur de propagation est prêt. Le protocole Stealth V2 masque automatiquement vos identifiants système. Chaque clic via votre lien personnalisé est une donnée sécurisée qui construit votre empire. Partagez votre influence dès maintenant.`;
     const base64 = await generateJoseAudio(textToRead);
     if (base64) {
       if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -64,87 +61,199 @@ export const SocialSync: React.FC = () => {
   };
 
   const shareTo = (platform: 'whatsapp' | 'facebook' | 'linkedin' | 'instagram') => {
-    const shareMessage = `Bonjour ! Découvre ton diagnostic de vitalité gratuit avec Coach JOSÉ. Cliquez ici :`;
+    const shareMessage = `Découvre ton diagnostic de vitalité gratuit avec Coach JOSÉ. Analyse SAB et Loi des 37°C. Cliquez ici :`;
     let url = "";
     switch(platform) {
       case 'whatsapp': url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareMessage + " " + smartLink)}`; break;
       case 'facebook': url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(smartLink)}`; break;
       case 'linkedin': url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(smartLink)}`; break;
-      case 'instagram': navigator.clipboard.writeText(smartLink); alert("Lien Furtif copié pour Instagram !"); return;
+      case 'instagram': navigator.clipboard.writeText(smartLink); alert("Lien Furtif copié ! Collez-le dans votre bio Instagram."); return;
     }
     if (url) window.open(url, '_blank');
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-20 pb-40 animate-in fade-in duration-1000">
-      <div className="bg-black/20 backdrop-blur-3xl rounded-[6rem] border border-white/5 p-20 md:p-24 relative overflow-hidden shadow-3xl">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#00d4ff]/5 rounded-full blur-[150px] -mr-64 -mt-64 pointer-events-none animate-pulse"></div>
-        
-        <div className="relative z-10 flex flex-col gap-24">
-          <div className="space-y-10">
-            <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-4 px-8 py-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[12px] font-black text-emerald-400 uppercase tracking-[0.5em] italic shadow-2xl">
-                <ShieldCheck size={20} className="animate-pulse" /> Stealth Mode active
-              </div>
-              <button onClick={handleRead} className={`w-20 h-20 rounded-[2rem] border transition-all flex items-center justify-center ${isReading ? 'bg-[#00d4ff] text-slate-950 animate-pulse' : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'}`}>
-                {isReading ? <Square size={28} /> : <Volume2 size={28} />}
-              </button>
-            </div>
-            <h2 className="text-[9rem] font-black text-white tracking-tighter italic uppercase leading-[0.8] drop-shadow-2xl">STEALTH <span className="text-[#00d4ff]">SYNC</span></h2>
-            <p className="text-slate-400 text-3xl font-medium leading-relaxed max-w-4xl italic opacity-90">
-              Votre lien intelligent contourne les filtres Meta. Attribution garantie par le moteur de routage NDSA.
-            </p>
-          </div>
-
-          <div className="bg-slate-900/40 p-10 rounded-[4rem] border border-white/5 space-y-8">
-             <div className="flex items-center gap-4 text-[#FFD700]">
-                <Lock size={20} />
-                <span className="text-xs font-black uppercase tracking-widest">Orphan Lead Rule</span>
+    <div className="max-w-[1500px] mx-auto space-y-12 pb-24 animate-in fade-in duration-1000">
+      
+      {/* SECTION 1: HEADER & TELEMETRY */}
+      <div className="flex flex-col xl:flex-row justify-between items-start gap-12 px-4">
+        <div className="space-y-6 flex-1">
+          <div className="flex items-center gap-4">
+             <div className="px-5 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center gap-3">
+                <Radio size={14} className="text-blue-400 animate-pulse" />
+                <span className="text-[10px] font-black text-blue-400 uppercase tracking-[0.4em]">Signal Status: Broadcast Ready</span>
              </div>
-             <p className="text-sm text-slate-500 italic font-medium leading-relaxed">
-               Si les paramètres <strong>r</strong> ou <strong>s</strong> sont absents de l'URL, le prospect est automatiquement redirigé vers l'instance de <strong>{SYSTEM_CONFIG.founder.name}</strong> pour assurer un suivi master.
-             </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-             <div className="space-y-8">
-                <label className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] ml-6 flex items-center gap-4">
-                  <Fingerprint size={16} className="text-[#00d4ff]" /> ID Distributeur (r)
-                </label>
-                <input type="text" value={customId} onChange={e => { setCustomId(e.target.value); localStorage.setItem('ndsa_personal_id', e.target.value); }} className="w-full bg-black/40 border border-white/5 px-10 py-8 rounded-[3rem] text-white font-black italic text-2xl outline-none focus:border-[#00d4ff] transition-all shadow-inner" />
-             </div>
-             <div className="space-y-8">
-                <label className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] ml-6 flex items-center gap-4">
-                  <ShoppingCart size={16} className="text-[#00d4ff]" /> Shop Slug (s)
-                </label>
-                <input type="text" value={shopSlug} onChange={e => { setShopSlug(e.target.value); localStorage.setItem('ndsa_personal_slug', e.target.value); }} className="w-full bg-black/40 border border-white/5 px-10 py-8 rounded-[3rem] text-white font-black italic text-xl outline-none focus:border-[#00d4ff] transition-all shadow-inner placeholder:text-slate-800" placeholder="startupforworld" />
+             <div className="px-5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-3">
+                <ShieldCheck size={14} className="text-emerald-400" />
+                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.4em]">Stealth V2 Active</span>
              </div>
           </div>
+          <h2 className="text-7xl md:text-9xl font-black text-white italic uppercase tracking-tighter leading-none">
+            Viral <span className="text-blue-500">Signal</span>
+          </h2>
+          <p className="text-slate-500 font-medium text-xl max-w-3xl italic leading-relaxed">
+            Votre cockpit de distribution massive via <strong>{SYSTEM_CONFIG.officialDomain}/jose</strong>. Générez, masquez et propagez votre influence biologique sur les réseaux mondiaux.
+          </p>
+        </div>
 
-          <div className="space-y-10">
-             <label className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] ml-6">Compact Stealth Link</label>
-             <div className="flex flex-col sm:flex-row gap-8">
-                <div className="flex-1 bg-black/60 border border-[#00d4ff]/20 px-12 py-10 rounded-[3.5rem] text-[#00d4ff] font-mono text-lg truncate flex items-center shadow-inner tracking-tight">{smartLink}</div>
-                <button onClick={copySmartLink} className="p-10 bg-[#00d4ff] text-slate-950 rounded-[3.5rem] transition-all shadow-[0_0_50px_#00d4ff44] hover:scale-110 active:scale-95 flex items-center justify-center gap-6">
-                  {copied ? <Check size={44} /> : <Copy size={44} />}
-                </button>
-             </div>
-          </div>
-
-          <div className="pt-10 flex flex-wrap gap-8 justify-center lg:justify-start">
-             {[
-               { id: 'whatsapp', label: 'WhatsApp', color: 'bg-emerald-600', icon: MessageSquare },
-               { id: 'linkedin', label: 'LinkedIn', color: 'bg-[#0077b5]', icon: Linkedin },
-               { id: 'instagram', label: 'Instagram', color: 'bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888]', icon: Instagram },
-               { id: 'facebook', label: 'Facebook', color: 'bg-blue-700', icon: Globe },
-             ].map(plat => (
-               <button key={plat.id} onClick={() => shareTo(plat.id as any)} className={`${plat.color} px-12 py-6 rounded-[2.5rem] text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl hover:scale-110 transition-all flex items-center gap-5`}>
-                 <plat.icon size={22} /> {plat.label}
-               </button>
-             ))}
-          </div>
+        {/* SIMULATED RADAR COMPONENT */}
+        <div className="w-full xl:w-[450px] aspect-[4/3] glass-card rounded-[3.5rem] p-8 flex flex-col items-center justify-center gap-8 relative overflow-hidden group">
+           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent"></div>
+           <div className="w-48 h-48 rounded-full border border-blue-500/20 relative flex items-center justify-center">
+              <div className="absolute inset-0 border-2 border-blue-500/5 rounded-full scale-110"></div>
+              <div className="absolute inset-0 border-2 border-blue-500/5 rounded-full scale-125"></div>
+              <div className="w-full h-[1px] bg-blue-500/40 absolute top-1/2 left-0 -rotate-45 origin-center animate-[spin_4s_linear_infinite]"></div>
+              <Activity size={48} className="text-blue-500" />
+           </div>
+           <div className="text-center space-y-2">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em]">Propagation Network</p>
+              <p className="text-3xl font-black text-white italic tracking-tighter">LIVE TELEMETRY</p>
+           </div>
         </div>
       </div>
+
+      {/* SECTION 2: THE CORE ENGINE */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* LEFT PANEL: CONFIGURATION */}
+        <div className="lg:col-span-4 space-y-8">
+           <div className="glass-card p-10 rounded-[3rem] border border-white/5 bg-slate-900/40 space-y-12 h-full">
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center text-blue-400"><Fingerprint size={24} /></div>
+                 <div>
+                    <h3 className="font-stark text-xs font-black text-white uppercase tracking-widest leading-none">Neural DNA</h3>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase mt-1">Identifiants Système</p>
+                 </div>
+              </div>
+
+              <div className="space-y-10">
+                 <div className="space-y-4 group">
+                    <div className="flex justify-between items-center px-2">
+                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">ID Sponsor (r)</label>
+                       <span className="text-[9px] text-blue-500 font-black uppercase">Verified</span>
+                    </div>
+                    <input 
+                      type="text" 
+                      value={customId} 
+                      onChange={e => { setCustomId(e.target.value); localStorage.setItem('ndsa_personal_id', e.target.value); }}
+                      className="w-full bg-black/40 border border-white/5 px-8 py-6 rounded-2xl text-white font-black italic text-xl outline-none focus:border-blue-500 transition-all shadow-inner"
+                      placeholder="Ex: 067-2922111"
+                    />
+                 </div>
+                 <div className="space-y-4 group">
+                    <div className="flex justify-between items-center px-2">
+                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Shop Slug (s)</label>
+                       <span className="text-[9px] text-blue-500 font-black uppercase">Validated</span>
+                    </div>
+                    <input 
+                      type="text" 
+                      value={shopSlug} 
+                      onChange={e => { setShopSlug(e.target.value); localStorage.setItem('ndsa_personal_slug', e.target.value); }}
+                      className="w-full bg-black/40 border border-white/5 px-8 py-6 rounded-2xl text-white font-black italic text-xl outline-none focus:border-blue-500 transition-all shadow-inner"
+                      placeholder="Ex: startupforworld"
+                    />
+                 </div>
+              </div>
+
+              <div className="p-6 bg-blue-500/5 border border-blue-500/10 rounded-2xl space-y-4">
+                 <div className="flex items-center gap-3 text-blue-400">
+                    <Lock size={16} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Masking Logic Active</span>
+                 </div>
+                 <p className="text-[9px] text-slate-500 font-bold leading-relaxed italic uppercase">
+                   Le protocole Stealth V2 sur <strong>gmbcoreos.com</strong> remplace les chaînes techniques pour éviter les bannissements publicitaires.
+                 </p>
+              </div>
+           </div>
+        </div>
+
+        {/* RIGHT PANEL: LINK & PROPAGATION */}
+        <div className="lg:col-span-8 flex flex-col gap-8">
+           {/* THE ARTIFACT */}
+           <div className="flex-1 glass-card p-12 rounded-[3.5rem] border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent flex flex-col justify-center items-center relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-full h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-[shimmer_3s_infinite]"></div>
+              
+              <div className="relative z-10 w-full space-y-12 text-center">
+                 <div className="w-24 h-24 bg-blue-500 text-slate-950 rounded-full flex items-center justify-center mx-auto shadow-[0_0_60px_#3b82f644] animate-pulse">
+                    <LinkIcon size={40} />
+                 </div>
+
+                 <div className="space-y-6">
+                    <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.5em]">Lien Intelligent Master</h4>
+                    <div className="bg-black/80 p-10 rounded-[2.5rem] border border-white/5 shadow-2xl relative group-hover:border-blue-500/30 transition-all">
+                       <p className="text-2xl md:text-3xl font-mono text-blue-400 truncate tracking-tighter italic">
+                          {smartLink}
+                       </p>
+                       <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-500 text-slate-950 text-[9px] font-black uppercase rounded-lg">
+                          Secure Vector V7.1
+                       </div>
+                    </div>
+                 </div>
+
+                 <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-4">
+                    <button 
+                      onClick={copySmartLink}
+                      className="w-full md:w-auto px-16 py-8 bg-white text-slate-950 rounded-[2.5rem] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-4 hover:scale-105 active:scale-95 transition-all shadow-3xl group"
+                    >
+                      {copied ? <Check size={24} className="text-emerald-600" /> : <Copy size={24} />}
+                      {copied ? "SIGNAL COPIÉ !" : "COPIER MON SIGNAL"}
+                    </button>
+                    <button 
+                      onClick={handleRead}
+                      className={`w-20 h-20 rounded-[1.5rem] border transition-all flex items-center justify-center ${isReading ? 'bg-blue-500 border-blue-500 text-slate-950' : 'bg-white/5 border-white/10 text-slate-500'}`}
+                    >
+                      {isReading ? <Square size={24} /> : <Volume2 size={24} />}
+                    </button>
+                 </div>
+              </div>
+           </div>
+
+           {/* PROPAGATION DOCK */}
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[
+                { id: 'whatsapp', name: 'WhatsApp', color: 'bg-emerald-600', hover: 'hover:bg-emerald-500', icon: MessageSquare },
+                { id: 'linkedin', name: 'LinkedIn', color: 'bg-blue-700', hover: 'hover:bg-blue-600', icon: Linkedin },
+                { id: 'instagram', name: 'Instagram', color: 'bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888]', hover: 'hover:brightness-110', icon: Instagram },
+                { id: 'facebook', name: 'Facebook', color: 'bg-blue-900', hover: 'hover:bg-blue-800', icon: Globe },
+              ].map(p => (
+                <button 
+                  key={p.id} 
+                  onClick={() => shareTo(p.id as any)}
+                  className={`${p.color} ${p.hover} p-10 rounded-[3rem] text-white flex flex-col items-center justify-center gap-4 transition-all hover:-translate-y-2 shadow-2xl group`}
+                >
+                  <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-transform">
+                    <p.icon size={28} />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em]">{p.name}</span>
+                </button>
+              ))}
+           </div>
+        </div>
+      </div>
+
+      {/* SECTION 3: FOOTER ACTIONS */}
+      <div className="glass-card p-10 rounded-[3rem] border border-white/5 flex flex-col md:flex-row items-center justify-between gap-10">
+         <div className="flex items-center gap-8">
+            <div className="w-20 h-20 bg-amber-500/10 border border-amber-500/20 rounded-[2rem] flex items-center justify-center text-amber-400">
+               <Rocket size={36} />
+            </div>
+            <div>
+               <h4 className="font-black text-white italic uppercase tracking-widest text-lg">Expansion Stratégique</h4>
+               <p className="text-slate-500 text-sm mt-1 italic">
+                 "Chaque clic sur <strong>gmbcoreos.com/jose</strong> est une porte ouverte vers la liberté biologique." — Coach José
+               </p>
+            </div>
+         </div>
+         <div className="flex gap-4">
+            <button className="px-10 py-5 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all">
+               Guide Stealth V2
+            </button>
+            <button className="px-10 py-5 bg-blue-500 text-slate-950 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl hover:brightness-110 transition-all">
+               Voir Mes Clics
+            </button>
+         </div>
+      </div>
+
     </div>
   );
 };

@@ -44,7 +44,8 @@ export const I18N = {
 
 export const SYSTEM_CONFIG = {
   brand: "Neo Digital Startup Academy",
-  version: "NDSA-GMBC-OS-V7-PROD",
+  version: "NDSA-GMBC-OS-V7.1-PROD",
+  officialDomain: "gmbcoreos.com",
   founder: {
     name: "ABADA Jose",
     id: "067-2922111",
@@ -58,7 +59,7 @@ export const SYSTEM_CONFIG = {
     orphan_owner: "ABADA Jose",
     orphan_id: "067-2922111",
     orphan_slug: "startupforworld",
-    rule: "IF param_r IS empty OR param_s IS empty THEN USE default_orphan_owner"
+    rule: "IF r IS empty OR s IS empty THEN USE founder_profile"
   },
   legal: {
     dpo: "ABADA Jose",
@@ -66,20 +67,8 @@ export const SYSTEM_CONFIG = {
     consent_text: "En m'inscrivant, j'accepte que l'IA José utilise mon ID et mon Slug pour automatiser mes ventes et m'envoyer des notifications WhatsApp/Email.",
     lead_guarantee: "Attribution stricte basée sur les paramètres de l'URL compressée."
   },
-  email_automation: {
-    subject: "Félicitations ! Votre IA Coach José est désormais à votre service 🚀",
-    sender_name: "NDSA - ABADA Jose",
-    support_contact: "support@ndsa.app",
-    trigger: "on_social_engine_setup_complete"
-  },
-  audio_logic: {
-    voice_engine: "TTS",
-    mode: "Exclusive_Single_Stream",
-    pause_duration: 1500, // ms
-    visual_feedback: true
-  },
   ai: {
-    name: "José",
+    name: "Coach José",
     role: "Expert en Nutrition Cellulaire & Psychiatrie Cellulaire",
     protocol_steps: ["Empathie", "Membrane", "37°C/Émotion", "Prescription 3-5", "Posologie", "Closing"],
     special_rules: {
@@ -120,12 +109,15 @@ export const SYSTEM_CONFIG = {
     ],
     premiumModules: []
   },
-  // Added billing configuration for FinanceView
   billing: {
     pricing: {
       [PricingZone.AFRICA]: { label: "Pack Africa Bio-Sync", amount: 15, currency: "USD" },
       [PricingZone.EUROPE]: { label: "Pack Euro Excellence", amount: 25, currency: "EUR" },
       [PricingZone.GLOBAL]: { label: "Pack Global Diamond", amount: 35, currency: "USD" }
     }
+  },
+  // Added audio_logic to resolve the error in voiceService.ts where this property was expected
+  audio_logic: {
+    pause_duration: 1500
   }
 };

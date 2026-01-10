@@ -54,7 +54,6 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
     const refId = params.get('r') || params.get('ref');
     const slug = params.get('s');
 
-    // TRAFFIC ROUTING LOGIC - PARAMÈTRES FURTIFS (ORPHAN RULE)
     const activeRef = refId || sessionStorage.getItem('ndsa_active_ref');
     const activeSlug = slug || sessionStorage.getItem('ndsa_active_slug');
 
@@ -77,7 +76,7 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
       if (mode === 'w' || mode === 'welcome') {
         handleAutoStart();
       } else {
-        const welcomeText = `Bonjour ! Je suis José, l'IA de la NDSA. ✨\n\nJe suis ici pour restaurer votre vitalité cellulaire via le protocole SAB. Quel est votre focus santé ?`;
+        const welcomeText = `Bonjour ! Je suis Coach José, l'IA de la NDSA. ✨\n\nJe suis ici pour restaurer votre vitalité cellulaire via le protocole SAB. Quel est votre focus santé ?`;
         setMessages([{ 
           id: 'welcome', 
           role: 'model', 
@@ -96,7 +95,7 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
     setMessages([{ id: aiMsgId, role: 'model', parts: [{ text: "" }], timestamp: new Date(), status: 'sending' }]);
 
     try {
-      const triggerPrompt = "Initialise un accueil chaleureux. Présente-toi comme José, l'IA NDSA de M. ABADA Jose. Demande s'il est prêt pour son diagnostic bio-cellulaire.";
+      const triggerPrompt = "Initialise un accueil chaleureux. Présente-toi comme Coach José, l'IA NDSA de M. ABADA Jose. Demande s'il est prêt pour son diagnostic bio-cellulaire.";
       const stream = await generateJoseResponseStream(triggerPrompt, [], referralContext, language as Language, persona, currentSubscriberId);
       
       let fullText = "";
@@ -148,7 +147,6 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
       }
       setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, status: 'read' } : m));
       
-      // TRIGGER LEAD NOTIFICATION IF PROTOCOL DETECTED
       if (fullText.toLowerCase().includes('protocole') || fullText.toLowerCase().includes('trio')) {
         setTimeout(() => setShowLeadNotification(true), 3000);
       }
@@ -163,8 +161,8 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
   return (
     <div className="flex h-screen bg-[#020617] text-white overflow-hidden font-sans">
       
-      {/* 1. PANNEAU BIO-SYNC */}
-      <aside className="hidden lg:flex w-72 flex-col border-r border-white/5 bg-black/20 backdrop-blur-3xl p-6 gap-8">
+      {/* 1. SIDEBAR BIO-SYNC : TITRE ET BOUTON DÉPLACÉS ICI */}
+      <aside className="hidden lg:flex w-72 flex-col border-r border-white/5 bg-black/20 backdrop-blur-3xl p-6 gap-8 overflow-y-auto no-scrollbar">
         <div className="flex flex-col items-center gap-4 py-6 border-b border-white/5">
           <div className="w-20 h-20 rounded-[2rem] bg-[#00d4ff]/10 border border-[#00d4ff]/20 flex items-center justify-center shadow-2xl">
             <Cpu className="text-[#00d4ff]" size={36} />
@@ -187,12 +185,33 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
           </div>
         </div>
 
-        <div className="mt-auto space-y-4">
+        {/* SECTION DÉPLACÉE DU HAUT VERS LE BAS DE LA SIDEBAR */}
+        <div className="mt-auto space-y-6 pt-6 border-t border-white/5">
+           <div className="flex items-center gap-4 px-2">
+             <div className={`w-2.5 h-2.5 rounded-full ${activeSpeechKey ? 'bg-[#00d4ff] animate-ping' : 'bg-slate-700'} shadow-[0_0_10px_#00d4ff]`}></div>
+             <h2 className="font-stark text-[10px] font-black text-white uppercase tracking-[0.3em] italic">JOSÉ - EXPERT NDSA</h2>
+           </div>
+
+           {referralContext && (
+               <a 
+                href={referralContext.shopUrl} 
+                target="_blank" 
+                className="flex flex-col gap-2 p-4 bg-[#00d4ff]/10 border border-[#00d4ff]/20 rounded-2xl group hover:bg-[#00d4ff]/20 transition-all shadow-xl"
+               >
+                 <div className="flex items-center gap-3">
+                    <ShoppingCart size={14} className="text-[#00d4ff]" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#00d4ff]">Boutique Officielle</span>
+                 </div>
+                 <p className="text-[9px] font-bold text-slate-400 leading-tight">Acheter chez mon conseiller <span className="text-white">{referralContext.referrerName}</span></p>
+               </a>
+            )}
+
            <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl">
               <p className="text-[9px] font-bold text-amber-500 leading-relaxed uppercase tracking-widest italic">
                 "Tre-en-en : 2 gélules matin, 2 gélules soir."
               </p>
            </div>
+           
            <div className="flex items-center gap-3 px-2">
               <Fingerprint size={14} className="text-slate-700" />
               <span className="text-[9px] font-black text-slate-700 uppercase tracking-widest">GMBC-OS-V7</span>
@@ -200,27 +219,10 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
         </div>
       </aside>
 
-      {/* 2. CHAT PANEL */}
+      {/* 2. NEXUS CENTRAL : EN-TÊTE SUPPRIMÉE POUR PLUS DE VISIBILITÉ */}
       <main className="flex-1 flex flex-col relative bg-gradient-to-b from-black/20 to-transparent">
-        <div className="h-24 px-12 border-b border-white/5 flex items-center justify-between backdrop-blur-md sticky top-0 z-30">
-          <div className="flex items-center gap-6">
-            <div className={`w-3 h-3 rounded-full ${activeSpeechKey ? 'bg-[#00d4ff] animate-ping' : 'bg-slate-700'} shadow-[0_0_15px_#00d4ff]`}></div>
-            <h2 className="font-stark text-sm font-black text-white uppercase tracking-[0.6em] italic">JOSÉ - EXPERT NDSA</h2>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            {referralContext && (
-               <a 
-                href={referralContext.shopUrl} 
-                target="_blank" 
-                className="flex items-center gap-3 px-6 py-2.5 bg-emerald-500 text-slate-950 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl"
-               >
-                 <ShoppingCart size={16} /> Acheter chez {referralContext.referrerName}
-               </a>
-            )}
-          </div>
-        </div>
-
+        
+        {/* L'espace est désormais totalement libéré en haut */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 md:px-24 py-16 space-y-24 no-scrollbar scroll-smooth">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-8 duration-700`}>
@@ -241,7 +243,7 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
                         className={`flex items-center gap-4 px-6 py-2.5 rounded-xl border font-stark text-[10px] font-black uppercase tracking-[0.2em] transition-all ${voiceService.isCurrentlyReading(`msg_${msg.id}`) ? 'bg-[#00d4ff] text-slate-950 border-[#00d4ff]' : 'bg-white/5 border-white/10 text-slate-500'}`}
                       >
                         {voiceService.isCurrentlyReading(`msg_${msg.id}`) ? <Square size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
-                        {voiceService.isCurrentlyReading(`msg_${msg.id}`) ? "SPEAKING..." : "AUDIO"}
+                        {voiceService.isCurrentlyReading(`msg_${msg.id}`) ? "SYNTHÈSE..." : "AUDIO"}
                       </button>
                     </div>
                   )}
@@ -263,14 +265,14 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
 
         {/* NOTIFICATION LEAD */}
         {showLeadNotification && (
-          <div className="absolute top-32 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md animate-in slide-in-from-top duration-700">
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md animate-in slide-in-from-top duration-700">
              <div className="bg-white border-4 border-[#FFD700] rounded-3xl p-6 shadow-3xl text-slate-900 relative">
                 <button onClick={() => setShowLeadNotification(false)} className="absolute top-4 right-4 text-slate-400"><X size={16} /></button>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 bg-emerald-500 text-white rounded-2xl animate-bounce"><Rocket size={24} /></div>
-                  <h4 className="font-black uppercase tracking-tighter text-xl">🚀 Nouveau Lead !</h4>
+                  <h4 className="font-black uppercase tracking-tighter text-xl text-slate-950">🚀 Nouveau Lead !</h4>
                 </div>
-                <p className="text-sm font-medium italic mb-4">Un prospect vient de finir son diagnostic. Lien de votre boutique [Slug] utilisé.</p>
+                <p className="text-sm font-medium italic mb-4 text-slate-800">Un prospect vient de finir son diagnostic. Votre lien shop a été utilisé.</p>
                 <button onClick={() => setShowLeadNotification(false)} className="w-full py-4 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl">
                    <MessageCircle size={16} /> Suivi WhatsApp immédiat
                 </button>
@@ -306,7 +308,7 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
                   />
                   {selectedImage && (
                     <div className="absolute -top-16 left-0 bg-[#00d4ff] text-slate-900 px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 animate-bounce">
-                       <ImageIcon size={12} /> Image prête pour analyse
+                       <ImageIcon size={12} /> Image prête
                     </div>
                   )}
                 </div>
