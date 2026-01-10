@@ -31,8 +31,8 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose }) =
 
   const steps = [
     {
-      title: "1. Rencontrez José (Expert Universel)",
-      content: "José est l'IA Universelle de la NDSA. Il ne remplace pas votre médecin, il amplifie son expertise. José gère les diagnostics complexes de nutrition cellulaire 24h/24 pour transformer vos prospects en clients convaincus.",
+      title: "1. Rencontrez Coach José (Expert Universel)",
+      content: "Coach José est l'IA Universelle de la NDSA (Neo Digital Startup Academy). Il ne remplace pas votre médecin, il amplifie son expertise. José gère les diagnostics complexes de nutrition cellulaire 24h/24 pour transformer vos prospects en clients convaincus.",
       actionLabel: "Initialiser la connexion",
       icon: <Bot size={48} className="text-[#FFD700]" />
     },

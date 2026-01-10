@@ -4,10 +4,11 @@ import { generateJoseResponseStream } from '../services/geminiService';
 import { voiceService } from '../services/voiceService';
 import { Message, Language, AIPersona, ReferralContext } from '../types'; 
 import { SYSTEM_CONFIG, I18N as I18N_CONST } from '../constants';
+import { jsPDF } from 'jspdf';
 import { 
   Send, Bot, Play, Square, User, Image as ImageIcon, Microscope, FlaskConical, Rocket, HelpCircle, 
   ChevronRight, Activity, Headphones, Sparkles, Zap, Brain, ThermometerSnowflake, Droplets, 
-  Terminal, Cpu, ShieldCheck, BarChart3, Fingerprint, Layers
+  Terminal, Cpu, ShieldCheck, BarChart3, Fingerprint, Layers, Download, FileText
 } from 'lucide-react';
 
 interface AssistantJoseProps {
@@ -83,6 +84,66 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
     }
   }, [messages, isLoading]);
 
+  const handleExportConversation = () => {
+    if (messages.length === 0) return;
+
+    const doc = new jsPDF();
+    const margin = 20;
+    let y = 30;
+
+    // Header Stark Design
+    doc.setFillColor(15, 23, 42); 
+    doc.rect(0, 0, 210, 50, 'F');
+    
+    doc.setTextColor(0, 212, 255); 
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("JOSÉ IMPERIUM 2026", margin, 25);
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(10);
+    doc.text("ARCHIVE DE RESTAURATION BIOLOGIQUE - NDSA", margin, 32);
+    doc.setFont("helvetica", "italic");
+    doc.text(`SESSION : ${new Date().toLocaleString()} | ID : ${currentSubscriberId || 'GUEST'}`, margin, 38);
+
+    y = 65;
+    messages.forEach((msg) => {
+        const isUser = msg.role === 'user';
+        
+        // Role Tag
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(isUser ? 100 : 0, 100, isUser ? 255 : 255);
+        doc.text(isUser ? "UTILISATEUR :" : "JOSÉ IMPERIUM :", margin, y);
+        y += 6;
+
+        // Content
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(51, 65, 85);
+        doc.setFontSize(11);
+        const splitText = doc.splitTextToSize(msg.parts[0].text, 170);
+        
+        if (y + (splitText.length * 6) > 280) {
+            doc.addPage();
+            y = 20;
+        }
+        
+        doc.text(splitText, margin, y);
+        y += (splitText.length * 6) + 12;
+    });
+
+    // Footer
+    const pageCount = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.text(`Propulsé par NDSA GMBC OS - Protection AXIOMA. Page ${i} sur ${pageCount}`, margin, 285);
+    }
+
+    doc.save(`Rapport_NDSA_${Date.now()}.pdf`);
+  };
+
   const handleSend = async (text?: string, medicalMode = false) => {
     const finalInput = text || input;
     if (!finalInput.trim() && !selectedImage || isLoading) return;
@@ -120,7 +181,7 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
   return (
     <div className="flex h-screen bg-[#020617] text-white overflow-hidden font-sans">
       
-      {/* 1. PANNEAU DE GAUCHE : BIO-SYNC TELEMETRY (HIDDEN ON MOBILE) */}
+      {/* 1. PANNEAU DE GAUCHE : BIO-SYNC TELEMETRY */}
       <aside className="hidden lg:flex w-72 flex-col border-r border-white/5 bg-black/20 backdrop-blur-3xl p-6 gap-8">
         <div className="flex flex-col items-center gap-4 py-6 border-b border-white/5">
           <div className="w-20 h-20 rounded-[2rem] bg-[#00d4ff]/10 border border-[#00d4ff]/20 flex items-center justify-center shadow-[0_0_30px_rgba(0,212,255,0.1)]">
@@ -179,18 +240,30 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
             <h2 className="font-stark text-sm font-black text-white uppercase tracking-[0.6em] italic">Neural Nexus</h2>
           </div>
           
-          {activeSpeechKey && (
-            <div className="flex items-center gap-6 animate-in slide-in-from-top duration-500">
-              <div className="flex items-end gap-1 h-5">
-                {[...Array(10)].map((_, i) => (
-                  <div key={i} className="w-0.5 bg-[#00d4ff] rounded-full animate-[wave_1s_infinite_ease-in-out]" style={{ animationDelay: `${i * 0.1}s` }}></div>
-                ))}
-              </div>
-              <button onClick={() => voiceService.stop()} className="p-2 bg-rose-500/10 text-rose-500 rounded-lg border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all">
-                <Square size={14} fill="currentColor" />
+          <div className="flex items-center gap-4">
+            {messages.length > 0 && (
+              <button 
+                onClick={handleExportConversation}
+                className="flex items-center gap-3 px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-[#00d4ff] hover:bg-[#00d4ff]/10 hover:border-[#00d4ff]/30 transition-all group"
+              >
+                <Download size={14} className="group-hover:translate-y-0.5 transition-transform" /> 
+                Export Session
               </button>
-            </div>
-          )}
+            )}
+
+            {activeSpeechKey && (
+              <div className="flex items-center gap-6 animate-in slide-in-from-top duration-500">
+                <div className="flex items-end gap-1 h-5">
+                  {[...Array(10)].map((_, i) => (
+                    <div key={i} className="w-0.5 bg-[#00d4ff] rounded-full animate-[wave_1s_infinite_ease-in-out]" style={{ animationDelay: `${i * 0.1}s` }}></div>
+                  ))}
+                </div>
+                <button onClick={() => voiceService.stop()} className="p-2 bg-rose-500/10 text-rose-500 rounded-lg border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all">
+                  <Square size={14} fill="currentColor" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ZONE DE LECTURE */}
@@ -285,7 +358,7 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
         <div className="h-40 bg-gradient-to-t from-[#020617] to-transparent absolute bottom-0 left-0 right-0 pointer-events-none z-10"></div>
       </main>
 
-      {/* 3. PILIER DE COMMANDE (DROITE) : PROTOCOLES & TOOLS */}
+      {/* 3. PILIER DE COMMANDE (DROITE) */}
       <aside className="hidden xl:flex w-96 flex-col border-l border-white/5 bg-slate-900/40 backdrop-blur-3xl p-10 gap-10 overflow-y-auto no-scrollbar shadow-[-20px_0_50px_rgba(0,0,0,0.3)]">
         
         <div className="space-y-6">
@@ -342,7 +415,7 @@ export const AssistantJose: React.FC<AssistantJoseProps> = ({ language = 'fr', c
         )}
       </aside>
 
-      {/* OVERLAY DE SCAN (BIO-SCAN) */}
+      {/* OVERLAY DE SCAN */}
       {isScanning && (
         <div className="absolute inset-0 z-[500] bg-black/95 backdrop-blur-3xl flex items-center justify-center animate-in fade-in duration-1000">
            <div className="text-center space-y-16">
