@@ -64,7 +64,6 @@ export const FinanceView: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Entity Branding / Business Model Clarification */}
       <div className="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-sm overflow-hidden relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full -mr-32 -mt-32"></div>
         <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
@@ -98,9 +97,7 @@ export const FinanceView: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* SaaS Revenue (Subscribers) */}
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden group hover:border-blue-300 transition-all">
           <div className="flex justify-between items-start mb-6">
             <div className="p-3 bg-blue-100 rounded-2xl text-blue-600 shadow-inner">
@@ -113,7 +110,6 @@ export const FinanceView: React.FC = () => {
           <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase">Mensuel Récurrent (MRR)</p>
         </div>
 
-        {/* MLM Volume (NeoLife Sales) */}
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden group hover:border-emerald-300 transition-all">
           <div className="flex justify-between items-start mb-6">
             <div className="p-3 bg-emerald-100 rounded-2xl text-emerald-600 shadow-inner">
@@ -126,7 +122,6 @@ export const FinanceView: React.FC = () => {
           <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase">Généré via José & Shop</p>
         </div>
 
-        {/* Affiliate Commission NDSA */}
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden group hover:border-amber-300 transition-all">
           <div className="flex justify-between items-start mb-6">
             <div className="p-3 bg-amber-100 rounded-2xl text-amber-600 shadow-inner">
@@ -139,7 +134,6 @@ export const FinanceView: React.FC = () => {
           <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase">Affiliation Plateforme</p>
         </div>
 
-        {/* Wallet Balance */}
         <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl shadow-slate-900/20 relative overflow-hidden flex flex-col justify-between">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <Wallet size={80} />
@@ -155,7 +149,6 @@ export const FinanceView: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Pillar 1: Digital SaaS NDSA */}
         <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
           <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-blue-50/30">
             <div>
@@ -171,16 +164,15 @@ export const FinanceView: React.FC = () => {
                   <span className="px-2 py-0.5 bg-blue-600 text-white text-[9px] font-black rounded uppercase">Actif</span>
                </div>
                <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                  NDSA fournit l'infrastructure IA (José), l'hébergement de vos hubs, les formations de l'Academy et le support technique. Les frais d'abonnement couvrent ces services premium.
+                  NDSA fournit l'infrastructure IA (José), l'hébergement de vos hubs, les formations de l'Academy et le support technique.
                </p>
             </div>
             
             <div className="space-y-3">
-              {/* Added explicit casting and optional chaining to fix compilation errors related to missing 'billing' and 'unknown' property access */}
-              {(SYSTEM_CONFIG as any).billing?.pricing && Object.entries((SYSTEM_CONFIG as any).billing.pricing).map(([zone, data]: [string, any]) => (
+              {Object.entries(SYSTEM_CONFIG.billing.pricing).map(([zone, data]) => (
                 <div key={zone} className="flex items-center justify-between p-5 border border-slate-100 rounded-2xl hover:bg-slate-50 transition-all group">
                   <div className="flex items-center gap-4">
-                    <div className={`w-3 h-3 rounded-full ${zone === 'AFRICA' ? 'bg-amber-400' : zone === 'EUROPE' ? 'bg-blue-400' : 'bg-purple-400'}`}></div>
+                    <div className={`w-3 h-3 rounded-full ${zone === PricingZone.AFRICA ? 'bg-amber-400' : zone === PricingZone.EUROPE ? 'bg-blue-400' : 'bg-purple-400'}`}></div>
                     <div>
                       <h4 className="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition-colors">{data.label}</h4>
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{zone}</p>
@@ -193,17 +185,9 @@ export const FinanceView: React.FC = () => {
                 </div>
               ))}
             </div>
-
-            <div className="bg-blue-50/50 p-6 rounded-3xl border border-blue-100 flex items-start gap-4">
-               <Info size={18} className="text-blue-600 shrink-0 mt-1" />
-               <p className="text-[11px] text-blue-800 font-bold leading-relaxed">
-                  En tant qu'affilié, vous percevez 20% sur chaque abonnement actif recommandé via votre lien.
-               </p>
-            </div>
           </div>
         </div>
 
-        {/* Pillar 2: Partner MLM NeoLife */}
         <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
           <div className="p-8 bg-emerald-50/50 border-b border-emerald-100 flex items-center justify-between">
             <div>
@@ -240,18 +224,12 @@ export const FinanceView: React.FC = () => {
                <div className="grid grid-cols-2 gap-4">
                   <div className="p-5 border border-slate-100 rounded-2xl bg-slate-50">
                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Responsabilité</p>
-                     <p className="text-xs font-bold text-slate-800">Logistique, Stock & Paiement Commissions Réseau</p>
+                     <p className="text-xs font-bold text-slate-800">Logistique & Stock</p>
                   </div>
                   <div className="p-5 border border-slate-100 rounded-2xl bg-slate-50">
                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Relation</p>
-                     <p className="text-xs font-bold text-slate-800">Fournisseur de solutions nutritives (SAB)</p>
+                     <p className="text-xs font-bold text-slate-800">Fournisseur de solutions (SAB)</p>
                   </div>
-               </div>
-               
-               <div className="bg-[#FFD700]/10 p-6 rounded-[2rem] border border-[#FFD700]/20">
-                  <p className="text-[11px] text-[#003366] font-black leading-relaxed text-center uppercase tracking-wider">
-                     "NDSA construit votre HUB digital. NeoLife livre votre IMPACT biologique."
-                  </p>
                </div>
             </div>
           </div>

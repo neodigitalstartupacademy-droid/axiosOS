@@ -1,15 +1,16 @@
 
 import React, { useEffect, useState } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { Activity, Zap, TrendingUp, Cpu } from 'lucide-react';
 
 const initialData = [
-  { name: 'Lun', leads: 4, clicks: 12 },
-  { name: 'Mar', leads: 7, clicks: 25 },
-  { name: 'Mer', leads: 5, clicks: 18 },
-  { name: 'Jeu', leads: 12, clicks: 40 },
-  { name: 'Ven', leads: 9, clicks: 35 },
-  { name: 'Sam', leads: 15, clicks: 55 },
-  { name: 'Dim', leads: 20, clicks: 80 },
+  { name: '08:00', leads: 4, activity: 65 },
+  { name: '10:00', leads: 7, activity: 85 },
+  { name: '12:00', leads: 5, activity: 70 },
+  { name: '14:00', leads: 12, activity: 95 },
+  { name: '16:00', leads: 9, activity: 80 },
+  { name: '18:00', leads: 15, activity: 110 },
+  { name: '20:00', leads: 20, activity: 130 },
 ];
 
 export const LeadChart: React.FC = () => {
@@ -19,76 +20,104 @@ export const LeadChart: React.FC = () => {
     const interval = setInterval(() => {
       setData(prev => {
         const newData = [...prev];
-        const last = newData[newData.length - 1];
-        // Simulation d'activité réseau légère
-        last.clicks += Math.floor(Math.random() * 3);
-        if (Math.random() > 0.8) last.leads += 1;
+        const last = { ...newData[newData.length - 1] };
+        last.activity += Math.floor(Math.random() * 5) - 2;
+        if (Math.random() > 0.9) last.leads += 1;
+        newData[newData.length - 1] = last;
         return newData;
       });
-    }, 5000);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="h-[550px] w-full glass-card p-14 rounded-[5rem] border border-white/5 flex flex-col min-w-0 shadow-3xl relative overflow-hidden group">
-      <div className="absolute -top-32 -right-32 w-80 h-80 bg-[#00d4ff]/10 rounded-full blur-[120px] pointer-events-none group-hover:bg-[#00d4ff]/20 transition-all duration-[2s]"></div>
+    <div className="h-[600px] w-full glass-card p-10 rounded-[3rem] border border-blue-500/20 flex flex-col relative overflow-hidden group shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+      {/* Laser Grid Overlay */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none" 
+           style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #00d4ff 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
       
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 relative z-10 gap-6">
-        <div>
-          <h3 className="text-[11px] font-black text-[#00d4ff] uppercase tracking-[0.5em] italic mb-3">Live Telemetry</h3>
-          <p className="text-4xl font-black text-white tracking-tighter uppercase italic">Bio-Sync Momentum</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 relative z-10">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3 text-[#00d4ff]">
+            <Activity size={18} className="animate-pulse" />
+            <h3 className="text-[10px] font-black uppercase tracking-[0.5em] font-stark">Neural Network Telemetry</h3>
+          </div>
+          <h2 className="text-5xl font-black text-white italic tracking-tighter uppercase">Bio-Sync <span className="text-blue-500">Flow</span></h2>
         </div>
-        <div className="flex gap-10">
-           <div className="flex items-center gap-4">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#00d4ff] shadow-[0_0_15px_#00d4ff] animate-pulse"></div>
-              <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Network Clicks</span>
+        
+        <div className="flex gap-8 mt-6 md:mt-0">
+           <div className="flex flex-col items-end">
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Efficiency</span>
+              <span className="text-2xl font-stark font-black text-emerald-400">98.4%</span>
            </div>
-           <div className="flex items-center gap-4">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_15px_#34d399]"></div>
-              <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Bio-Sync Leads</span>
+           <div className="flex flex-col items-end">
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Active Hubs</span>
+              <span className="text-2xl font-stark font-black text-blue-400">1.2K</span>
            </div>
         </div>
       </div>
       
       <div className="flex-1 w-full min-h-0 relative">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
+          <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
-              <linearGradient id="colorLeads" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-              </linearGradient>
-              <linearGradient id="colorClicks" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#00d4ff" stopOpacity={0.3}/>
+              <linearGradient id="colorActivity" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#00d4ff" stopOpacity={0.4}/>
                 <stop offset="95%" stopColor="#00d4ff" stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
+            <CartesianGrid strokeDasharray="1 5" vertical={false} stroke="rgba(0, 212, 255, 0.1)" />
             <XAxis 
               dataKey="name" 
               axisLine={false} 
               tickLine={false} 
-              tick={{fontSize: 11, fill: '#64748b', fontWeight: 900, fontFamily: 'Orbitron'}} 
-              dy={25}
+              tick={{fontSize: 10, fill: '#64748b', fontWeight: 900, fontFamily: 'Orbitron'}} 
+              dy={20}
             />
-            <YAxis hide />
+            <YAxis hide domain={['auto', 'auto']} />
             <Tooltip 
-              cursor={{ stroke: 'rgba(0,212,255,0.2)', strokeWidth: 2 }}
+              cursor={{ stroke: '#00d4ff', strokeWidth: 1, strokeDasharray: '5 5' }}
               contentStyle={{ 
-                backgroundColor: 'rgba(1,4,9,0.95)',
-                borderRadius: '32px', 
-                border: '1px solid rgba(0,212,255,0.3)', 
-                boxShadow: '0 30px 60px rgba(0,0,0,0.8)',
-                padding: '24px',
-                backdropFilter: 'blur(20px)',
+                backgroundColor: 'rgba(2, 6, 23, 0.9)',
+                borderRadius: '20px', 
+                border: '1px solid rgba(0, 212, 255, 0.3)', 
+                boxShadow: '0 20px 40px rgba(0,0,0,0.8)',
+                padding: '20px',
+                backdropFilter: 'blur(10px)',
                 color: '#fff',
-                fontFamily: 'Inter'
+                fontFamily: 'Orbitron'
               }}
             />
-            <Area type="monotone" dataKey="clicks" stroke="#00d4ff" fillOpacity={1} fill="url(#colorClicks)" strokeWidth={3} animationDuration={1000} />
-            <Area type="monotone" dataKey="leads" stroke="#10b981" fillOpacity={1} fill="url(#colorLeads)" strokeWidth={4} animationDuration={1500} />
+            <Area 
+              type="monotone" 
+              dataKey="activity" 
+              stroke="#00d4ff" 
+              fillOpacity={1} 
+              fill="url(#colorActivity)" 
+              strokeWidth={4} 
+              dot={{ r: 4, fill: '#00d4ff', strokeWidth: 0 }}
+              activeDot={{ r: 8, fill: '#fff', stroke: '#00d4ff', strokeWidth: 4 }}
+              animationDuration={2000} 
+            />
           </AreaChart>
         </ResponsiveContainer>
+      </div>
+
+      <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
+         {[
+           { label: 'Network Latency', val: '12ms', icon: Zap, color: 'text-blue-400' },
+           { label: 'Closing Probability', val: '84%', icon: TrendingUp, color: 'text-emerald-400' },
+           { label: 'Cellular Sync', val: 'Active', icon: Cpu, color: 'text-purple-400' },
+           { label: 'Stark Protocol', val: 'Stable', icon: Activity, color: 'text-amber-400' },
+         ].map((item, i) => (
+           <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex items-center gap-4">
+              <item.icon size={16} className={item.color} />
+              <div>
+                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">{item.label}</p>
+                <p className="text-xs font-stark font-bold text-white mt-1 uppercase">{item.val}</p>
+              </div>
+           </div>
+         ))}
       </div>
     </div>
   );
