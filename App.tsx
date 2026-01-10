@@ -6,7 +6,6 @@ import { AcademyView } from './components/AcademyView';
 import { SocialSync } from './components/SocialSync';
 import { FinanceView } from './components/FinanceView';
 import { AdminMonitor } from './components/AdminMonitor';
-import { LeadChart } from './components/LeadChart';
 import { AuthView } from './components/AuthView';
 import { ProfileView } from './components/ProfileView';
 import { OnboardingWizard } from './components/OnboardingWizard';
@@ -39,18 +38,18 @@ const App: React.FC = () => {
 
     const params = new URLSearchParams(window.location.search);
     
-    // TRAFFIC ROUTING LOGIC - PARAMÈTRES FURTIFS (r, s, m)
-    const referrerId = params.get('r') || params.get('ref');
-    const shopSlug = params.get('s');
-    const mode = params.get('m') || params.get('mode');
+    // NEXUS ROUTING : Capture des paramètres furtifs [r], [s], [m]
+    const refId = params.get('r') || params.get('ref');
+    const slug = params.get('s');
+    const mode = params.get('m');
     
-    // RÈGLE DES ORPHELINS : SI r OU s MANQUENT -> ATTRIBUTION FONDATEUR
-    if (referrerId && shopSlug) {
-      sessionStorage.setItem('ndsa_active_ref', referrerId);
-      sessionStorage.setItem('ndsa_active_slug', shopSlug);
-      sessionStorage.setItem('ndsa_active_shop', `https://shopneolife.com/${shopSlug}/shop/atoz`);
+    // RÈGLE DES ORPHELINS : Fallback automatique vers ABADA Jose si paramètres manquants
+    if (refId && slug) {
+      sessionStorage.setItem('ndsa_active_ref', refId);
+      sessionStorage.setItem('ndsa_active_slug', slug);
+      sessionStorage.setItem('ndsa_active_shop', `https://shopneolife.com/${slug}/shop/atoz`);
     } else {
-      // ORPHAN PROTECTION
+      // ATTRIBUTION AUTOMATIQUE AU FONDATEUR (ORPHAN PROTECTION)
       sessionStorage.setItem('ndsa_active_ref', SYSTEM_CONFIG.founder.id);
       sessionStorage.setItem('ndsa_active_slug', SYSTEM_CONFIG.founder.shop_slug);
       sessionStorage.setItem('ndsa_active_shop', SYSTEM_CONFIG.founder.officialShopUrl);
@@ -65,8 +64,8 @@ const App: React.FC = () => {
       } catch (e) {}
     }
     
-    // LOGIQUE DE BIENVENUE (PULSE)
-    if (mode === 'w' || mode === 'welcome' || referrerId !== null) {
+    // REDIRECTION AUTOMATIQUE JOSÉ : Déclenchée par r ou m=w
+    if (mode === 'w' || refId) {
       setActiveTab('jose');
     }
     
@@ -83,15 +82,14 @@ const App: React.FC = () => {
   if (isAuthLoading) return null;
 
   const params = new URLSearchParams(window.location.search);
-  const isWelcomeMode = params.get('m') === 'w' || params.get('r') !== null;
+  const isPublicWelcome = params.get('m') === 'w' || params.get('r') !== null;
   const isMasterFounder = currentUser?.neoLifeId === SYSTEM_CONFIG.founder.id;
 
-  // Si on est en mode bienvenue, on laisse l'accès à José sans auth forcée
-  if (!currentUser && !isWelcomeMode) return <AuthView onLogin={handleLogin} />;
+  // Accès public pour les prospects via le lien furtif /jose?r=...
+  if (!currentUser && !isPublicWelcome) return <AuthView onLogin={handleLogin} />;
 
   return (
     <div className="min-h-screen flex font-sans antialiased text-white overflow-hidden bg-[#020617]">
-      
       <aside className={`fixed inset-y-0 left-0 w-72 glass-card z-50 transition-transform lg:translate-x-0 lg:static border-r border-white/5 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-10 h-full flex flex-col">
           <div className="flex flex-col items-center gap-6 mb-16 px-4 cursor-pointer" onClick={() => setActiveTab('jose')}>
@@ -100,10 +98,9 @@ const App: React.FC = () => {
             </div>
             <div className="text-center">
               <h1 className="font-stark font-black text-xl tracking-tighter uppercase leading-none">{SYSTEM_CONFIG.brand}</h1>
-              <p className="font-stark text-[8px] text-emerald-400 font-bold tracking-widest uppercase mt-2 opacity-50 italic">V7.1 MASTER</p>
+              <p className="font-stark text-[8px] text-emerald-400 font-bold tracking-widest uppercase mt-2 opacity-50 italic">V7.1 IMPERIUM</p>
             </div>
           </div>
-
           <nav className="space-y-3 flex-1 overflow-y-auto no-scrollbar">
             {[
               { id: 'jose', label: "Coach Jose", icon: Bot },
@@ -111,7 +108,7 @@ const App: React.FC = () => {
               { id: 'social', label: "Social Sync", icon: Share2 },
               { id: 'history', label: "Archives", icon: ClipboardList },
               { id: 'finance', label: "Finance", icon: Wallet },
-              ...(isMasterFounder ? [{ id: 'stats', label: "Cockpit", icon: LayoutDashboard }] : []),
+              ...(isMasterFounder ? [{ id: 'admin', label: "Admin Console", icon: LayoutDashboard }] : []),
               { id: 'profile', label: "Profile", icon: User },
             ].map((item) => (
               <button 
@@ -125,16 +122,12 @@ const App: React.FC = () => {
           </nav>
         </div>
       </aside>
-
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative z-10">
         <header className="h-24 px-12 flex items-center justify-between relative bg-black/5 backdrop-blur-3xl border-b border-white/5">
           <div className="flex items-center gap-10">
             <button className="lg:hidden p-4 bg-white/5 border border-white/10 rounded-xl" onClick={() => setIsSidebarOpen(true)}><Menu size={24} /></button>
-            <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter flex items-center gap-5">
-              NDSA HUB <Sparkles size={20} className="text-[#00d4ff]" />
-            </h2>
+            <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter flex items-center gap-5">NDSA HUB <Sparkles size={20} className="text-[#00d4ff]" /></h2>
           </div>
-          
           <div className="flex items-center gap-8">
              <div className="flex items-center bg-black/20 border border-white/5 rounded-xl p-1">
                 {(['fr', 'en', 'it', 'es'] as Language[]).map(l => (
@@ -148,7 +141,6 @@ const App: React.FC = () => {
              )}
           </div>
         </header>
-
         <div className="p-8 flex-1 overflow-y-auto no-scrollbar">
           <div className="max-w-[1400px] mx-auto h-full">
             {activeTab === 'jose' && <AssistantJose language={lang} currentSubscriberId={currentUser?.neoLifeId} />}

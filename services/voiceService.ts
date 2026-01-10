@@ -31,10 +31,9 @@ class VoiceService {
   }
 
   async play(text: string, key: string, lang: Language = 'fr') {
-    // ANTI-OVERLAP (Mutex Logic): Stop everything before playing something new
+    // AUDIO MUTEX : Arrêt immédiat de tout flux existant avant de commencer
     this.stop();
 
-    // SPLIT TEXT INTO PARAGRAPHS FOR ACCESSIBILITY PAUSES
     const paragraphs = text.split(/\n\n|STEP \d:/).filter(p => p.trim().length > 0);
     
     this.isLoading = true;
@@ -51,7 +50,6 @@ class VoiceService {
       this.notify(true, key);
 
       for (const p of paragraphs) {
-        // Double check global flag to support sudden stop() calls
         if (!this.globalAudioIsPlaying) break;
 
         const base64 = await generateJoseAudio(p, lang);
@@ -71,7 +69,6 @@ class VoiceService {
           source.onended = () => resolve(true);
         });
 
-        // ACCESSIBILITY PAUSE (1.5s between steps/paragraphs)
         if (this.globalAudioIsPlaying) {
           await new Promise(resolve => setTimeout(resolve, SYSTEM_CONFIG.audio_logic.pause_duration));
         }
@@ -79,7 +76,7 @@ class VoiceService {
 
       this.stop();
     } catch (e) {
-      console.error("STARK-VOICE-ERROR:", e);
+      console.error("NDSA-VOICE-MUTEX-ERROR:", e);
       this.stop();
     }
   }

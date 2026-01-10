@@ -32,7 +32,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onClose }) =
   const steps = [
     {
       title: "1. Activation du Hub (5 min)",
-      content: "L'activation de votre instance GMBC-OS est instantanée. Renseignez votre ID NeoLife et votre lien boutique pour permettre à José de travailler pour vous immédiatement.",
+      content: "L'activation de votre instance GMBC-OS est instantanée. Renseignez votre ID NeoLife et votre lien boutique pour permettre à L'IA Coach José de travailler pour vous immédiatement.",
       actionLabel: "Démarrer l'activation",
       icon: <Zap size={48} className="text-[#FFD700]" />
     },

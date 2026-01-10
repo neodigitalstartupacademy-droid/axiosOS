@@ -44,7 +44,7 @@ export const I18N = {
 
 export const SYSTEM_CONFIG = {
   brand: "Neo Digital Startup Academy",
-  version: "NDSA-GMBC-OS-V7.1-PROD",
+  version: "NDSA-GMBC-OS-V7.1-IMPERIUM",
   officialDomain: "gmbcoreos.com",
   founder: {
     name: "ABADA Jose",
@@ -116,7 +116,6 @@ export const SYSTEM_CONFIG = {
       [PricingZone.GLOBAL]: { label: "Pack Global Diamond", amount: 35, currency: "USD" }
     }
   },
-  // Added audio_logic to resolve the error in voiceService.ts where this property was expected
   audio_logic: {
     pause_duration: 1500
   }
