@@ -34,7 +34,7 @@
         width: 100vw;
         overflow: hidden;
         -webkit-font-smoothing: antialiased;
-        position: fixed; /* Empêche le rebond élastique sur iOS */
+        position: fixed;
       }
       #root {
         height: 100%;
@@ -42,38 +42,67 @@
       }
       .font-stark { font-family: 'Orbitron', sans-serif; }
       
+      /* STARK BACKGROUND HUD EFFECTS */
       .stark-bg {
         position: fixed;
         inset: 0;
         z-index: -1;
-        background: radial-gradient(circle at 50% 50%, #020617 0%, #010409 100%);
+        background: radial-gradient(circle at 50% 50%, #051923 0%, #020617 100%);
       }
-      .stark-bg::after {
+      
+      .stark-bg::before {
         content: '';
         position: absolute;
         inset: 0;
         background-image: 
-          linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
-        background-size: 50px 50px;
-        mask-image: radial-gradient(circle at 50% 50%, black, transparent 80%);
+          linear-gradient(rgba(0, 212, 255, 0.05) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 212, 255, 0.05) 1px, transparent 1px);
+        background-size: 40px 40px;
+        mask-image: radial-gradient(circle at 50% 50%, black, transparent 90%);
+        animation: pulse-grid 8s ease-in-out infinite;
+      }
+
+      .stark-bg::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+        background-size: 100% 2px, 3px 100%;
+        pointer-events: none;
+        z-index: 100;
+        opacity: 0.15;
+      }
+
+      .vignette {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle, transparent 40%, rgba(2, 6, 23, 0.8) 100%);
+        pointer-events: none;
+        z-index: 50;
+      }
+
+      @keyframes pulse-grid {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 0.6; transform: scale(1.02); }
       }
 
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
       .glass-card {
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(25px);
-        -webkit-backdrop-filter: blur(25px);
-        border: 1px solid rgba(0, 212, 255, 0.1);
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(30px) saturate(180%);
+        -webkit-backdrop-filter: blur(30px) saturate(180%);
+        border: 1px solid rgba(0, 212, 255, 0.15);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
       }
 
       .gold-card {
-        background: rgba(12, 10, 9, 0.85);
-        backdrop-filter: blur(30px);
-        -webkit-backdrop-filter: blur(30px);
-        border: 1px solid rgba(255, 215, 0, 0.2);
+        background: rgba(12, 10, 9, 0.7);
+        backdrop-filter: blur(40px) saturate(200%);
+        -webkit-backdrop-filter: blur(40px) saturate(200%);
+        border: 1px solid rgba(255, 215, 0, 0.25);
+        box-shadow: 0 8px 60px 0 rgba(255, 215, 0, 0.05);
       }
 
       .gold-text-shimmer {
@@ -92,7 +121,20 @@
         font-weight: 900;
         text-transform: uppercase;
         letter-spacing: 0.2em;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      
+      .stark-btn:hover {
+        transform: scale(1.05) translateY(-2px);
+        box-shadow: 0 0 25px var(--glow);
+      }
+
+      .hud-line {
+        position: absolute;
+        height: 1px;
+        background: var(--primary);
+        opacity: 0.2;
+        pointer-events: none;
       }
     </style>
     <script type="importmap">
@@ -111,6 +153,7 @@
   </head>
   <body>
     <div class="stark-bg"></div>
+    <div class="vignette"></div>
     <div id="root"></div>
   </body>
 </html>

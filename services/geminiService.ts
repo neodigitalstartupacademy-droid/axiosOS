@@ -14,6 +14,35 @@ const getApiKey = () => {
 
 export const getAIInstance = () => new GoogleGenAI({ apiKey: getApiKey() });
 
+export const generateLocationInsight = async (
+  query: string,
+  userLat: number,
+  userLng: number
+) => {
+  const ai = getAIInstance();
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: query,
+    config: {
+      tools: [{ googleMaps: {} }],
+      toolConfig: {
+        retrievalConfig: {
+          latLng: {
+            latitude: userLat,
+            longitude: userLng
+          }
+        }
+      },
+      systemInstruction: "Tu es l'intelligence géographique de la NDSA. Utilise Google Maps pour localiser précisément les centres de santé ou hubs NeoLife proches de l'utilisateur."
+    },
+  });
+  
+  return {
+    text: response.text,
+    chunks: response.candidates?.[0]?.groundingMetadata?.groundingChunks || []
+  };
+};
+
 export const generateJoseResponseStream = async (
   userPrompt: string, 
   history: Message[] = [], 
