@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { AuthUser, LeaderDNA, Language } from '../types';
 import { voiceService } from '../services/voiceService';
-import { GoogleGenAI } from "@google/genai";
+import { generateDnaAnalysis } from '../services/geminiService';
 
 interface ProfileViewProps {
   user: AuthUser;
@@ -31,31 +31,19 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ user, onUpdate, onLogo
     voiceService.play("Initialisation du scan neural de votre ADN de leader. Analyse des vecteurs d'influence et de stratégie en cours.", 'dna_scan_start');
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const prompt = `
         Tu es José, l'IA de la NDSA. Analyse l'utilisateur suivant pour définir son "Leader DNA".
         Nom: ${formData.name}
         Rôle: ${formData.role}
         ID NeoLife: ${formData.neoLifeId}
 
-        Génère un profil de leader technique et puissant au format JSON strict:
-        {
-          "archetype": "Nom d'archétype futuriste (ex: Bio-Sync Architect)",
-          "strategy": score de 1 à 100,
-          "empathy": score de 1 à 100,
-          "technical": score de 1 à 100,
-          "influence": score de 1 à 100,
-          "vision": "Une phrase courte et percutante sur sa mission de leader."
-        }
+        Génère un profil de leader technique et puissant au format JSON strict avec les champs: 
+        archetype, strategy (1-100), empathy (1-100), technical (1-100), influence (1-100), vision.
       `;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: prompt,
-        config: { responseMimeType: "application/json" }
-      });
-
-      const dna = JSON.parse(response.text) as LeaderDNA;
+      const result = await generateDnaAnalysis(prompt);
+      const dna = JSON.parse(result) as LeaderDNA;
+      
       const updatedUser = { ...formData, dna };
       setFormData(updatedUser);
       onUpdate(updatedUser);
@@ -92,7 +80,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ user, onUpdate, onLogo
 
   return (
     <div className="max-w-5xl mx-auto space-y-10 animate-in fade-in zoom-in-95 duration-700 pb-20">
-      {/* Profil Header */}
       <div className="bg-slate-950/40 backdrop-blur-3xl rounded-[4rem] border border-blue-500/10 p-12 relative overflow-hidden shadow-3xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full -mr-32 -mt-32 blur-[100px] pointer-events-none"></div>
         
@@ -113,7 +100,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ user, onUpdate, onLogo
               <h2 className="text-5xl font-black text-white italic uppercase tracking-tighter">{formData.name}</h2>
               <button 
                 onClick={handleRead} 
-                className={`p-3 rounded-xl border transition-all ${activeSpeechKey === 'profile_brief' ? 'bg-blue-500 text-slate-950' : 'bg-white/5 border-white/10 text-slate-500 hover:text-white'}`}
+                className={`p-3 rounded-xl border transition-all ${activeSpeechKey === 'profile_brief' ? 'bg-blue-500 text-slate-950' : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'}`}
               >
                 {activeSpeechKey === 'profile_brief' ? <Square size={16} /> : <Volume2 size={16} />}
               </button>
@@ -134,7 +121,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ user, onUpdate, onLogo
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* DNA Telemetry Card */}
         <div className="lg:col-span-7 space-y-8">
           <div className="glass-card p-10 rounded-[3.5rem] border border-blue-500/10 relative overflow-hidden group">
             <div className="flex items-center justify-between mb-10">
@@ -181,7 +167,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ user, onUpdate, onLogo
           </div>
         </div>
 
-        {/* DNA Activity / Bio-Link */}
         <div className="lg:col-span-5 space-y-8">
            <div className="glass-card p-10 rounded-[3.5rem] border border-white/5 space-y-8">
               <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">Informations Système</h4>

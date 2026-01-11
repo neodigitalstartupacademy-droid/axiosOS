@@ -1,135 +1,164 @@
-
 import React, { useState, useEffect, Suspense } from 'react';
-import { LayoutDashboard, Bot, GraduationCap, Share2, Wallet, Menu, User, ClipboardList, Cpu, Globe, Zap, ShieldCheck, MapPin, Terminal, Box, Sparkles, Loader2 } from 'lucide-react';
-import { SYSTEM_CONFIG } from './constants';
+import { LayoutDashboard, Bot, GraduationCap, Share2, Wallet, User, MapPin, Terminal, Power, Zap, ShieldCheck, Globe, Loader2 } from 'lucide-react';
 import { AssistantJose } from './components/AssistantJose';
 import { AcademyView } from './components/AcademyView';
 import { SocialSync } from './components/SocialSync';
 import { FinanceView } from './components/FinanceView';
-import { AdminMonitor } from './components/AdminMonitor';
-import { AuthView } from './components/AuthView';
 import { ProfileView } from './components/ProfileView';
 import { HubLocator } from './components/HubLocator';
 import { LeadChart } from './components/LeadChart';
-import { DiagnosticHistory } from './components/DiagnosticHistory';
-import { AuthUser, Language } from './types';
+import { OnboardingWizard } from './components/OnboardingWizard';
+import { ConversionNotification } from './components/ConversionNotification';
+import { AuthView } from './components/AuthView';
+import { AuthUser } from './types';
 import { voiceService } from './services/voiceService';
+import { referralService } from './services/referralService';
+import { SYSTEM_CONFIG } from './constants';
 
-type TabType = 'dashboard' | 'jose' | 'academy' | 'social' | 'finance' | 'admin' | 'profile' | 'history' | 'hubs';
+type TabType = 'dashboard' | 'jose' | 'academy' | 'social' | 'finance' | 'admin' | 'profile' | 'hubs';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [isUltimateGold, setIsUltimateGold] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [lang, setLang] = useState<Language>('fr');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [activeConversion, setActiveConversion] = useState<{country: string, focus: string} | null>(null);
 
   useEffect(() => {
+    // Initialisation rapide
+    const context = referralService.captureReferral();
+    if (context && !currentUser) {
+      setActiveTab('jose'); 
+    }
+
     const saved = localStorage.getItem('ndsa_session');
     if (saved) {
       const user = JSON.parse(saved);
       setCurrentUser(user);
-      if (localStorage.getItem('ndsa_ultimate_gold') === 'true') setIsUltimateGold(true);
+      const onboardingDone = localStorage.getItem('ndsa_onboarding_done');
+      if (!onboardingDone) setShowOnboarding(true);
     }
     setIsAuthLoading(false);
   }, []);
 
   const handleLogin = (user: AuthUser, ultimate = false) => {
     setCurrentUser(user);
-    if (ultimate) {
-      setIsUltimateGold(true);
-      localStorage.setItem('ndsa_ultimate_gold', 'true');
-      document.body.classList.add('ultimate-gold-mode');
-    }
     localStorage.setItem('ndsa_session', JSON.stringify(user));
+    const onboardingDone = localStorage.getItem('ndsa_onboarding_done');
+    if (!onboardingDone) setShowOnboarding(true);
   };
 
-  if (isAuthLoading) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-[#020617] text-blue-500 font-stark">
-      <Cpu className="animate-spin mb-4" size={64} />
-      <p className="tracking-[0.5em] animate-pulse">BOOTING STARK OS...</p>
-    </div>
+  const handleLogout = () => {
+    voiceService.stop();
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.reload();
+  };
+
+  if (isAuthLoading) return null;
+  if (!currentUser && activeTab !== 'jose') return <AuthView onLogin={handleLogin} />;
+  
+  const NavItem = ({ id, label, icon: Icon }: { id: TabType, label: string, icon: any }) => (
+    <button 
+      onClick={() => { setActiveTab(id); setSidebarOpen(false); voiceService.stop(); }}
+      className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl transition-none ${
+        activeTab === id 
+        ? 'bg-[#FFD700] text-black shadow-lg' 
+        : 'text-slate-400 hover:text-white'
+      }`}
+    >
+      <Icon size={18} />
+      <span className="text-[10px] font-black uppercase tracking-widest font-stark">{label}</span>
+    </button>
   );
 
-  if (!currentUser) return <AuthView onLogin={handleLogin} />;
-
   return (
-    <div className={`h-screen flex overflow-hidden ${isUltimateGold ? 'ultimate-gold-mode' : ''}`}>
-      {isUltimateGold && <div className="gold-aura"></div>}
+    <div className="h-screen flex flex-col md:flex-row overflow-hidden bg-[#020617] text-white">
+      {showOnboarding && <OnboardingWizard onClose={() => setShowOnboarding(false)} />}
       
-      {/* SIDEBAR */}
-      <aside className={`w-72 lg:w-80 h-full glass-card border-r transition-all z-[100] flex flex-col ${isUltimateGold ? 'gold-card' : 'border-white/5'}`}>
-        <div className="p-8 space-y-12">
-          <div className="flex flex-col items-center gap-4">
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border ${isUltimateGold ? 'border-amber-500 bg-amber-500/10' : 'border-blue-500/20 bg-blue-500/5'}`}>
-              <Box size={32} className={isUltimateGold ? 'text-amber-500' : 'text-blue-500'} />
-            </div>
-            <h1 className={`font-stark font-black text-xl uppercase tracking-tighter ${isUltimateGold ? 'gold-text-shimmer' : ''}`}>STARK OS</h1>
+      {activeConversion && (
+        <ConversionNotification 
+          prospectCountry={activeConversion.country}
+          healthFocus={activeConversion.focus}
+          onClose={() => setActiveConversion(null)}
+          onSocialSync={() => setActiveTab('social')}
+        />
+      )}
+
+      <aside className={`fixed md:relative inset-y-0 left-0 w-64 h-full bg-[#0f172a] border-r border-white/5 flex flex-col z-[100] transition-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <div className="p-8 flex flex-col items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+            <Zap size={28} className="text-amber-500" />
           </div>
-          
-          <nav className="space-y-2">
-            {[
-              { id: 'dashboard', label: "Command Center", icon: LayoutDashboard },
-              { id: 'jose', label: "Neural Advisor", icon: Bot },
-              { id: 'hubs', label: "Geo-Nexus", icon: MapPin },
-              { id: 'academy', label: "Stark Academy", icon: GraduationCap },
-              { id: 'social', label: "Viral Network", icon: Share2 },
-              { id: 'finance', label: "Revenue Flux", icon: Wallet },
-              { id: 'profile', label: "Identity DNA", icon: User },
-              ...(currentUser.role === 'ADMIN' ? [{ id: 'admin', label: "High Command", icon: Terminal }] : [])
-            ].map(item => (
-              <button 
-                key={item.id} 
-                onClick={() => { setActiveTab(item.id as TabType); voiceService.stop(); }}
-                className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === item.id ? (isUltimateGold ? 'bg-amber-500 text-black' : 'bg-blue-500 text-black') : 'text-slate-500 hover:bg-white/5'}`}
-              >
-                <item.icon size={16} /> {item.label}
-              </button>
-            ))}
-          </nav>
+          <h1 className="font-stark font-black text-lg text-[#FFD700] uppercase tracking-tighter">GMBC OS</h1>
+        </div>
+        
+        <nav className="flex-1 px-4 space-y-2 overflow-y-auto no-scrollbar py-4">
+          <NavItem id="dashboard" label="Dashboard" icon={LayoutDashboard} />
+          <NavItem id="jose" label="IA Jose" icon={Bot} />
+          <NavItem id="hubs" label="Nexus Geo" icon={MapPin} />
+          <NavItem id="academy" label="Academy" icon={GraduationCap} />
+          <NavItem id="social" label="Viral Sync" icon={Share2} />
+          <NavItem id="finance" label="Finances" icon={Wallet} />
+          <NavItem id="profile" label="Profile" icon={User} />
+        </nav>
+
+        <div className="p-6 border-t border-white/5 bg-black/20">
+          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-3 py-3 text-slate-600 text-[10px] font-black uppercase tracking-widest hover:text-[#FFD700]">
+            <Power size={14} /> Logout
+          </button>
         </div>
       </aside>
 
-      {/* MAIN */}
-      <main className="flex-1 flex flex-col relative overflow-hidden">
-        <header className="h-24 px-10 border-b border-white/5 flex items-center justify-between shrink-0 bg-black/20">
-          <h2 className="text-2xl font-black uppercase italic tracking-tighter">Mission <span className={isUltimateGold ? 'text-amber-500' : 'text-blue-500'}>{activeTab}</span></h2>
+      <main className="flex-1 flex flex-col relative overflow-hidden bg-[#020617]">
+        <header className="h-16 px-6 flex items-center justify-between border-b border-white/5 bg-[#020617] z-50">
           <div className="flex items-center gap-4">
-            <div className={`px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest ${isUltimateGold ? 'border-amber-500 text-amber-500 bg-amber-500/10' : 'border-white/10 text-slate-500'}`}>
-              {currentUser.dna?.rank || 'OPERATIVE'}
-            </div>
+             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-2 text-[#FFD700]">
+               <LayoutDashboard size={20} />
+             </button>
+             <span className="hidden md:block text-[9px] font-black text-slate-500 uppercase tracking-widest">{SYSTEM_CONFIG.officialDomain}</span>
+          </div>
+          <div className="flex items-center gap-4">
+             <div className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[8px] font-black text-amber-500 uppercase">
+                Core Secured
+             </div>
+             {currentUser && (
+               <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-black text-white uppercase hidden sm:block">{currentUser.name}</span>
+                  <img src={currentUser.avatar} className="w-8 h-8 rounded-lg border border-white/10" alt="AV" />
+               </div>
+             )}
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto no-scrollbar p-10">
-          <Suspense fallback={<Loader2 className="animate-spin" />}>
+        <div className="flex-1 overflow-y-auto px-4 md:px-10 pt-6 pb-20 no-scrollbar">
+          <Suspense fallback={<Loader2 className="animate-spin text-[#FFD700] mx-auto mt-20" size={32} />}>
             {activeTab === 'dashboard' && (
-              <div className="space-y-10 animate-in fade-in duration-500">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="glass-card p-10 rounded-3xl border border-white/5">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Neural Core</p>
-                    <h3 className="text-3xl font-stark font-black">99.9%</h3>
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-[#0f172a] p-6 rounded-2xl border border-white/5">
+                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Status</p>
+                    <h3 className="text-xl font-stark font-black text-emerald-400 uppercase">Active</h3>
                   </div>
-                  <div className="glass-card p-10 rounded-3xl border border-white/5">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Viral Reach</p>
-                    <h3 className="text-3xl font-stark font-black text-emerald-500">Global</h3>
+                  <div className="bg-[#0f172a] p-6 rounded-2xl border border-white/5">
+                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Hub</p>
+                    <h3 className="text-xl font-stark font-black text-white uppercase">V9.7 Gold</h3>
                   </div>
-                  <div className="glass-card p-10 rounded-3xl border border-white/5">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Sync Status</p>
-                    <h3 className="text-3xl font-stark font-black text-blue-500">Stable</h3>
+                  <div className="bg-[#0f172a] p-6 rounded-2xl border border-white/5">
+                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Host</p>
+                    <h3 className="text-xl font-stark font-black text-amber-500 uppercase">GMBCOREOS</h3>
                   </div>
                 </div>
                 <LeadChart />
               </div>
             )}
-            {activeTab === 'jose' && <AssistantJose />}
+            {activeTab === 'jose' && <AssistantJose onConversionDetected={(c, f) => setActiveConversion({country: c, focus: f})} />}
             {activeTab === 'hubs' && <HubLocator />}
-            {activeTab === 'academy' && <AcademyView user={currentUser} />}
+            {activeTab === 'academy' && <AcademyView user={currentUser} onUpdateUser={u => setCurrentUser(u)} />}
             {activeTab === 'social' && <SocialSync />}
             {activeTab === 'finance' && <FinanceView user={currentUser} />}
-            {activeTab === 'profile' && <ProfileView user={currentUser} onUpdate={(u) => setCurrentUser(u)} onLogout={() => { localStorage.clear(); window.location.reload(); }} />}
-            {activeTab === 'admin' && <AdminMonitor stats={{ totalNetSaaS: 125000, aiEffectiveness: 99.2, orphanLeadsCount: 1420, totalActiveHubs: 18 }} />}
+            {activeTab === 'profile' && currentUser && <ProfileView user={currentUser} onUpdate={setCurrentUser} onLogout={handleLogout} />}
           </Suspense>
         </div>
       </main>

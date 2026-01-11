@@ -1,73 +1,27 @@
-
 <!DOCTYPE html>
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>NDSA GMBC OS V8 - Stark Fusion Elite</title>
-    <!-- SHIM CRITIQUE POUR ÉVITER LES ERREURS DE BOOT -->
+    
+    <!-- PWA & Mobile Optimization -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GMBC-OS">
+    <meta name="theme-color" content="#020617">
+    
+    <!-- SEO & Social Sync Furtif (Minimalist Gold Mode) -->
+    <title>GMBC-OS | Terminal de Survie NDSA</title>
+    <meta name="description" content="Protocole de Restauration Biologique NDSA. Mode Performance Active.">
+    
     <script>
       window.process = { env: { API_KEY: "" } };
-      window.addEventListener('error', function(e) {
-        if (e.message.indexOf('process is not defined') > -1) {
-          window.process = { env: { API_KEY: "" } };
-        }
-      });
     </script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-      :root {
-        --primary: #00d4ff;
-        --accent: #FFD700;
-        --dark: #020617;
-      }
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: var(--dark);
-        color: white;
-        margin: 0; padding: 0;
-        height: 100dvh; width: 100vw;
-        overflow: hidden;
-        position: fixed;
-      }
-      .font-stark { font-family: 'Orbitron', sans-serif; }
-      .stark-bg {
-        position: fixed; inset: 0; z-index: -1;
-        background: radial-gradient(circle at 50% 50%, #051923 0%, #020617 100%);
-      }
-      .stark-bg::before {
-        content: ''; position: absolute; inset: 0;
-        background-image: linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
-        background-size: 50px 50px;
-        animation: pulse-grid 10s ease-in-out infinite;
-      }
-      @keyframes pulse-grid { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.5; } }
-      .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, rgba(2, 6, 23, 0.9) 110%); pointer-events: none; z-index: 50; }
-      
-      /* SPLASH SCREEN DE SECOURS */
-      #stark-loader {
-        position: fixed; inset: 0; z-index: 9999;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        background: #020617; transition: opacity 0.5s ease-out;
-      }
-      .loader-ring {
-        width: 80px; height: 80px; border: 4px solid rgba(0, 212, 255, 0.1);
-        border-top-color: var(--primary); border-radius: 50%;
-        animation: spin 1s linear infinite; margin-bottom: 20px;
-      }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      .loading-text { font-family: 'Orbitron', sans-serif; font-weight: 900; letter-spacing: 0.5em; color: var(--primary); font-size: 10px; animation: pulse 2s infinite; }
-      @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-
-      .glass-card { background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(25px); border: 1px solid rgba(0, 212, 255, 0.1); }
-      .gold-card { background: rgba(12, 10, 9, 0.85); border: 1px solid rgba(255, 215, 0, 0.4); box-shadow: 0 0 50px rgba(255, 215, 0, 0.15); }
-      .gold-text-shimmer { background: linear-gradient(90deg, #FFD700, #fff, #FFD700); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 4s linear infinite; }
-      @keyframes shimmer { to { background-position: 200% center; } }
-      .gold-aura { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 200px rgba(255, 215, 0, 0.2); z-index: 10000; animation: aura-pulse 4s infinite alternate; }
-      @keyframes aura-pulse { from { opacity: 0.2; } to { opacity: 0.5; } }
-      .no-scrollbar::-webkit-scrollbar { display: none; }
-    </style>
+    
     <script type="importmap">
 {
   "imports": {
@@ -83,41 +37,62 @@
   }
 }
 </script>
+
+    <style>
+      :root { 
+        --primary: #FFD700; 
+        --dark: #020617; 
+      }
+      body { 
+        font-family: 'Inter', sans-serif; 
+        background-color: var(--dark); 
+        color: white; 
+        margin: 0; 
+        overflow: hidden; 
+        height: 100dvh;
+        -webkit-font-smoothing: antialiased;
+      }
+      .font-stark { font-family: 'Orbitron', sans-serif; }
+      
+      /* Minimalist Gold: Suppression du flou lourd pour stabilité mobile */
+      .glass-card { 
+        background: rgba(15, 23, 42, 0.95); 
+        backdrop-filter: none; 
+        -webkit-backdrop-filter: none;
+        border: 1px solid rgba(255, 215, 0, 0.1); 
+      }
+      
+      .gold-text-shimmer { 
+        color: var(--primary);
+        text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+      }
+      
+      #stark-loader { 
+        position: fixed; inset: 0; z-index: 9999; 
+        display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        background: #020617; transition: opacity 0.3s ease; 
+      }
+      .loader-core { 
+        width: 60px; height: 60px; border-radius: 50%; border: 2px solid rgba(255, 215, 0, 0.1); 
+        border-top-color: var(--primary); animation: spin 0.6s linear infinite; 
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      
+      /* Désactivation des animations lourdes */
+      .animate-pulse { animation: none !important; }
+      .transition-all { transition: none !important; }
+      
+      /* Scrollbars minimalistes */
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
   </head>
   <body>
     <div id="stark-loader">
-      <div class="loader-ring"></div>
-      <div class="loading-text">STARK ENGINE INITIALIZING...</div>
+      <div class="loader-core"></div>
+      <div class="mt-6 font-stark text-[9px] tracking-[0.4em] text-[#FFD700]">PROTOCOLE MINIMALIST GOLD ACTIVE...</div>
     </div>
-    <div class="stark-bg"></div>
-    <div class="vignette"></div>
     <div id="root"></div>
-    
-    <script>
-      // Protocole anti-black screen de secours
-      (function() {
-          console.log("🚀 Initialisation du Bouclier Stark...");
-          setTimeout(() => {
-              const root = document.getElementById('root');
-              const loader = document.getElementById('stark-loader');
-              if (root.innerHTML === "" || root.offsetHeight === 0) {
-                  console.warn("⚠️ Écran noir détecté. Forçage de la membrane visuelle...");
-                  root.innerHTML = `
-                      <div style="background:#000; color:#FFD700; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Orbitron', sans-serif; text-align:center; padding:20px;">
-                          <h1 style="text-shadow: 0 0 20px #FFD700; font-size:24px; margin-bottom:10px;">STARK ENGINE V8.5 RECOVERY</h1>
-                          <p style="color:#64748b; font-size:12px; letter-spacing:2px;">RÉCUPÉRATION DES DONNÉES NEURALES...</p>
-                          <button onclick="location.reload()" style="margin-top:30px; background:#FFD700; color:#000; border:none; padding:15px 30px; cursor:pointer; font-weight:900; border-radius:10px; font-family:'Orbitron', sans-serif; letter-spacing:2px;">FORCER LA RELANCE</button>
-                      </div>
-                  `;
-                  if(loader) loader.style.display = 'none';
-              } else {
-                  if(loader) {
-                    loader.style.opacity = '0';
-                    setTimeout(() => loader.style.display = 'none', 500);
-                  }
-              }
-          }, 4500);
-      })();
-    </script>
+    <script type="module" src="index.tsx"></script>
   </body>
 </html>

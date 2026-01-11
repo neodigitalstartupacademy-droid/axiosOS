@@ -1,16 +1,6 @@
-
-export enum PricingZone {
-  AFRICA = 'AFRICA',
-  EUROPE = 'EUROPE',
-  GLOBAL = 'GLOBAL'
-}
-
+export enum PricingZone { AFRICA = 'AFRICA', EUROPE = 'EUROPE', GLOBAL = 'GLOBAL' }
 export type Language = 'fr' | 'en' | 'it' | 'es';
-export type TimeFormat = '24h' | '12h' | 'seconds';
-
 export type UserRank = 'NOVICE' | 'RESTORER' | 'AMBASSADOR' | 'ELITE_DIAMOND';
-
-export type NexusPhase = 'welcome' | 'intent_scan' | 'diagnostic' | 'path_selection';
 
 export interface LeaderDNA {
   archetype: string;
@@ -35,18 +25,6 @@ export interface AuthUser {
   dna?: LeaderDNA;
 }
 
-export interface Resource {
-  id: string;
-  title: string;
-  type: 'BOOK' | 'VIDEO' | 'AUDIO';
-  author: string;
-  description: string;
-  price: number | 'FREE';
-  currency: string;
-  link: string;
-  thumbnail?: string;
-}
-
 export interface Lesson {
   id: string;
   title: string;
@@ -61,7 +39,6 @@ export interface AcademyModule {
   title: string;
   description: string;
   lessons: Lesson[];
-  resources?: Resource[];
   isPremium?: boolean;
 }
 
@@ -69,6 +46,7 @@ export interface Message {
   id: string;
   role: 'user' | 'model';
   parts: { text: string }[];
+  image?: string;
   timestamp: Date;
   status?: 'sending' | 'sent' | 'read';
 }
@@ -89,16 +67,8 @@ export interface AIPersona {
 }
 
 export interface ClinicalData {
-  biomarkers: {
-    glycemia_mmol_l?: number;
-    cholesterol_total_mmol_l?: number;
-    bmi?: number;
-  };
-  protocol: Array<{
-    product: string;
-    dosage: string;
-    duration_days: number;
-  }>;
+  biomarkers: { glycemia_mmol_l?: number; cholesterol_total_mmol_l?: number; bmi?: number; };
+  protocol: Array<{ product: string; dosage: string; duration_days: number; }>;
 }
 
 export interface DiagnosticReport {
@@ -117,20 +87,4 @@ export interface AdminMonitorStats {
   aiEffectiveness: number;
   orphanLeadsCount: number;
   totalActiveHubs: number;
-}
-
-export interface WhiteLabelInstance {
-  id: string;
-  clientName: string;
-  industry: string;
-  aiName: string;
-  currency: string;
-  primaryColor: string;
-  catalogType: 'neolife' | 'custom';
-  logoUrl?: string;
-  setupFee: number;
-  royaltyRate: number;
-  isLocked: boolean;
-  deploymentDate: Date;
-  status: 'ACTIVE' | 'LOCKED';
 }

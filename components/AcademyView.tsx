@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { SYSTEM_CONFIG } from '../constants';
-import { Lesson, Resource, Message, AuthUser } from '../types';
+import { Lesson, Message, AuthUser } from '../types';
 import { voiceService } from '../services/voiceService';
 import { generateJoseResponseStream } from '../services/geminiService';
 import { storageService } from '../services/storageService';
@@ -65,19 +64,11 @@ export const AcademyView: React.FC<AcademyViewProps> = ({ user, onUpdateUser }) 
       setCurrentSectionIdx(0);
       setIsLessonCompleted(false);
       
-      const welcomeText = `Bonjour Leader. Je suis le Professeur NDSA. Prêt pour le chapitre "${lesson.title}" ? Voici le segment initial : \n\n ${lesson.sections?.[0] || lesson.content}`;
+      const welcomeText = `Bonjour Leader. Ici le Professeur Gaetan. Je supervise personnellement votre formation. Commencons le module "${lesson.title}". Voici votre premier pilier de connaissance : \n\n ${lesson.sections?.[0] || lesson.content}`;
       const initMsg: Message = { id: 'init_' + Date.now(), role: 'model', parts: [{ text: welcomeText }], timestamp: new Date() };
       setProfessorMessages([initMsg]);
       voiceService.play(welcomeText, initMsg.id);
     }
-  };
-
-  const finalizeCH10 = async () => {
-    if (!user || !onUpdateUser) return;
-    const updatedDNA = { ...user.dna, rank: 'AMBASSADOR' as const };
-    onUpdateUser({ ...user, dna: updatedDNA as any });
-    setIsLessonCompleted(true);
-    setShowManifesto(false);
   };
 
   const handleInteraction = async () => {
@@ -92,8 +83,8 @@ export const AcademyView: React.FC<AcademyViewProps> = ({ user, onUpdateUser }) 
         name: SYSTEM_CONFIG.ai.professor.name,
         role: SYSTEM_CONFIG.ai.professor.role,
         philosophy: SYSTEM_CONFIG.ai.professor.philosophy,
-        tonality: "Érudit, direct, exigeant.",
-        coreValues: "Excellence NDSA."
+        tonality: "Erudit, strategique, autoritaire mais bienveillant.",
+        coreValues: "Vision NDSA, Discipline Stark."
       });
 
       let fullText = "";
@@ -115,27 +106,26 @@ export const AcademyView: React.FC<AcademyViewProps> = ({ user, onUpdateUser }) 
         <div className="space-y-10">
           <header className="px-6 space-y-4">
              <div className="flex items-center gap-3">
-                <Dna className="text-blue-500 animate-pulse" size={32} />
-                <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500 font-stark">Neural Mutation Sequencer</h2>
+                <ShieldCheck className="text-amber-500" size={32} />
+                <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500 font-stark">Protocole Gaetan Active</h2>
              </div>
-             <h1 className="text-5xl md:text-7xl font-black text-white italic uppercase tracking-tighter leading-none">Academy <span className="text-blue-500">Elite</span></h1>
+             <h1 className="text-5xl md:text-7xl font-black text-white italic uppercase tracking-tighter leading-none">Academy <span className="text-amber-500">Gaetan</span></h1>
           </header>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
             {allModules.map(module => (
-              <div key={module.id} className="glass-card p-10 rounded-[3rem] border border-white/5 space-y-8 group hover:border-blue-500/30 transition-all">
+              <div key={module.id} className="glass-card p-10 rounded-[3rem] border border-white/5 space-y-8 group hover:border-amber-500/30 transition-all">
                 <div className="flex justify-between items-start">
                    <div className="space-y-2">
                       <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">{module.title}</h3>
                       <p className="text-slate-500 text-sm italic">{module.description}</p>
                    </div>
-                   <Award className="text-blue-500 group-hover:scale-110 transition-transform" size={32} />
+                   <Award className="text-amber-500 group-hover:scale-110 transition-transform" size={32} />
                 </div>
                 <div className="space-y-3">
                    {module.lessons.map(lesson => (
-                     <button key={lesson.id} onClick={() => startLesson(lesson)} className="w-full p-6 bg-slate-900/60 border border-white/5 rounded-2xl flex items-center justify-between hover:bg-blue-500/10 transition-all group/btn">
+                     <button key={lesson.id} onClick={() => startLesson(lesson)} className="w-full p-6 bg-slate-900/60 border border-white/5 rounded-2xl flex items-center justify-between hover:bg-amber-500/10 transition-all group/btn">
                         <div className="flex items-center gap-5">
-                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-xs border ${lessonsProgress[lesson.id]?.isCompleted ? 'bg-emerald-500 text-slate-950 border-emerald-500' : 'bg-slate-800 text-slate-500 border-white/10'}`}>
+                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-xs border ${lessonsProgress[lesson.id]?.isCompleted ? 'bg-amber-500 text-slate-950 border-amber-500' : 'bg-slate-800 text-slate-500 border-white/10'}`}>
                               {lessonsProgress[lesson.id]?.isCompleted ? <CheckCircle2 size={20} /> : lesson.id}
                            </div>
                            <span className="font-black uppercase tracking-widest text-[11px] text-white">{lesson.title}</span>
@@ -149,18 +139,18 @@ export const AcademyView: React.FC<AcademyViewProps> = ({ user, onUpdateUser }) 
           </div>
         </div>
       ) : (
-        <div className="flex flex-col h-[85vh] bg-[#020617] rounded-[3rem] border border-blue-500/20 overflow-hidden relative animate-in zoom-in-95 duration-500">
+        <div className="flex flex-col h-[85vh] bg-[#020617] rounded-[3rem] border border-amber-500/20 overflow-hidden relative animate-in zoom-in-95 duration-500">
            <header className="h-20 px-10 border-b border-white/10 flex items-center justify-between bg-black/40">
               <button onClick={() => { voiceService.stop(); setActiveLesson(null); }} className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all">
-                 <ArrowLeft size={16} /> Exit Terminal
+                 <ArrowLeft size={16} /> Retour au Hub
               </button>
               <div className="text-center">
-                 <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest leading-none mb-1">Active DNA Synthesis</p>
+                 <p className="text-[8px] font-black text-amber-500 uppercase tracking-widest leading-none mb-1">Enseignement de Gaetan</p>
                  <h4 className="text-sm font-black text-white italic uppercase tracking-tighter">{activeLesson.title}</h4>
               </div>
               <div className="flex gap-1.5">
                  {(activeLesson.sections || [1,2,3]).map((_, i) => (
-                    <div key={i} className={`w-8 h-1 rounded-full transition-all duration-700 ${i <= currentSectionIdx ? 'bg-blue-500 shadow-[0_0_10px_#00d4ff]' : 'bg-white/5'}`}></div>
+                    <div key={i} className={`w-8 h-1 rounded-full transition-all duration-700 ${i <= currentSectionIdx ? 'bg-amber-500 shadow-[0_0_10px_#FFD700]' : 'bg-white/5'}`}></div>
                  ))}
               </div>
            </header>
@@ -170,18 +160,18 @@ export const AcademyView: React.FC<AcademyViewProps> = ({ user, onUpdateUser }) 
                  {professorMessages.map(msg => (
                     <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-4 duration-500`}>
                        <div className={`flex gap-6 w-full ${msg.role === 'user' ? 'max-w-[75%] flex-row-reverse' : 'max-w-full'}`}>
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border mt-1 ${msg.role === 'user' ? 'bg-slate-900 border-white/10' : 'bg-blue-500/10 border-blue-500/30'}`}>
-                             {msg.role === 'user' ? <User size={20} className="text-slate-600" /> : <Bot size={24} className="text-blue-400" />}
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border mt-1 ${msg.role === 'user' ? 'bg-slate-900 border-white/10' : 'bg-amber-500/10 border-amber-500/30'}`}>
+                             {msg.role === 'user' ? <User size={20} className="text-slate-600" /> : <Star size={24} className="text-amber-500" />}
                           </div>
                           <div className="space-y-4 w-full">
-                             <div className={`text-lg font-light leading-relaxed tracking-tight whitespace-pre-line ${msg.role === 'user' ? 'text-blue-300 italic text-right' : 'text-slate-100'}`}>
+                             <div className={`text-lg font-light leading-relaxed tracking-tight whitespace-pre-line ${msg.role === 'user' ? 'text-amber-300 italic text-right' : 'text-slate-100'}`}>
                                 {msg.parts[0].text}
                              </div>
                              {msg.role === 'model' && (
-                               <button onClick={() => voiceService.play(msg.parts[0].text, msg.id)} className={`px-5 py-2 rounded-xl border font-stark text-[8px] font-black uppercase tracking-widest flex items-center gap-3 transition-all ${voiceService.isCurrentlyReading(msg.id) ? 'bg-blue-500 text-slate-950 border-blue-500' : 'bg-white/5 border-white/10 text-slate-500 hover:text-white'}`}>
+                               <button onClick={() => voiceService.play(msg.parts[0].text, msg.id)} className={`px-5 py-2 rounded-xl border font-stark text-[8px] font-black uppercase tracking-widest flex items-center gap-3 transition-all ${voiceService.isCurrentlyReading(msg.id) ? 'bg-amber-500 text-slate-950 border-amber-500' : 'bg-white/5 border-white/10 text-slate-500 hover:text-white'}`}>
                                   {voiceService.isCurrentlyReading(msg.id) ? <Square size={10} fill="currentColor" /> : <Play size={10} fill="currentColor" />}
-                                  {voiceService.isCurrentlyReading(msg.id) ? "Stop" : "Vocaliser"}
-                               </button>
+                                  {voiceService.isCurrentlyReading(msg.id) ? "Stop" : "Vocaliser Gaetan"}
+                                </button>
                              )}
                           </div>
                        </div>
@@ -189,59 +179,30 @@ export const AcademyView: React.FC<AcademyViewProps> = ({ user, onUpdateUser }) 
                  ))}
                  {isProfessorLoading && (
                     <div className="flex items-center gap-4 p-8 bg-white/5 rounded-[2.5rem] border border-white/5 animate-pulse max-w-sm">
-                       <Loader2 className="animate-spin text-blue-500" size={24} />
-                       <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] italic">Analyse Pédagogique...</p>
+                       <Loader2 className="animate-spin text-amber-500" size={24} />
+                       <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em] italic">Analyse Strategique de Gaetan...</p>
                     </div>
                  )}
               </div>
 
               <div className="absolute bottom-10 left-0 w-full px-10 pointer-events-none">
                  <div className="max-w-4xl mx-auto glass-card rounded-[2.5rem] p-3 pointer-events-auto border border-white/10 shadow-3xl">
-                    <div className="flex items-center gap-5 bg-black/60 rounded-[2rem] border border-white/5 px-8 focus-within:border-blue-500/50 transition-all">
+                    <div className="flex items-center gap-5 bg-black/60 rounded-[2rem] border border-white/5 px-8 focus-within:border-amber-500/50 transition-all">
                        <input 
                           type="text" 
                           value={userInput} 
                           onChange={e => setUserInput(e.target.value)}
                           onKeyDown={e => e.key === 'Enter' && handleInteraction()}
-                          placeholder="Interagir avec le Professeur..." 
+                          placeholder="Repondre au Professeur Gaetan..." 
                           className="flex-1 bg-transparent border-none text-white outline-none font-medium text-lg italic py-5 placeholder:text-slate-800"
                        />
-                       <button onClick={handleInteraction} disabled={isProfessorLoading} className="w-14 h-14 bg-blue-500 text-slate-950 rounded-2xl flex items-center justify-center shadow-2xl active:scale-95 transition-all">
+                       <button onClick={handleInteraction} disabled={isProfessorLoading} className="w-14 h-14 bg-amber-500 text-slate-950 rounded-2xl flex items-center justify-center shadow-2xl active:scale-95 transition-all">
                           <Send size={24} />
                        </button>
                     </div>
                  </div>
               </div>
            </main>
-
-           {showManifesto && (
-              <div className="absolute inset-0 bg-slate-950/98 backdrop-blur-2xl z-[200] flex items-center justify-center p-12 animate-in fade-in zoom-in-95 duration-1000">
-                 <div className="max-w-3xl w-full glass-card p-16 rounded-[5rem] border-4 border-amber-500/20 text-center space-y-12 shadow-[0_0_100px_rgba(255,215,0,0.1)]">
-                    <div className="relative inline-block">
-                       <Award size={100} className="text-amber-500 mx-auto animate-bounce" />
-                       <div className="absolute -top-4 -right-4 w-12 h-12 bg-slate-950 rounded-full flex items-center justify-center border-2 border-amber-500 shadow-xl"><Star className="text-amber-500" size={24} /></div>
-                    </div>
-                    <div className="space-y-6">
-                       <h2 className="text-6xl font-black text-white italic uppercase tracking-tighter gold-text-shimmer">MANIFESTE ELITE</h2>
-                       <p className="text-slate-400 text-xl italic leading-relaxed max-w-xl mx-auto">
-                          En signant, vous franchissez le seuil. Vous n'êtes plus un distributeur, vous devenez un <strong>Ambassadeur Souverain</strong> de la NDSA.
-                       </p>
-                    </div>
-                    <div className="space-y-6">
-                       <input 
-                          type="text" 
-                          value={signatureName}
-                          onChange={e => setSignatureName(e.target.value)}
-                          placeholder="Signature Neurale (Votre Nom Complet)..." 
-                          className="w-full bg-slate-900 border-2 border-white/10 px-10 py-6 rounded-[2rem] text-white font-black italic text-center outline-none focus:border-amber-500 transition-all text-xl"
-                       />
-                       <button onClick={finalizeCH10} disabled={!signatureName} className="w-full py-8 bg-amber-500 text-slate-950 font-black rounded-[2.5rem] uppercase tracking-[0.4em] text-xs shadow-3xl hover:brightness-110 active:scale-95 transition-all">
-                          INITIALISER MUTATION DNA
-                       </button>
-                    </div>
-                 </div>
-              </div>
-           )}
         </div>
       )}
     </div>
